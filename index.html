@@ -25,18 +25,19 @@ tailwind.config = {
   theme: {
     extend: {
       colors: {
-        "secondary-fixed": "#cce5ff", "secondary-container": "#5bb8fe", "on-secondary-fixed": "#001d31",
+        "secondary-fixed": "#D6E4FF", "secondary-container": "#5B9BFF", "on-secondary-fixed": "#001A41",
         "outline-variant": "#bccac0", "tertiary-container": "#a36700", "surface-container-lowest": "#ffffff",
-        "primary-container": "#00855d", "on-tertiary-fixed": "#2a1700", "primary-fixed-dim": "#68dba9",
-        "on-secondary": "#ffffff", "secondary-fixed-dim": "#93ccff", "on-primary-container": "#f5fff7",
-        "outline": "#6d7a72", "error": "#ba1a1a", "on-background": "#111c2d", "on-secondary-container": "#00476e",
-        "primary-fixed": "#85f8c4", "on-primary-fixed": "#002114", "surface-variant": "#d8e3fb",
-        "on-error": "#ffffff", "primary": "#006948", "tertiary-fixed": "#ffddb8", "on-error-container": "#93000a",
+        "primary-container": "#096A64", "on-tertiary-fixed": "#2a1700", "primary-fixed-dim": "#6ADBCD",
+        "on-secondary": "#ffffff", "secondary-fixed-dim": "#9DBDFF", "on-primary-container": "#ffffff",
+        "outline": "#6d7a72", "error": "#ba1a1a", "on-background": "#111c2d", "on-secondary-container": "#00367A",
+        "primary-fixed": "#B5F0E6", "on-primary-fixed": "#00201D", "surface-variant": "#d8e3fb",
+        "on-error": "#ffffff", "primary": "#0B7F78", "tertiary-fixed": "#ffddb8", "on-error-container": "#93000a",
         "surface-container-highest": "#d8e3fb", "on-surface": "#111c2d", "surface-container": "#e7eeff",
-        "error-container": "#ffdad6", "secondary": "#006398", "surface": "#f9f9ff", "background": "#f9f9ff",
+        "error-container": "#ffdad6", "secondary": "#1A66DB", "surface": "#f9f9ff", "background": "#f9f9ff",
         "on-surface-variant": "#3d4a42", "tertiary": "#825100", "tertiary-fixed-dim": "#ffb95f",
         "surface-container-high": "#dee8ff", "on-primary": "#ffffff", "on-tertiary": "#ffffff",
-        "surface-bright": "#f9f9ff", "surface-container-low": "#f0f3ff"
+        "surface-bright": "#f9f9ff", "surface-container-low": "#F0F6FF",
+        "brand-green": "#4FD97A", "brand-teal": "#2CC9C3", "brand-blue": "#2F80FF", "brand-deep": "#0E8A63"
       },
       spacing: {
         "gutter": "1rem", "space-xl": "2.5rem", "space-xs": "0.25rem", "margin-desktop": "3rem", "space-lg": "1.5rem",
@@ -66,6 +67,7 @@ tailwind.config = {
 
 <!-- ===== HEADER ===== -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+  <div class="h-[3px] bg-gradient-to-r from-brand-green via-brand-teal to-brand-blue"></div>
   <div class="h-20 max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md">
     <a href="#top" class="flex items-center gap-3 flex-shrink-0">
       <img src="images/logo.png" alt="" class="w-10 h-10 rounded-[22%] shadow-sm" width="40" height="40"/>
@@ -87,12 +89,12 @@ tailwind.config = {
         <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-fixed-dim opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span></span>
         <span class="text-label-sm text-primary font-semibold">오늘도 별일 없어요</span>
       </div>
-      <a class="inline-flex items-center justify-center text-label-md bg-primary text-on-primary hover:bg-primary-container px-space-lg py-space-sm rounded-full transition-all shadow-[0_12px_32px_-6px_rgba(5,150,105,0.25)]" href="#poc">PoC 보기</a>
+      <a class="inline-flex items-center justify-center text-label-md bg-primary text-on-primary hover:bg-primary-container px-space-lg py-space-sm rounded-full transition-all shadow-[0_12px_32px_-6px_rgba(11,127,120,0.28)]" href="#poc">PoC 보기</a>
     </div>
   </div>
 </header>
 
-<main id="top" class="w-full pt-20">
+<main id="top" class="w-full pt-[83px]">
 
 <!-- ===== 01 HERO ===== -->
 <section class="relative w-full overflow-hidden bg-gradient-to-b from-surface via-surface-container-low/40 to-surface py-16 md:py-24">
@@ -130,8 +132,8 @@ tailwind.config = {
 
       <!-- Hero visual: 보호자 앱 미리보기 -->
       <div class="lg:col-span-6 relative">
-        <div class="absolute -top-12 -right-12 w-80 h-80 bg-primary-fixed-dim/20 rounded-full blur-3xl -z-10 pointer-events-none"></div>
-        <div class="absolute -bottom-10 -left-10 w-80 h-80 bg-secondary-fixed/30 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+        <div class="absolute -top-12 -right-12 w-80 h-80 bg-brand-green/20 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+        <div class="absolute -bottom-10 -left-10 w-80 h-80 bg-brand-blue/20 rounded-full blur-3xl -z-10 pointer-events-none"></div>
         <div class="relative w-full rounded-3xl bg-surface-container-lowest p-6 sm:p-8 shadow-xl border border-[#E8EFF7]">
           <div class="flex items-center justify-between mb-5">
             <div>
@@ -206,7 +208,7 @@ tailwind.config = {
       </div>
     </div>
 
-    <div class="w-full rounded-3xl bg-gradient-to-r from-primary to-secondary p-8 sm:p-10 text-on-primary shadow-lg grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+    <div class="w-full rounded-3xl bg-gradient-to-r from-brand-deep via-primary to-secondary p-8 sm:p-10 text-on-primary shadow-lg grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
       <div class="lg:col-span-7">
         <span class="text-label-sm uppercase tracking-wider opacity-80">Insight</span>
         <h3 class="text-headline-lg font-bold mt-1">위험은 사고 순간보다,<br class="hidden sm:inline"/> 그 전의 생활 리듬 변화로 먼저 나타납니다.</h3>
@@ -450,7 +452,7 @@ tailwind.config = {
             <div class="p-3 rounded-xl bg-surface-container-low"><span class="material-symbols-outlined text-tertiary">timer</span><div class="text-label-sm text-outline mt-1">얼마나</div><div class="text-body-sm font-semibold">계속 머묾</div></div>
           </div>
           <div class="flex justify-center text-outline"><span class="material-symbols-outlined">arrow_downward</span></div>
-          <div class="p-5 rounded-2xl bg-gradient-to-r from-primary to-primary-container text-on-primary flex items-center gap-3 shadow-md">
+          <div class="p-5 rounded-2xl bg-gradient-to-r from-brand-deep to-primary text-on-primary flex items-center gap-3 shadow-md">
             <span class="material-symbols-outlined text-2xl">check_circle</span>
             <div><div class="text-label-sm opacity-80">별일없지가 전하는 말</div><div class="text-headline-sm font-bold">“08:31 거실 소파에서 휴식 중”</div></div>
           </div>
@@ -699,7 +701,7 @@ tailwind.config = {
         </dl>
         <p class="text-body-sm text-on-surface-variant mt-5">개발비는 고정이고 절감액은 가구 수에 비례해, 규모가 커질수록 사업성이 좋아집니다.</p>
       </div>
-      <div class="rounded-3xl p-8 bg-gradient-to-br from-primary to-secondary text-on-primary shadow-lg flex flex-col">
+      <div class="rounded-3xl p-8 bg-gradient-to-br from-brand-deep via-primary to-secondary text-on-primary shadow-lg flex flex-col">
         <span class="text-label-sm uppercase tracking-wider opacity-80">판정</span>
         <h3 class="text-headline-lg font-bold mt-1 mb-4">조건부 GO</h3>
         <ul class="flex flex-col gap-3 text-body-sm opacity-95">

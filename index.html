@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>별일없지 | Physical AI 생활안심 시스템</title>
+<meta name="description" content="별일없지는 집 안의 Edge AI 카메라와 생활센서가 독거 어르신의 생활 리듬을 읽고, 영상 대신 의미 있는 생활 신호만 가족과 돌봄 기관에 전달하는 Physical AI 생활안심 시스템입니다."/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"/>
+<style>
+  html { scroll-behavior: smooth; scroll-padding-top: 5.5rem; }
+  html, body { margin: 0; padding: 0; }
+  body { overscroll-behavior: none; word-break: keep-all; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400; line-height: 1; }
+  a:focus-visible, button:focus-visible { outline: 3px solid #0ea5e9; outline-offset: 3px; border-radius: 9999px; }
+</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        "secondary-fixed": "#cce5ff", "secondary-container": "#5bb8fe", "on-secondary-fixed": "#001d31",
+        "outline-variant": "#bccac0", "tertiary-container": "#a36700", "surface-container-lowest": "#ffffff",
+        "primary-container": "#00855d", "on-tertiary-fixed": "#2a1700", "primary-fixed-dim": "#68dba9",
+        "on-secondary": "#ffffff", "secondary-fixed-dim": "#93ccff", "on-primary-container": "#f5fff7",
+        "outline": "#6d7a72", "error": "#ba1a1a", "on-background": "#111c2d", "on-secondary-container": "#00476e",
+        "primary-fixed": "#85f8c4", "on-primary-fixed": "#002114", "surface-variant": "#d8e3fb",
+        "on-error": "#ffffff", "primary": "#006948", "tertiary-fixed": "#ffddb8", "on-error-container": "#93000a",
+        "surface-container-highest": "#d8e3fb", "on-surface": "#111c2d", "surface-container": "#e7eeff",
+        "error-container": "#ffdad6", "secondary": "#006398", "surface": "#f9f9ff", "background": "#f9f9ff",
+        "on-surface-variant": "#3d4a42", "tertiary": "#825100", "tertiary-fixed-dim": "#ffb95f",
+        "surface-container-high": "#dee8ff", "on-primary": "#ffffff", "on-tertiary": "#ffffff",
+        "surface-bright": "#f9f9ff", "surface-container-low": "#f0f3ff"
+      },
+      spacing: {
+        "gutter": "1rem", "space-xl": "2.5rem", "space-xs": "0.25rem", "margin-desktop": "3rem", "space-lg": "1.5rem",
+        "margin-tablet": "2rem", "margin": "1rem", "space-sm": "0.5rem", "space-md": "1rem"
+      },
+      fontFamily: {
+        sans: ["Plus Jakarta Sans", "Pretendard", "-apple-system", "Apple SD Gothic Neo", "Malgun Gothic", "sans-serif"],
+        mono: ["ui-monospace", "SFMono-Regular", "Consolas", "monospace"]
+      },
+      fontSize: {
+        "display-lg": ["36px", { lineHeight: "46px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "headline-lg": ["28px", { lineHeight: "38px", letterSpacing: "-0.015em", fontWeight: "700" }],
+        "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "headline-sm": ["17px", { lineHeight: "24px", fontWeight: "600" }],
+        "body-lg": ["16px", { lineHeight: "27px", fontWeight: "400" }],
+        "body-md": ["14px", { lineHeight: "23px", fontWeight: "400" }],
+        "body-sm": ["13px", { lineHeight: "20px", fontWeight: "400" }],
+        "label-md": ["13px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "600" }],
+        "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "600" }]
+      }
+    }
+  }
+};
+</script>
+</head>
+<body class="bg-surface font-sans text-body-md text-on-surface antialiased">
+
+<!-- ===== HEADER ===== -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+  <div class="h-20 max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md">
+    <a href="#top" class="flex items-center gap-3 flex-shrink-0">
+      <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-on-primary shadow-sm">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.6 6.1 6.6.5-5 4.3 1.5 6.4L12 16.4l-5.7 3.4 1.5-6.4-5-4.3 6.6-.5z"/></svg>
+      </span>
+      <span class="flex flex-col">
+        <span class="text-headline-sm text-primary font-bold tracking-tight leading-tight">별일없지</span>
+        <span class="text-label-sm text-on-surface-variant font-medium">Physical AI 생활안심 시스템</span>
+      </span>
+    </a>
+    <nav class="hidden xl:flex items-center gap-space-lg text-body-md text-on-surface-variant" aria-label="주요 메뉴">
+      <a class="hover:text-on-surface transition-colors" href="#problem">왜 필요한가</a>
+      <a class="hover:text-on-surface transition-colors" href="#how">작동 방식</a>
+      <a class="hover:text-on-surface transition-colors" href="#day">하루 시나리오</a>
+      <a class="hover:text-on-surface transition-colors" href="#privacy">프라이버시</a>
+      <a class="hover:text-on-surface transition-colors" href="#tech">기술 스택</a>
+      <a class="hover:text-on-surface transition-colors" href="#roi">도입 효과</a>
+    </nav>
+    <div class="flex items-center gap-space-sm sm:gap-space-md">
+      <div class="hidden md:flex items-center gap-space-xs bg-surface-container-low px-space-md py-space-xs rounded-full">
+        <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-fixed-dim opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span></span>
+        <span class="text-label-sm text-primary font-semibold">오늘도 별일 없어요</span>
+      </div>
+      <a class="inline-flex items-center justify-center text-label-md bg-primary text-on-primary hover:bg-primary-container px-space-lg py-space-sm rounded-full transition-all shadow-[0_12px_32px_-6px_rgba(5,150,105,0.25)]" href="#poc">PoC 보기</a>
+    </div>
+  </div>
+</header>
+
+<main id="top" class="w-full pt-20">
+
+<!-- ===== 01 HERO ===== -->
+<section class="relative w-full overflow-hidden bg-gradient-to-b from-surface via-surface-container-low/40 to-surface py-16 md:py-24">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+      <div class="lg:col-span-6 flex flex-col items-start gap-6">
+        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-primary-fixed/30 text-primary border border-primary-fixed">
+          <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span></span>
+          <span class="text-label-md tracking-wider uppercase">Physical AI Family Care</span>
+        </div>
+        <h1 class="text-display-lg md:text-[44px] md:leading-[56px] text-on-surface font-bold tracking-tight">
+          멀리 있어도,<br/>오늘의 평범한 하루를<br/>알 수 있도록.
+        </h1>
+        <p class="text-body-lg text-on-surface-variant max-w-xl">
+          별일없지는 혼자 사시는 부모님 댁의 Edge AI 카메라와 생활센서가 생활 리듬을 읽고, 가족과 돌봄 기관에는 영상 대신
+          <strong class="text-primary font-semibold">“07:42 거실에서 활동 시작”</strong> 같은 의미 있는 생활 신호만 전달하는 생활안심 시스템입니다.
+        </p>
+        <blockquote class="text-body-md text-on-surface border-l-4 border-primary pl-4 py-1 font-medium">
+          “고령자는 평소처럼 생활하고, 기술은 뒤에서 조용히 안전을 보조한다.”
+        </blockquote>
+        <div class="flex flex-wrap items-center gap-4 pt-2">
+          <a class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-container transition-all shadow-md hover:shadow-lg" href="#how">
+            <span>작동 방식 보기</span><span class="material-symbols-outlined text-lg">arrow_forward</span>
+          </a>
+          <a class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-surface-container-lowest text-on-surface text-label-md hover:bg-surface-container-high transition-all shadow-sm" href="#day">
+            <span class="material-symbols-outlined text-lg text-secondary">schedule</span><span>하루 시나리오</span>
+          </a>
+        </div>
+        <ul class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 w-full max-w-xl text-body-sm text-on-surface-variant">
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-xl">touch_app</span>어르신 조작 0회</li>
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-xl">videocam_off</span>영상 외부 전송 0건</li>
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-xl">insights</span>평소 대비 변화만 알림</li>
+        </ul>
+      </div>
+
+      <!-- Hero visual: 보호자 앱 미리보기 -->
+      <div class="lg:col-span-6 relative">
+        <div class="absolute -top-12 -right-12 w-80 h-80 bg-primary-fixed-dim/20 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+        <div class="absolute -bottom-10 -left-10 w-80 h-80 bg-secondary-fixed/30 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+        <div class="relative w-full rounded-3xl bg-surface-container-lowest p-6 sm:p-8 shadow-xl border border-[#E8EFF7]">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <div class="text-label-sm text-outline">김영희 님 (81세) · 수도권 아파트</div>
+              <div class="text-headline-lg text-on-surface font-bold">오늘도 별일 없어요</div>
+            </div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed/50 text-primary text-label-sm font-bold">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>NORMAL
+            </span>
+          </div>
+          <ol class="relative flex flex-col gap-4 before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-0.5 before:bg-[#E2E8F0]">
+            <li class="relative flex items-start gap-4">
+              <span class="z-10 w-10 h-10 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary flex-shrink-0"><span class="material-symbols-outlined text-xl">bedtime</span></span>
+              <div class="pt-1"><div class="text-label-sm text-outline">23:10 ~ 06:35 · 침실</div><div class="text-headline-sm text-on-surface">침대 휴식 추정</div></div>
+            </li>
+            <li class="relative flex items-start gap-4">
+              <span class="z-10 w-10 h-10 rounded-full bg-primary-fixed/60 flex items-center justify-center text-primary flex-shrink-0"><span class="material-symbols-outlined text-xl">wb_sunny</span></span>
+              <div class="pt-1"><div class="text-label-sm text-outline">07:42 · 거실</div><div class="text-headline-sm text-on-surface">활동 시작</div></div>
+            </li>
+            <li class="relative flex items-start gap-4">
+              <span class="z-10 w-10 h-10 rounded-full bg-secondary-fixed/70 flex items-center justify-center text-secondary flex-shrink-0"><span class="material-symbols-outlined text-xl">directions_walk</span></span>
+              <div class="pt-1"><div class="text-label-sm text-outline">09:30 · 현관</div><div class="text-headline-sm text-on-surface">외출 추정</div></div>
+            </li>
+            <li class="relative flex items-start gap-4">
+              <span class="z-10 w-10 h-10 rounded-full bg-primary-fixed/60 flex items-center justify-center text-primary flex-shrink-0"><span class="material-symbols-outlined text-xl">weekend</span></span>
+              <div class="pt-1"><div class="text-label-sm text-outline">14:20 · 거실 소파</div><div class="text-headline-sm text-on-surface">휴식 중</div></div>
+            </li>
+          </ol>
+          <div class="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-surface-container-low">
+            <div class="flex items-center gap-2 text-body-sm text-on-surface-variant">
+              <span class="material-symbols-outlined text-primary">lock</span>원본 영상은 집 안 장치에서 처리 후 즉시 폐기
+            </div>
+            <span class="text-label-sm text-outline">보호자 앱 화면 예시</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 02 PROBLEM ===== -->
+<section class="w-full py-20 bg-surface-container-low" id="problem">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-secondary font-bold tracking-wider uppercase mb-2">The Problem</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">사고가 없는 날에도,<br/>“평소처럼 지내시는지” 알 방법이 없습니다.</h2>
+      <p class="text-body-lg text-on-surface-variant">
+        독거 어르신의 안부 확인은 대부분 전화와 방문에 기대고 있습니다. 확인 빈도는 사람의 시간에 묶여 있고, 확인과 확인 사이의 공백은 그대로 남습니다.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div class="flex flex-col bg-surface-container-lowest rounded-2xl p-7 shadow-sm">
+        <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant mb-5"><span class="material-symbols-outlined text-2xl">call</span></div>
+        <h3 class="text-headline-md text-on-surface font-bold mb-2">안부 전화·방문</h3>
+        <p class="text-body-md text-on-surface-variant flex-grow">인력과 시간에 비례해 비용이 늘고, 확인과 확인 사이에 공백이 생깁니다.</p>
+      </div>
+      <div class="flex flex-col bg-surface-container-lowest rounded-2xl p-7 shadow-sm">
+        <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-error mb-5"><span class="material-symbols-outlined text-2xl">videocam</span></div>
+        <h3 class="text-headline-md text-on-surface font-bold mb-2">실내 CCTV</h3>
+        <p class="text-body-md text-on-surface-variant flex-grow">원본 영상이 상시 노출되어 사생활을 침해하고, 어르신은 거부감을 느낍니다. 보호자가 직접 영상을 봐야 합니다.</p>
+      </div>
+      <div class="flex flex-col bg-surface-container-lowest rounded-2xl p-7 shadow-sm">
+        <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-secondary mb-5"><span class="material-symbols-outlined text-2xl">sensors</span></div>
+        <h3 class="text-headline-md text-on-surface font-bold mb-2">PIR 단독 센서</h3>
+        <p class="text-body-md text-on-surface-variant flex-grow">“08:31 움직임”만 남습니다. 휴식·수면·외출처럼 행동이 가진 의미를 구분하지 못합니다.</p>
+      </div>
+      <div class="flex flex-col bg-surface-container-lowest rounded-2xl p-7 shadow-sm">
+        <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-tertiary mb-5"><span class="material-symbols-outlined text-2xl">watch</span></div>
+        <h3 class="text-headline-md text-on-surface font-bold mb-2">웨어러블·응급버튼</h3>
+        <p class="text-body-md text-on-surface-variant flex-grow">착용·충전·조작을 어르신에게 요구합니다. 착용하지 않으면 아무 소용이 없습니다.</p>
+      </div>
+    </div>
+
+    <div class="w-full rounded-3xl bg-gradient-to-r from-primary to-secondary p-8 sm:p-10 text-on-primary shadow-lg grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+      <div class="lg:col-span-7">
+        <span class="text-label-sm uppercase tracking-wider opacity-80">Insight</span>
+        <h3 class="text-headline-lg font-bold mt-1">위험은 사고 순간보다,<br class="hidden sm:inline"/> 그 전의 생활 리듬 변화로 먼저 나타납니다.</h3>
+      </div>
+      <ul class="lg:col-span-5 flex flex-wrap gap-2">
+        <li class="px-4 py-2 rounded-full bg-on-primary/15 text-label-md">늦어진 기상</li>
+        <li class="px-4 py-2 rounded-full bg-on-primary/15 text-label-md">줄어든 활동</li>
+        <li class="px-4 py-2 rounded-full bg-on-primary/15 text-label-md">야간 화장실 장시간 체류</li>
+        <li class="w-full text-body-sm opacity-90 pt-1">지금은 이런 변화를 기록하고 평소와 비교하는 체계가 없습니다.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 03 CORE VALUES ===== -->
+<section class="w-full py-20 bg-surface">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">Quiet Care Principles</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">지켜보지 않고도,<br/>일상을 알 수 있도록.</h2>
+      <p class="text-body-lg text-on-surface-variant">별일없지가 지키는 네 가지 약속입니다.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-surface-container-lowest rounded-2xl p-7 shadow-sm border border-[#E8EFF7]">
+        <div class="w-12 h-12 rounded-xl bg-primary-fixed/40 flex items-center justify-center text-primary mb-5"><span class="material-symbols-outlined text-2xl">touch_app</span></div>
+        <h3 class="text-headline-md text-on-surface font-bold mb-2">어르신 조작 0회</h3>
+        <p class="text-body-md text-on-surface-variant">착용할 기기도, 누를 버튼도, 배워야 할 앱도 없습니다. 평소처럼 생활하시면 됩니다.</p>
+      </div>
+      <div class="bg-surface-container-lowest rounded-2xl p-7 shadow-sm border border-[#E8EFF7]">
+        <div class="w-12 h-12 rounded-xl bg-secondary-fixed/50 flex items-center justify-center text-secondary mb-5"><span class="material-symbols-outlined text-2xl">graphic_eq</span></div>
+        <h3 class="text-headline-md text-on-surface font-bold mb-2">영상 대신 생활 신호</h3>
+        <p class="text-body-md text-on-surface-variant">보호자에게는 “07:42 거실에서 활동 시작” 같은 의미 단위 이벤트만 전달합니다.</p>
+      </div>
+      <div class="bg-surface-container-lowest rounded-2xl p-7 shadow-sm border border-[#E8EFF7]">
+        <div class="w-12 h-12 rounded-xl bg-tertiary-fixed/60 flex items-center justify-center text-tertiary mb-5"><span class="material-symbols-outlined text-2xl">compare_arrows</span></div>
+        <h3 class="text-headline-md text-on-surface font-bold mb-2">평소 대비 변화 감지</h3>
+        <p class="text-body-md text-on-surface-variant">어르신 개인의 기준선과 비교해 “확인이 필요한 날”만 알립니다. 매일 울리는 알림은 없습니다.</p>
+      </div>
+      <div class="bg-surface-container-lowest rounded-2xl p-7 shadow-sm border border-[#E8EFF7]">
+        <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant mb-5"><span class="material-symbols-outlined text-2xl">chat_bubble</span></div>
+        <h3 class="text-headline-md text-on-surface font-bold mb-2">단정하지 않는 말투</h3>
+        <p class="text-body-md text-on-surface-variant">“낙상했습니다” 대신 “확인이 필요한 변화가 있어요”. 진단하지 않고 확인을 권합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 04 HOW IT WORKS ===== -->
+<section class="w-full py-20 bg-surface-container-low" id="how">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">How It Works</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">감지하고, 판단하고, 조용히 행동합니다.</h2>
+      <p class="text-body-lg text-on-surface-variant">
+        영상은 집 안의 Edge 장치에서 기계가 해석하고 바로 폐기합니다. 밖으로 나가는 것은 상태가 바뀌는 순간의 생활 이벤트뿐입니다.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+      <!-- 감지 -->
+      <div class="bg-surface-container-lowest rounded-3xl p-8 shadow-sm flex flex-col">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="w-12 h-12 rounded-2xl bg-surface-container-highest flex items-center justify-center text-on-surface"><span class="material-symbols-outlined text-2xl">sensors</span></span>
+          <div><div class="text-label-sm text-outline">STEP 01</div><h3 class="text-headline-md font-bold">감지</h3></div>
+        </div>
+        <p class="text-body-md text-on-surface-variant mb-5">거실·침실 카메라가 5~10 FPS로 프레임을 Edge 장치 메모리에서만 처리합니다. 현관·화장실의 문 센서와 PIR은 출입과 움직임을 감지하고, 10분마다 장치 상태(heartbeat)를 보냅니다.</p>
+        <div class="mt-auto flex flex-wrap gap-2 text-label-sm">
+          <span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant">Edge 카메라 2대</span>
+          <span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant">문 센서</span>
+          <span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant">PIR</span>
+        </div>
+      </div>
+      <!-- 판단 -->
+      <div class="bg-surface-container-lowest rounded-3xl p-8 shadow-md border-2 border-primary/20 flex flex-col">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-2xl">memory</span></span>
+          <div><div class="text-label-sm text-primary font-bold">STEP 02</div><h3 class="text-headline-md font-bold">판단</h3></div>
+        </div>
+        <ol class="flex flex-col gap-2 text-body-sm text-on-surface-variant mb-5">
+          <li class="flex gap-2"><span class="text-primary font-bold">1</span>사람 검출 (YOLO nano)</li>
+          <li class="flex gap-2"><span class="text-primary font-bold">2</span>자세 추정 — 관절 17점 (MediaPipe Pose)</li>
+          <li class="flex gap-2"><span class="text-primary font-bold">3</span>Zone 매칭 — 소파·식탁·침대·바닥</li>
+          <li class="flex gap-2"><span class="text-primary font-bold">4</span>체류 시간 계산 → 상태 머신 판단</li>
+        </ol>
+        <p class="text-body-sm text-on-surface-variant mt-auto">Cloud는 10분마다 하루 이벤트를 모아 최근 14일 개인 기준선(첫 활동 시각, 오전 활동 시간, 야간 화장실 횟수 등)과 비교합니다.</p>
+      </div>
+      <!-- 행동 -->
+      <div class="bg-surface-container-lowest rounded-3xl p-8 shadow-sm flex flex-col">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-on-secondary"><span class="material-symbols-outlined text-2xl">notifications_active</span></span>
+          <div><div class="text-label-sm text-secondary font-bold">STEP 03</div><h3 class="text-headline-md font-bold">행동</h3></div>
+        </div>
+        <ul class="flex flex-col gap-3 text-body-sm text-on-surface-variant">
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-secondary">smartphone</span>보호자 앱에 상태와 Timeline 표시</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-secondary">campaign</span>CHECK·EMERGENCY 전환 시 푸시 알림</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-secondary">light</span>야간 침대 이탈 시 화장실 동선 LED 자동 점등</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-secondary">dashboard</span>돌봄 기관 대시보드에 확인 필요 가구 우선 표시</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 상태 머신 -->
+    <div class="bg-surface-container-lowest rounded-3xl p-8 lg:p-10 shadow-sm">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+          <span class="text-label-sm text-secondary font-bold uppercase tracking-wider">Edge State Machine</span>
+          <h3 class="text-headline-lg font-bold mt-1">카메라가 읽는 다섯 가지 생활 상태</h3>
+        </div>
+        <p class="text-body-sm text-on-surface-variant max-w-md">상태가 바뀌는 순간에만 이벤트를 만들고, 1분 미만의 짧은 왕복 전환은 걸러냅니다.</p>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="p-4 rounded-2xl bg-primary-fixed/30"><div class="font-mono text-label-md text-primary font-bold">ACTIVE</div><div class="text-body-sm text-on-surface-variant mt-1">거실·식탁 등에서 활동 중</div></div>
+        <div class="p-4 rounded-2xl bg-secondary-fixed/40"><div class="font-mono text-label-md text-secondary font-bold">REST</div><div class="text-body-sm text-on-surface-variant mt-1">소파 등에서 휴식 중</div></div>
+        <div class="p-4 rounded-2xl bg-tertiary-fixed/50"><div class="font-mono text-label-md text-tertiary font-bold">BED_REST</div><div class="text-body-sm text-on-surface-variant mt-1">침대에서 휴식·수면 추정</div></div>
+        <div class="p-4 rounded-2xl bg-surface-container"><div class="font-mono text-label-md text-on-surface-variant font-bold">NOT_IN_VIEW</div><div class="text-body-sm text-on-surface-variant mt-1">카메라 시야 밖에 계심</div></div>
+        <div class="p-4 rounded-2xl bg-error-container/50 col-span-2 md:col-span-1"><div class="font-mono text-label-md text-error font-bold">FLOOR_LYING</div><div class="text-body-sm text-on-surface-variant mt-1">바닥에 누운 상태 지속</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 05 SPACES ===== -->
+<section class="w-full py-20 bg-surface" id="spaces">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+      <div class="lg:col-span-4 flex flex-col gap-5 lg:sticky lg:top-28">
+        <span class="text-label-md text-primary font-bold tracking-wider uppercase">Installation</span>
+        <h2 class="text-display-lg text-on-surface font-bold">공간마다,<br/>꼭 필요한 만큼만.</h2>
+        <p class="text-body-lg text-on-surface-variant">설치 기사가 1시간 안에 장치 4종을 설치합니다. 카메라 화면은 설치할 때 Zone을 지정하려고 딱 한 번만 보고, 그 뒤로는 영상 보기 기능이 꺼집니다.</p>
+        <div class="p-5 rounded-2xl bg-surface-container-low border-l-4 border-primary text-body-md text-on-surface">
+          화장실에는 카메라를 두지 않습니다. 문 센서와 PIR만으로 들어가고 나오는 것과 머무는 시간을 판단합니다.
+        </div>
+      </div>
+      <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="bg-surface-container-lowest rounded-2xl p-7 shadow-sm border border-[#E8EFF7]">
+          <div class="flex items-center justify-between mb-4"><h3 class="text-headline-md font-bold">거실·식탁</h3><span class="material-symbols-outlined text-primary text-2xl">chair</span></div>
+          <div class="text-label-sm text-outline mb-2">Edge 카메라 #1</div>
+          <p class="text-body-md text-on-surface-variant">활동 / 휴식 / 시야 밖 상태를 구분합니다.</p>
+        </div>
+        <div class="bg-surface-container-lowest rounded-2xl p-7 shadow-sm border border-[#E8EFF7]">
+          <div class="flex items-center justify-between mb-4"><h3 class="text-headline-md font-bold">침실</h3><span class="material-symbols-outlined text-tertiary text-2xl">bed</span></div>
+          <div class="text-label-sm text-outline mb-2">Edge 카메라 #2 (적외선 지원)</div>
+          <p class="text-body-md text-on-surface-variant">침대 휴식을 추정하고, 밤에 침대에서 일어나시는 것을 감지합니다.</p>
+        </div>
+        <div class="bg-surface-container-lowest rounded-2xl p-7 shadow-sm border border-[#E8EFF7]">
+          <div class="flex items-center justify-between mb-4"><h3 class="text-headline-md font-bold">현관</h3><span class="material-symbols-outlined text-secondary text-2xl">door_front</span></div>
+          <div class="text-label-sm text-outline mb-2">문 열림 센서 + PIR</div>
+          <p class="text-body-md text-on-surface-variant">문 열림 뒤 실내 활동이 없으면 외출로, 다시 문이 열리고 활동이 생기면 귀가로 추정합니다.</p>
+        </div>
+        <div class="bg-surface-container-lowest rounded-2xl p-7 shadow-sm border border-[#E8EFF7]">
+          <div class="flex items-center justify-between mb-4"><h3 class="text-headline-md font-bold">화장실</h3><span class="material-symbols-outlined text-on-surface-variant text-2xl">shower</span></div>
+          <div class="text-label-sm text-outline mb-2">문 센서 + PIR (카메라 없음)</div>
+          <p class="text-body-md text-on-surface-variant">들어가고 나오는 시각을 기록하고, 기준보다 오래 머무르면 확인을 요청합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 06 A DAY ===== -->
+<section class="w-full py-20 bg-surface-container-low" id="day">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">A Day with 별일없지</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">AI가 읽는 것은 사람이 아니라,<br/>하루의 흐름입니다.</h2>
+      <p class="text-body-lg text-on-surface-variant">
+        수도권에 혼자 사시는 김영희 님(81세), 지방에 사는 아들 박민수 님(52세), 15가구를 맡은 생활지원사의 하루입니다.
+      </p>
+      <span class="mt-3 text-label-sm text-outline">* 이해를 돕기 위한 예시 시나리오입니다.</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5 mb-10">
+      <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4"><span class="px-2.5 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed text-label-sm font-bold">02:10</span><span class="material-symbols-outlined text-tertiary text-2xl">light</span></div>
+        <h3 class="text-headline-sm font-bold mb-2">밤길을 밝히는 조명</h3>
+        <p class="text-body-sm text-on-surface-variant flex-grow">침대에서 일어나시자 침실에서 화장실까지 동선 LED가 3초 안에 켜집니다. 침대로 돌아오시거나 10분이 지나면 꺼집니다.</p>
+        <div class="mt-5 pt-3 border-t border-surface-container text-label-sm text-outline">야간 동선 조명 제어</div>
+      </div>
+      <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4"><span class="px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed text-label-sm font-bold">07:42</span><span class="material-symbols-outlined text-primary text-2xl">wb_sunny</span></div>
+        <h3 class="text-headline-sm font-bold mb-2">거실에서 활동 시작</h3>
+        <p class="text-body-sm text-on-surface-variant flex-grow">23:10부터 06:35까지 침대 휴식이 추정된 뒤, 평소와 비슷한 시각에 거실 활동이 시작됩니다.</p>
+        <div class="mt-5 pt-3 border-t border-surface-container text-label-sm text-outline">ACTIVE · 거실</div>
+      </div>
+      <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4"><span class="px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-label-sm font-bold">09:30</span><span class="material-symbols-outlined text-secondary text-2xl">directions_walk</span></div>
+        <h3 class="text-headline-sm font-bold mb-2">외출 추정</h3>
+        <p class="text-body-sm text-on-surface-variant flex-grow">현관문이 열린 뒤 실내 활동이 없어 외출로 추정합니다. 문이 다시 열리고 활동이 생기면 귀가로 기록합니다.</p>
+        <div class="mt-5 pt-3 border-t border-surface-container text-label-sm text-outline">문 센서 + 실내 활동 결합</div>
+      </div>
+      <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4"><span class="px-2.5 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-label-sm font-bold">14:20</span><span class="material-symbols-outlined text-primary text-2xl">weekend</span></div>
+        <h3 class="text-headline-sm font-bold mb-2">소파에서 휴식</h3>
+        <p class="text-body-sm text-on-surface-variant flex-grow">소파 Zone에 앉은 자세로 머무르시는 것을 휴식으로 판단합니다. 영상이 아니라 상태만 기록됩니다.</p>
+        <div class="mt-5 pt-3 border-t border-surface-container text-label-sm text-outline">REST · 소파</div>
+      </div>
+      <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-md border-2 border-primary/20 flex flex-col md:col-span-2 lg:col-span-1">
+        <div class="flex items-center justify-between mb-4"><span class="px-2.5 py-1 rounded-full bg-primary text-on-primary text-label-sm font-bold">하루 판정</span><span class="material-symbols-outlined text-primary text-2xl">verified</span></div>
+        <h3 class="text-headline-sm font-bold mb-2 text-primary">“오늘도 별일 없어요”</h3>
+        <p class="text-body-sm text-on-surface-variant flex-grow">최근 14일 기준선과 비교해 하루 상태를 판정합니다. 평소와 같으면 알림 없이 앱에만 조용히 표시됩니다.</p>
+        <div class="mt-5 pt-3 border-t border-surface-container text-label-sm text-primary font-bold">NORMAL</div>
+      </div>
+    </div>
+
+    <!-- 하루 상태 3단계 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-surface-container-lowest rounded-3xl p-7 shadow-sm">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed/50 text-primary text-label-md font-bold mb-4"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>NORMAL</span>
+        <h3 class="text-headline-md font-bold mb-2">평소와 같은 하루</h3>
+        <p class="text-body-md text-on-surface-variant">앱에 “오늘도 별일 없어요”와 하루 Timeline이 표시됩니다. 푸시 알림은 보내지 않습니다.</p>
+      </div>
+      <div class="bg-surface-container-lowest rounded-3xl p-7 shadow-sm">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEF3C7] text-[#B45309] text-label-md font-bold mb-4"><span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span>CHECK</span>
+        <h3 class="text-headline-md font-bold mb-2">확인이 필요한 변화</h3>
+        <p class="text-body-md text-on-surface-variant">“오늘 오전 활동이 평소보다 적어요” 알림을 받은 보호자가 전화를 겁니다. 연락이 닿지 않으면 생활지원사에게 방문을 요청합니다.</p>
+      </div>
+      <div class="bg-surface-container-lowest rounded-3xl p-7 shadow-sm">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container text-on-error-container text-label-md font-bold mb-4"><span class="w-1.5 h-1.5 rounded-full bg-error"></span>EMERGENCY 후보</span>
+        <h3 class="text-headline-md font-bold mb-2">즉시 함께 확인</h3>
+        <p class="text-body-md text-on-surface-variant">화장실에 기준보다 오래 머무시거나 바닥에 누운 상태가 이어지면, 10분 집계를 기다리지 않고 보호자와 생활지원사에게 동시에 알립니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 07 WHY AI ===== -->
+<section class="w-full py-20 bg-surface">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div class="lg:col-span-6 bg-surface-container-lowest rounded-3xl p-8 shadow-md border border-[#E8EFF7]">
+        <div class="text-label-sm text-secondary font-bold uppercase tracking-wider mb-6">Sensor vs. Physical AI</div>
+        <div class="flex flex-col gap-4">
+          <div class="p-5 rounded-2xl bg-surface-container-low">
+            <div class="text-label-sm text-outline mb-2">PIR 센서만 있을 때</div>
+            <div class="font-mono text-body-md text-on-surface-variant">"08:31 Motion detected"</div>
+          </div>
+          <div class="flex justify-center text-outline"><span class="material-symbols-outlined">arrow_downward</span></div>
+          <div class="grid grid-cols-3 gap-3 text-center">
+            <div class="p-3 rounded-xl bg-surface-container-low"><span class="material-symbols-outlined text-primary">location_on</span><div class="text-label-sm text-outline mt-1">어디서</div><div class="text-body-sm font-semibold">소파 Zone</div></div>
+            <div class="p-3 rounded-xl bg-surface-container-low"><span class="material-symbols-outlined text-secondary">accessibility_new</span><div class="text-label-sm text-outline mt-1">어떤 자세로</div><div class="text-body-sm font-semibold">앉음</div></div>
+            <div class="p-3 rounded-xl bg-surface-container-low"><span class="material-symbols-outlined text-tertiary">timer</span><div class="text-label-sm text-outline mt-1">얼마나</div><div class="text-body-sm font-semibold">계속 머묾</div></div>
+          </div>
+          <div class="flex justify-center text-outline"><span class="material-symbols-outlined">arrow_downward</span></div>
+          <div class="p-5 rounded-2xl bg-gradient-to-r from-primary to-primary-container text-on-primary flex items-center gap-3 shadow-md">
+            <span class="material-symbols-outlined text-2xl">check_circle</span>
+            <div><div class="text-label-sm opacity-80">별일없지가 전하는 말</div><div class="text-headline-sm font-bold">“08:31 거실 소파에서 휴식 중”</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="lg:col-span-6 flex flex-col gap-6">
+        <span class="text-label-md text-primary font-bold tracking-wider uppercase">Why Physical AI</span>
+        <h2 class="text-display-lg text-on-surface font-bold">움직임 감지를 넘어,<br/>생활의 의미를 읽습니다.</h2>
+        <ul class="flex flex-col gap-5">
+          <li class="flex gap-4">
+            <span class="w-10 h-10 rounded-xl bg-primary-fixed/40 text-primary flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined">accessibility_new</span></span>
+            <div><h3 class="text-headline-sm font-bold mb-1">자세와 위치를 함께 봅니다</h3><p class="text-body-md text-on-surface-variant">PIR은 움직임이 있는지만 압니다. 서기·앉기·눕기와 소파·침대·바닥을 구분해야 휴식, 수면, 바닥에 누운 상태를 판단할 수 있습니다.</p></div>
+          </li>
+          <li class="flex gap-4">
+            <span class="w-10 h-10 rounded-xl bg-secondary-fixed/50 text-secondary flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined">shield_lock</span></span>
+            <div><h3 class="text-headline-sm font-bold mb-1">사람 대신 기계가 보고, 바로 지웁니다</h3><p class="text-body-md text-on-surface-variant">사생활을 지키려면 영상을 사람이 보는 대신 현장에서 해석하고 폐기해야 합니다. 이 해석이 Edge AI의 역할입니다.</p></div>
+          </li>
+          <li class="flex gap-4">
+            <span class="w-10 h-10 rounded-xl bg-tertiary-fixed/60 text-tertiary flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined">person_search</span></span>
+            <div><h3 class="text-headline-sm font-bold mb-1">어르신마다 다른 기준</h3><p class="text-body-md text-on-surface-variant">“180분 무활동” 같은 고정 기준으로는 잘못된 알림과 놓친 변화가 함께 생깁니다. 별일없지는 개인별 14일 기준선과 비교합니다.</p></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 08 PRIVACY ===== -->
+<section class="w-full py-20 bg-surface-container-low" id="privacy">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">Privacy-First by Design</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">보지 않아도, 알 수 있도록.</h2>
+      <p class="text-body-lg text-on-surface-variant">원본 영상은 저장하지도, 밖으로 보내지도 않습니다. 외부로 나가는 데이터 중 이미지·영상은 0건을 목표로 네트워크 로그로 감사합니다.</p>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-3xl p-8 lg:p-10 shadow-sm mb-10">
+      <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-5">
+        <div class="flex items-center gap-4"><span class="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-2xl">videocam</span></span><div><div class="text-headline-sm font-bold">카메라 프레임</div><div class="text-body-sm text-outline">5~10 FPS</div></div></div>
+        <span class="material-symbols-outlined text-outline hidden lg:block">arrow_forward</span>
+        <div class="flex items-center gap-4"><span class="w-12 h-12 rounded-2xl bg-primary-fixed flex items-center justify-center text-primary"><span class="material-symbols-outlined text-2xl">memory</span></span><div><div class="text-headline-sm font-bold text-primary">Edge 장치 메모리</div><div class="text-body-sm text-outline">사람·자세·Zone만 추출</div></div></div>
+        <span class="material-symbols-outlined text-outline hidden lg:block">arrow_forward</span>
+        <div class="flex items-center gap-4 bg-error-container/30 px-4 py-3 rounded-2xl"><span class="w-10 h-10 rounded-xl bg-error text-on-error flex items-center justify-center"><span class="material-symbols-outlined text-xl">delete_forever</span></span><div><div class="text-headline-sm font-bold text-error">프레임 즉시 폐기</div><div class="text-body-sm text-on-error-container">저장·전송하지 않음</div></div></div>
+        <span class="material-symbols-outlined text-outline hidden lg:block">arrow_forward</span>
+        <div class="flex items-center gap-4"><span class="w-12 h-12 rounded-2xl bg-secondary-fixed flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-2xl">encrypted</span></span><div><div class="text-headline-sm font-bold text-secondary">이벤트 JSON만 전송</div><div class="text-body-sm text-outline">HTTPS · 기기 키 인증</div></div></div>
+      </div>
+      <div class="mt-8 pt-6 border-t border-surface-container flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <span class="text-label-sm text-outline font-mono">EVENT PAYLOAD EXAMPLE</span>
+        <code class="px-4 py-2 rounded-xl bg-surface-container-low font-mono text-body-sm text-primary font-semibold break-all">{"time": "07:42", "zone": "living_room", "state": "ACTIVE"}</code>
+        <span class="text-label-sm text-outline">이미지·영상 데이터: 0 KB</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-surface-container-lowest p-7 rounded-2xl shadow-sm">
+        <div class="w-12 h-12 rounded-xl bg-primary-fixed/40 flex items-center justify-center text-primary mb-5"><span class="material-symbols-outlined text-2xl">visibility_off</span></div>
+        <h3 class="text-headline-md font-bold mb-2">보호자도 영상은 볼 수 없습니다</h3>
+        <p class="text-body-md text-on-surface-variant">설치할 때 Zone 지정을 위해 한 번 본 뒤로 영상 보기 기능은 꺼집니다. 실시간 영상도, 녹화 영상도 제공하지 않습니다.</p>
+      </div>
+      <div class="bg-surface-container-lowest p-7 rounded-2xl shadow-sm">
+        <div class="w-12 h-12 rounded-xl bg-secondary-fixed/50 flex items-center justify-center text-secondary mb-5"><span class="material-symbols-outlined text-2xl">face_retouching_off</span></div>
+        <h3 class="text-headline-md font-bold mb-2">누구인지 알아보지 않습니다</h3>
+        <p class="text-body-md text-on-surface-variant">얼굴 인식이나 신원 식별을 하지 않습니다. 사람이 있는지와 자세, 위치만 판단합니다. 화장실에는 카메라가 없습니다.</p>
+      </div>
+      <div class="bg-surface-container-lowest p-7 rounded-2xl shadow-sm">
+        <div class="w-12 h-12 rounded-xl bg-tertiary-fixed/60 flex items-center justify-center text-tertiary mb-5"><span class="material-symbols-outlined text-2xl">how_to_reg</span></div>
+        <h3 class="text-headline-md font-bold mb-2">동의와 연결된 가족만</h3>
+        <p class="text-body-md text-on-surface-variant">어르신과 보호자가 서면으로 동의한 뒤 설치합니다. 앱에서는 연결된 보호자만 해당 가구 데이터를 볼 수 있습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 09 KPI ===== -->
+<section class="w-full py-20 bg-surface" id="metrics">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-secondary font-bold tracking-wider uppercase mb-2">Success Metrics</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">숫자로 약속하는 안심</h2>
+      <p class="text-body-lg text-on-surface-variant">별일없지가 검증하려는 목표치입니다. 시나리오 영상, 수면·외출 일지, 실가구 파일럿 로그로 측정합니다.</p>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+      <div class="p-6 rounded-2xl bg-surface-container-low"><div class="text-label-sm text-outline mb-2">생활상태 분류 정확도</div><div class="text-display-lg text-primary font-bold">≥ 90<span class="text-headline-sm">%</span></div><div class="text-body-sm text-on-surface-variant mt-1">ACTIVE · REST · NOT_IN_VIEW</div></div>
+      <div class="p-6 rounded-2xl bg-surface-container-low"><div class="text-label-sm text-outline mb-2">바닥 누운 상태 검출 재현율</div><div class="text-display-lg text-primary font-bold">≥ 95<span class="text-headline-sm">%</span></div><div class="text-body-sm text-on-surface-variant mt-1">오검출 가구당 월 1회 이하</div></div>
+      <div class="p-6 rounded-2xl bg-surface-container-low"><div class="text-label-sm text-outline mb-2">상태 변화 → 보호자 앱</div><div class="text-display-lg text-secondary font-bold">≤ 60<span class="text-headline-sm">초</span></div><div class="text-body-sm text-on-surface-variant mt-1">EMERGENCY 후보 푸시도 60초 이내</div></div>
+      <div class="p-6 rounded-2xl bg-surface-container-low"><div class="text-label-sm text-outline mb-2">야간 침대 이탈 → 조명</div><div class="text-display-lg text-secondary font-bold">≤ 3<span class="text-headline-sm">초</span></div><div class="text-body-sm text-on-surface-variant mt-1">동선 LED 자동 점등</div></div>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+      <div class="p-5 rounded-2xl border border-[#E8EFF7]"><div class="text-label-sm text-outline mb-1">외출·귀가 추정 정확도</div><div class="text-headline-md font-bold">≥ 95%</div></div>
+      <div class="p-5 rounded-2xl border border-[#E8EFF7]"><div class="text-label-sm text-outline mb-1">가구당 주간 오알림</div><div class="text-headline-md font-bold">≤ 1회</div></div>
+      <div class="p-5 rounded-2xl border border-[#E8EFF7]"><div class="text-label-sm text-outline mb-1">장치 월간 가동률</div><div class="text-headline-md font-bold">≥ 99%</div></div>
+      <div class="p-5 rounded-2xl border border-[#E8EFF7]"><div class="text-label-sm text-outline mb-1">6개월 서비스 유지율</div><div class="text-headline-md font-bold">≥ 85%</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 10 TECH STACK ===== -->
+<section class="w-full py-20 bg-surface-container-low" id="tech">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">End-to-End Tech Stack</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">기술은 뒤에서, 안심은 앞에서.</h2>
+      <p class="text-body-lg text-on-surface-variant">이미 구현해 검증한 센서·서버·앱 위에 Edge Vision AI를 더하는 4계층 구조입니다.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4"><span class="text-label-sm text-outline font-mono">TIER 01</span><span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold">센서 확장</span></div>
+        <h3 class="text-headline-md font-bold mb-3">HOME</h3>
+        <ul class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">check_circle</span>ESP32-S3 MCU (Wi-Fi)</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">check_circle</span>HC-SR501 PIR · MC-38 도어 센서</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">check_circle</span>1080p 광각 UVC 웹캠 (거실)</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">check_circle</span>Pi Camera 3 NoIR + 850nm IR (침실)</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">check_circle</span>릴레이/MOSFET + 12V LED 바</li>
+        </ul>
+        <div class="mt-auto pt-4 border-t border-surface-container text-label-sm text-outline mt-6">생활 신호 수집과 조명 제어</div>
+      </div>
+      <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-md border-2 border-primary/20 flex flex-col">
+        <div class="flex items-center justify-between mb-4"><span class="text-label-sm text-outline font-mono">TIER 02</span><span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-secondary text-label-sm font-bold">PoC 검증</span></div>
+        <h3 class="text-headline-md font-bold mb-3">EDGE AI</h3>
+        <ul class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-secondary">developer_board</span>Raspberry Pi 5 (8GB)</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-secondary">person_search</span>YOLO nano급 사람 검출 (ONNX Runtime)</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-secondary">accessibility</span>MediaPipe Pose 자세 추정</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-secondary">account_tree</span>규칙 기반 상태 머신 (Zone·자세·체류 시간)</li>
+        </ul>
+        <div class="mt-auto pt-4 border-t border-surface-container text-label-sm text-outline mt-6">목표 처리 속도 5 FPS 이상</div>
+      </div>
+      <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4"><span class="text-label-sm text-outline font-mono">TIER 03</span><span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-label-sm font-bold">기존 구현 재사용</span></div>
+        <h3 class="text-headline-md font-bold mb-3">CLOUD</h3>
+        <ul class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">bolt</span>Cloudflare Workers + Cron Triggers</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">database</span>Firebase Cloud Firestore</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">query_stats</span>14일 이동 평균·표준편차 기준선</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">send</span>FCM HTTP v1 푸시</li>
+        </ul>
+        <div class="mt-auto pt-4 border-t border-surface-container text-label-sm text-outline mt-6">이벤트 저장과 평소 대비 판정</div>
+      </div>
+      <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4"><span class="text-label-sm text-outline font-mono">TIER 04</span><span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-label-sm font-bold">기존 구현 재사용</span></div>
+        <h3 class="text-headline-md font-bold mb-3">FAMILY · CARE</h3>
+        <ul class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">phone_android</span>보호자 앱: Expo React Native (Android)</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">dashboard</span>운영자 대시보드: React + Vite 웹</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-primary">lock</span>Firebase Auth + Security Rules</li>
+        </ul>
+        <div class="mt-auto pt-4 border-t border-surface-container text-label-sm text-outline mt-6">가족과 돌봄 기관을 위한 화면</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 11 SCOPE & POC ===== -->
+<section class="w-full py-20 bg-surface" id="poc">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">Scope & Roadmap</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">할 일과 하지 않을 일을<br/>분명히 정했습니다.</h2>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+      <div class="bg-surface-container-lowest rounded-3xl p-8 shadow-sm border-2 border-primary/20">
+        <span class="px-3 py-1 rounded-full bg-primary-fixed text-primary text-label-md font-bold">별일없지가 하는 일</span>
+        <ul class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-body-sm text-on-surface">
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-primary">check</span>Edge 사람 검출·자세 추정</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-primary">check</span>Zone 기반 생활상태 판단</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-primary">check</span>원본 영상 미저장·미전송</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-primary">check</span>외출·귀가 추정</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-primary">check</span>화장실 장시간 체류 감지</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-primary">check</span>야간 동선 조명 제어</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-primary">check</span>14일 개인 기준선 비교</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-primary">check</span>보호자 앱 Timeline·푸시</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-primary">check</span>운영자 웹 대시보드</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-primary">check</span>장치 상태 모니터링·로그</li>
+        </ul>
+      </div>
+      <div class="bg-surface-container-lowest rounded-3xl p-8 shadow-sm">
+        <span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-label-md font-bold">하지 않는 일</span>
+        <ul class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-body-sm text-on-surface-variant">
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">close</span>질병·수면의 질 등 의료적 판단</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">close</span>식사·복약 여부 판정</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">close</span>넘어지는 순간의 동작 인식</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">close</span>얼굴 인식·신원 식별</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">close</span>보호자용 실시간·녹화 영상</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">close</span>화장실 카메라</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">close</span>119 자동 신고</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">close</span>음성 대화형 안부 확인</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-surface-container-low p-7 rounded-2xl">
+        <div class="flex items-center justify-between mb-4"><span class="px-2.5 py-1 rounded-full bg-secondary-fixed text-secondary text-label-sm font-bold">4주 PoC</span><span class="material-symbols-outlined text-secondary text-xl">biotech</span></div>
+        <h3 class="text-headline-md font-bold mb-3">거실 카메라 파이프라인과 앱 연동 검증</h3>
+        <ul class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-secondary">arrow_right</span>Edge 사람 검출·자세 추정, Zone 기반 상태 판단</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-secondary">arrow_right</span>원본 영상 미저장·미전송</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-secondary">arrow_right</span>Vision 이벤트를 기존 서버에 연결, 보호자 앱 Timeline 표시</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-secondary">arrow_right</span>침실은 2주차에 판단 후 낮 조도에서 검증</li>
+        </ul>
+      </div>
+      <div class="bg-surface-container-low p-7 rounded-2xl">
+        <div class="flex items-center justify-between mb-4"><span class="px-2.5 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-label-sm font-bold">다음 단계</span><span class="material-symbols-outlined text-outline text-xl">route</span></div>
+        <h3 class="text-headline-md font-bold mb-3">센서·조명·기준선·대시보드로 확장</h3>
+        <ul class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">arrow_right</span>현관·화장실 센서로 외출·귀가 추정, 장시간 체류 감지</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">arrow_right</span>야간 동선 조명 제어</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">arrow_right</span>14일 개인 기준선 비교와 CHECK 판정</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">arrow_right</span>돌봄 기관용 운영자 대시보드</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 12 ROI ===== -->
+<section class="w-full py-20 bg-surface-container-low" id="roi">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-secondary font-bold tracking-wider uppercase mb-2">For Care Organizations</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">돌봄 기관에는,<br/>정기 확인 업무를 덜어 드립니다.</h2>
+      <p class="text-body-lg text-on-surface-variant">생활지원사는 대시보드에서 확인이 필요한 가구부터 연락합니다. 노인맞춤돌봄 수행기관 도입을 가정한 추산입니다.</p>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="bg-surface-container-lowest rounded-3xl p-8 shadow-sm">
+        <div class="text-label-sm text-outline mb-1">시나리오 A</div>
+        <h3 class="text-headline-md font-bold mb-5">파일럿 100가구</h3>
+        <dl class="grid grid-cols-2 gap-4">
+          <div><dt class="text-label-sm text-outline">초기 투자</dt><dd class="text-headline-sm font-bold">1억 600만 원</dd></div>
+          <div><dt class="text-label-sm text-outline">월 순 절감</dt><dd class="text-headline-sm font-bold">235만 원</dd></div>
+          <div><dt class="text-label-sm text-outline">연간 ROI</dt><dd class="text-headline-lg font-bold text-on-surface-variant">26.6%</dd></div>
+          <div><dt class="text-label-sm text-outline">회수 기간</dt><dd class="text-headline-lg font-bold text-on-surface-variant">약 45개월</dd></div>
+        </dl>
+        <p class="text-body-sm text-on-surface-variant mt-5">파일럿의 목적은 수익이 아니라 KPI 검증입니다.</p>
+      </div>
+      <div class="bg-surface-container-lowest rounded-3xl p-8 shadow-md border-2 border-primary/20">
+        <div class="text-label-sm text-primary font-bold mb-1">시나리오 B</div>
+        <h3 class="text-headline-md font-bold mb-5">확산 500가구</h3>
+        <dl class="grid grid-cols-2 gap-4">
+          <div><dt class="text-label-sm text-outline">초기 투자</dt><dd class="text-headline-sm font-bold">2억 8,600만 원</dd></div>
+          <div><dt class="text-label-sm text-outline">월 순 절감</dt><dd class="text-headline-sm font-bold">2,015만 원</dd></div>
+          <div><dt class="text-label-sm text-outline">연간 ROI</dt><dd class="text-headline-lg font-bold text-primary">84.5%</dd></div>
+          <div><dt class="text-label-sm text-outline">회수 기간</dt><dd class="text-headline-lg font-bold text-primary">약 14개월</dd></div>
+        </dl>
+        <p class="text-body-sm text-on-surface-variant mt-5">개발비는 고정이고 절감액은 가구 수에 비례해, 규모가 커질수록 사업성이 좋아집니다.</p>
+      </div>
+      <div class="rounded-3xl p-8 bg-gradient-to-br from-primary to-secondary text-on-primary shadow-lg flex flex-col">
+        <span class="text-label-sm uppercase tracking-wider opacity-80">판정</span>
+        <h3 class="text-headline-lg font-bold mt-1 mb-4">조건부 GO</h3>
+        <ul class="flex flex-col gap-3 text-body-sm opacity-95">
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base">schedule</span>정기 안부 확인 시간 50% 감소 목표</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base">directions_car</span>불필요한 방문 가구당 월 1회 감소</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-base">priority_high</span>가장 민감한 가정은 “확인 시간 50% 감소” — 파일럿에서 가장 먼저 실측합니다.</li>
+        </ul>
+        <p class="text-label-sm opacity-80 mt-auto pt-5">가구당 H/W 45만 원(Edge 2대·센서·조명·설치) 기준. 사고 조기 발견에 따른 효과는 보수적으로 제외.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 13 CTA ===== -->
+<section class="w-full py-24 bg-gradient-to-b from-surface-container-low to-surface">
+  <div class="max-w-3xl mx-auto px-margin text-center flex flex-col items-center">
+    <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-secondary shadow-xl flex items-center justify-center text-on-primary mb-8">
+      <svg viewBox="0 0 24 24" class="w-10 h-10" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.6 6.1 6.6.5-5 4.3 1.5 6.4L12 16.4l-5.7 3.4 1.5-6.4-5-4.3 6.6-.5z"/></svg>
+    </div>
+    <span class="text-label-md text-primary font-bold tracking-widest uppercase mb-4">Small Signals, A Safer Tomorrow</span>
+    <h2 class="text-display-lg text-on-surface font-bold mb-6">“오늘 부모님, 별일 없지?”</h2>
+    <p class="text-body-lg text-on-surface-variant max-w-xl mb-10">
+      매일 먼저 전화하지 않아도, 집 안을 계속 지켜보지 않아도, 평범한 하루가 이어지고 있다는 것을 가족이 조용히 느낄 수 있도록.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-4">
+      <a class="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-primary text-on-primary text-label-md font-bold hover:bg-primary-container transition-all shadow-md" href="#how">
+        <span>작동 방식 다시 보기</span><span class="material-symbols-outlined text-lg">arrow_upward</span>
+      </a>
+      <a class="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-surface-container-lowest text-on-surface text-label-md font-semibold hover:bg-surface-container transition-all shadow-sm" href="PRD/PRD.md">
+        <span class="material-symbols-outlined text-lg text-secondary">description</span><span>PRD 문서 보기</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="w-full bg-surface-container-low">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl flex flex-col gap-space-lg">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-space-md">
+      <div class="flex flex-col gap-space-xs">
+        <div class="flex items-center gap-2"><span class="text-headline-sm text-primary font-bold">별일없지</span><span class="text-label-sm text-on-surface-variant">· Physical AI 생활안심 시스템</span></div>
+        <p class="text-body-sm text-outline">고령자는 평소처럼 생활하고, 기술은 뒤에서 조용히 안전을 보조합니다.</p>
+      </div>
+      <nav class="flex flex-wrap items-center gap-space-md text-body-sm text-on-surface-variant" aria-label="하단 메뉴">
+        <a class="hover:text-on-surface" href="#problem">왜 필요한가</a>
+        <a class="hover:text-on-surface" href="#how">작동 방식</a>
+        <a class="hover:text-on-surface" href="#day">하루 시나리오</a>
+        <a class="hover:text-on-surface" href="#privacy">프라이버시</a>
+        <a class="hover:text-on-surface" href="#tech">기술 스택</a>
+        <a class="hover:text-on-surface" href="#roi">도입 효과</a>
+      </nav>
+    </div>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-space-sm pt-space-md border-t border-surface-container text-outline text-body-sm">
+      <div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-base">verified_user</span><span>원본 영상은 집 안 Edge 장치에서 처리 후 즉시 폐기됩니다</span></div>
+      <span>© 2026 별일없지 · 나만의 피지컬 AI 제품 만들기</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

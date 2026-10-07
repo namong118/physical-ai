@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>문서 | 별일없지</title>
+<meta name="robots" content="noindex"/>
+<link rel="icon" type="image/png" href="images/favicon.png"/>
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"/>
+<style>
+  html { scroll-behavior: smooth; scroll-padding-top: 5.5rem; }
+  html, body { margin: 0; padding: 0; }
+  body { overscroll-behavior: none; word-break: keep-all; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400; line-height: 1; }
+  a:focus-visible, button:focus-visible { outline: 3px solid #0ea5e9; outline-offset: 3px; border-radius: 9999px; }
+
+  /* ===== 문서 본문 ===== */
+  .doc { color: #111c2d; font-size: 16px; line-height: 1.75; overflow-wrap: anywhere; }
+  .doc > :first-child { margin-top: 0; }
+  .doc h1 { font-size: 30px; line-height: 40px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 1rem; }
+  .doc h2 { font-size: 23px; line-height: 32px; font-weight: 700; letter-spacing: -0.015em; margin: 2.75rem 0 1rem; padding-top: 1.5rem; border-top: 1px solid #e7eeff; }
+  .doc h3 { font-size: 18px; line-height: 27px; font-weight: 600; margin: 2rem 0 0.75rem; }
+  .doc h4 { font-size: 16px; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+  .doc p, .doc ul, .doc ol, .doc blockquote, .doc pre, .doc .table-wrap, .doc figure { margin: 0 0 1rem; }
+  .doc ul { list-style: disc; padding-left: 1.4rem; }
+  .doc ol { list-style: decimal; padding-left: 1.4rem; }
+  .doc li { margin: 0.25rem 0; }
+  .doc li > ul, .doc li > ol { margin: 0.25rem 0 0; }
+  .doc a { color: #0B7F78; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .doc a:hover { color: #096A64; }
+  .doc strong { font-weight: 700; }
+  .doc hr { border: 0; border-top: 1px solid #d8e3fb; margin: 2.5rem 0; }
+  .doc blockquote { padding: 0.75rem 1.1rem; border-left: 4px solid #0B7F78; background: #F0F6FF; border-radius: 0 1rem 1rem 0; color: #3d4a42; font-size: 14px; line-height: 23px; }
+  .doc blockquote > :last-child { margin-bottom: 0; }
+  .doc code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.88em; background: #e7eeff; padding: 0.1em 0.35em; border-radius: 0.35rem; }
+  .doc pre { background: #F0F6FF; padding: 1rem 1.1rem; border-radius: 1rem; overflow-x: auto; font-size: 13px; line-height: 20px; }
+  .doc pre code { background: none; padding: 0; font-size: inherit; }
+  .doc img { max-width: 100%; height: auto; border-radius: 1rem; border: 1px solid #E8EFF7; }
+  .doc .table-wrap { overflow-x: auto; border: 1px solid #e7eeff; border-radius: 1rem; }
+  .doc table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 22px; }
+  .doc th { background: #F0F6FF; color: #3d4a42; font-weight: 600; text-align: left; white-space: nowrap; }
+  .doc th, .doc td { padding: 0.6rem 0.9rem; vertical-align: top; min-width: 5.5rem; }
+  .doc tr + tr td, .doc thead + tbody tr td { border-top: 1px solid #e7eeff; }
+</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        "secondary-fixed": "#D6E4FF", "secondary-container": "#5B9BFF", "on-secondary-fixed": "#001A41",
+        "outline-variant": "#bccac0", "tertiary-container": "#a36700", "surface-container-lowest": "#ffffff",
+        "primary-container": "#096A64", "on-tertiary-fixed": "#2a1700", "primary-fixed-dim": "#6ADBCD",
+        "on-secondary": "#ffffff", "secondary-fixed-dim": "#9DBDFF", "on-primary-container": "#ffffff",
+        "outline": "#6d7a72", "error": "#ba1a1a", "on-background": "#111c2d", "on-secondary-container": "#00367A",
+        "primary-fixed": "#B5F0E6", "on-primary-fixed": "#00201D", "surface-variant": "#d8e3fb",
+        "on-error": "#ffffff", "primary": "#0B7F78", "tertiary-fixed": "#ffddb8", "on-error-container": "#93000a",
+        "surface-container-highest": "#d8e3fb", "on-surface": "#111c2d", "surface-container": "#e7eeff",
+        "error-container": "#ffdad6", "secondary": "#1A66DB", "surface": "#f9f9ff", "background": "#f9f9ff",
+        "on-surface-variant": "#3d4a42", "tertiary": "#825100", "tertiary-fixed-dim": "#ffb95f",
+        "surface-container-high": "#dee8ff", "on-primary": "#ffffff", "on-tertiary": "#ffffff",
+        "surface-bright": "#f9f9ff", "surface-container-low": "#F0F6FF",
+        "brand-green": "#4FD97A", "brand-teal": "#2CC9C3", "brand-blue": "#2F80FF", "brand-deep": "#0E8A63"
+      },
+      spacing: {
+        "gutter": "1rem", "space-xl": "2.5rem", "space-xs": "0.25rem", "margin-desktop": "3rem", "space-lg": "1.5rem",
+        "margin-tablet": "2rem", "margin": "1rem", "space-sm": "0.5rem", "space-md": "1rem"
+      },
+      fontFamily: {
+        sans: ["Plus Jakarta Sans", "Pretendard", "-apple-system", "Apple SD Gothic Neo", "Malgun Gothic", "sans-serif"],
+        mono: ["ui-monospace", "SFMono-Regular", "Consolas", "monospace"]
+      },
+      fontSize: {
+        "display-lg": ["36px", { lineHeight: "46px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "headline-lg": ["28px", { lineHeight: "38px", letterSpacing: "-0.015em", fontWeight: "700" }],
+        "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "headline-sm": ["17px", { lineHeight: "24px", fontWeight: "600" }],
+        "body-lg": ["16px", { lineHeight: "27px", fontWeight: "400" }],
+        "body-md": ["14px", { lineHeight: "23px", fontWeight: "400" }],
+        "body-sm": ["13px", { lineHeight: "20px", fontWeight: "400" }],
+        "label-md": ["13px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "600" }],
+        "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "600" }]
+      }
+    }
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/lib/marked.umd.js" integrity="sha384-1k2MTWjtw1PI6EOZEAvwL3bDoJfybbsEJcaXqsRTurALpMRRfQwza/nvaUQ7S/CQ" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" integrity="sha384-+VfUPEb0PdtChMwmBcBmykRMDd+v6D/oFmB3rZM/puCMDYcIvF968OimRh4KQY9a" crossorigin="anonymous"></script>
+</head>
+<body class="bg-surface font-sans text-body-md text-on-surface antialiased">
+
+<!-- ===== HEADER ===== -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+  <div class="h-[3px] bg-gradient-to-r from-brand-green via-brand-teal to-brand-blue"></div>
+  <div class="h-20 max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md">
+    <a href="index.html" class="flex items-center gap-3 flex-shrink-0">
+      <img src="images/logo.png" alt="" class="w-10 h-10 rounded-[22%] shadow-sm" width="40" height="40"/>
+      <span class="flex flex-col">
+        <span class="text-headline-sm text-primary font-bold tracking-tight leading-tight">별일없지</span>
+        <span class="text-label-sm text-on-surface-variant font-medium">Physical AI 생활안심 시스템</span>
+      </span>
+    </a>
+    <a class="inline-flex items-center gap-1.5 text-label-md bg-surface-container-low text-on-surface hover:bg-surface-container px-space-lg py-space-sm rounded-full transition-all" href="index.html">
+      <span class="material-symbols-outlined text-lg">home</span><span>홈으로</span>
+    </a>
+  </div>
+</header>
+
+<main class="w-full pt-[83px]">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-10 md:py-14">
+    <div class="max-w-[820px] mx-auto">
+      <div class="flex flex-wrap items-center gap-2 mb-5 text-label-sm">
+        <span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary font-bold">문서</span>
+        <span id="doc-path" class="font-mono text-outline break-all"></span>
+        <a id="doc-raw" class="hidden ml-auto text-outline hover:text-on-surface underline underline-offset-2" href="#">원문(.md) 보기</a>
+      </div>
+      <article id="doc" class="doc bg-surface-container-lowest rounded-3xl p-6 md:p-10 shadow-sm border border-[#E8EFF7]">
+        <p class="text-on-surface-variant">문서를 불러오는 중입니다…</p>
+      </article>
+    </div>
+  </div>
+</main>
+
+<footer class="w-full bg-surface-container-low mt-10">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-space-sm text-outline text-body-sm">
+    <a class="hover:text-on-surface" href="index.html">← 별일없지 홈으로</a>
+    <span>© 2026 별일없지 · 나만의 피지컬 AI 제품 만들기</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // 뷰어가 열 수 있는 문서: 레포의 PRD/, report/ 아래 .md 만
+  var ALLOWED = /^(PRD|report)\/[^\\:?#]+\.md$/i;
+  var article = document.getElementById('doc');
+  var siteRoot = new URL('./', location.href);   // doc.html 이 있는 레포 루트
+
+  function isAllowed(path) {
+    return typeof path === 'string' && ALLOWED.test(path) &&
+      path.split('/').every(function (seg) { return seg !== '' && seg !== '.' && seg !== '..'; });
+  }
+
+  function showError(title, detail) {
+    document.title = '문서를 열 수 없음 | 별일없지';
+    article.innerHTML = '';
+    var h = document.createElement('h1'); h.textContent = title;
+    var p = document.createElement('p'); p.textContent = detail;
+    var a = document.createElement('a'); a.href = 'index.html'; a.textContent = '홈으로 돌아가기';
+    article.append(h, p, a);
+  }
+
+  // 사이트 루트 기준 상대 경로 (루트 밖이면 null)
+  function siteRelative(url) {
+    if (url.origin !== siteRoot.origin || url.pathname.indexOf(siteRoot.pathname) !== 0) return null;
+    return decodeURIComponent(url.pathname.slice(siteRoot.pathname.length));
+  }
+
+  // GitHub 방식에 가까운 제목 id
+  function slugify(text, used) {
+    var base = text.trim().toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, '').replace(/\s/g, '-') || 'section';
+    var id = base, n = 1;
+    while (used[id]) id = base + '-' + n++;
+    used[id] = true;
+    return id;
+  }
+
+  // 문서 안 상대 경로를 .md 파일 위치 기준으로 다시 계산
+  function rewrite(root, mdUrl) {
+    root.querySelectorAll('img[src]').forEach(function (img) {
+      var abs = new URL(img.getAttribute('src'), mdUrl);
+      var rel = siteRelative(abs);
+      img.setAttribute('src', rel !== null ? rel : abs.href);
+      img.setAttribute('loading', 'lazy');
+    });
+    root.querySelectorAll('a[href]').forEach(function (a) {
+      var href = a.getAttribute('href');
+      if (href.charAt(0) === '#') return;                       // 문서 안 이동
+      var abs = new URL(href, mdUrl);
+      if (abs.protocol !== 'http:' && abs.protocol !== 'https:') return;  // mailto 등
+      var rel = siteRelative(abs);
+      if (rel === null) {                                       // 외부 링크
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+        return;
+      }
+      if (isAllowed(rel)) {                                     // 다른 문서 → 뷰어 안에서
+        a.setAttribute('href', 'doc.html?file=' + encodeURIComponent(rel).replace(/%2F/g, '/') + abs.hash);
+      } else {                                                  // docx 등 → 파일 그대로
+        a.setAttribute('href', rel + abs.hash);
+        if (!/\.html?$/i.test(rel)) a.setAttribute('download', '');
+      }
+    });
+  }
+
+  var file = new URLSearchParams(location.search).get('file');
+  if (!file) {
+    showError('문서를 지정하지 않았습니다', '주소에 ?file=PRD/PRD.md 처럼 열 문서를 지정해 주세요.');
+    return;
+  }
+  if (!isAllowed(file)) {
+    showError('열 수 없는 문서입니다', '이 뷰어는 PRD/, report/ 폴더 아래의 .md 파일만 열 수 있습니다. (요청: ' + file + ')');
+    return;
+  }
+  if (!window.marked || !window.DOMPurify) {
+    showError('문서 뷰어를 불러오지 못했습니다', '마크다운 변환 스크립트(CDN)를 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 새로고침해 주세요.');
+    return;
+  }
+
+  var mdUrl = new URL(file, siteRoot);
+  document.getElementById('doc-path').textContent = file;
+  var raw = document.getElementById('doc-raw');
+  raw.href = file; raw.classList.remove('hidden');
+
+  fetch(mdUrl.href, { cache: 'no-cache' })
+    .then(function (res) {
+      if (!res.ok) throw new Error(res.status === 404 ? '파일이 없습니다 (404).' : '서버 응답 ' + res.status);
+      return res.text();
+    })
+    .then(function (md) {
+      var html = DOMPurify.sanitize(marked.parse(md, { gfm: true }));
+      var tpl = document.createElement('template');
+      tpl.innerHTML = html;
+      var frag = tpl.content;
+
+      rewrite(frag, mdUrl);
+
+      var used = {};
+      frag.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(function (h) {
+        if (!h.id) h.id = slugify(h.textContent, used);
+      });
+      frag.querySelectorAll('table').forEach(function (t) {
+        var wrap = document.createElement('div');
+        wrap.className = 'table-wrap';
+        t.parentNode.insertBefore(wrap, t);
+        wrap.appendChild(t);
+      });
+
+      var h1 = frag.querySelector('h1');
+      document.title = (h1 ? h1.textContent.trim() : file) + ' | 별일없지';
+
+      article.innerHTML = '';
+      article.appendChild(frag);
+      if (location.hash) {
+        var target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        if (target) target.scrollIntoView();
+      }
+    })
+    .catch(function (err) {
+      showError('문서를 불러오지 못했습니다', file + ' — ' + err.message);
+    });
+})();
+</script>
+</body>
+</html>

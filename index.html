@@ -646,9 +646,9 @@ tailwind.config = {
       </div>
       <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div class="bg-surface-container-lowest rounded-2xl p-7 shadow-sm border border-[#E8EFF7]">
-          <div class="flex items-center justify-between mb-4"><h3 class="text-headline-md font-bold">거실·식탁</h3><span class="material-symbols-outlined text-primary text-2xl">chair</span></div>
+          <div class="flex items-center justify-between mb-4"><h3 class="text-headline-md font-bold">거실·주방</h3><span class="material-symbols-outlined text-primary text-2xl">chair</span></div>
           <div class="text-label-sm text-outline mb-2">Edge 카메라 #1</div>
-          <p class="text-body-md text-on-surface-variant">활동 / 휴식 / 시야 밖 상태를 구분합니다.</p>
+          <p class="text-body-md text-on-surface-variant">활동 / 휴식 / 주방 활동 / 식탁 체류 / 시야 밖 상태를 구분합니다.</p>
         </div>
         <div class="bg-surface-container-lowest rounded-2xl p-7 shadow-sm border border-[#E8EFF7]">
           <div class="flex items-center justify-between mb-4"><h3 class="text-headline-md font-bold">침실</h3><span class="material-symbols-outlined text-tertiary text-2xl">bed</span></div>
@@ -666,6 +666,74 @@ tailwind.config = {
           <p class="text-body-md text-on-surface-variant">들어가고 나오는 시각을 기록하고, 기준보다 오래 머무르면 확인을 요청합니다.</p>
         </div>
       </div>
+    </div>
+
+    <!-- 최종 목표 구조 -->
+    <div class="mt-16">
+      <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-10">
+        <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">Target Architecture</span>
+        <h3 class="text-headline-lg text-on-surface font-bold">모든 신호는 하나로 모입니다</h3>
+      </div>
+      <div class="bg-surface-container-lowest rounded-3xl p-6 md:p-8 lg:p-10 shadow-sm border border-[#E8EFF7]">
+        <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 lg:gap-4">
+          <!-- 입력: 공간별 장치 -->
+          <div class="lg:flex-[1.5] min-w-0 flex flex-col gap-3">
+            <div class="text-label-sm text-outline font-bold">입력 · 공간별 장치</div>
+            <div class="p-4 rounded-2xl bg-primary-fixed/30 border border-primary/20 flex items-start gap-3">
+              <span class="w-10 h-10 flex-shrink-0 rounded-xl bg-primary flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-xl">videocam</span></span>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2"><span class="text-headline-sm font-bold">거실·주방 카메라</span><span class="px-2 py-0.5 rounded-full bg-primary text-on-primary text-label-sm font-bold">Edge AI</span></div>
+                <div class="text-body-sm text-on-surface-variant mt-1">위치 + 자세 → 활동·휴식·주방 활동</div>
+              </div>
+            </div>
+            <div class="p-4 rounded-2xl bg-primary-fixed/30 border border-primary/20 flex items-start gap-3">
+              <span class="w-10 h-10 flex-shrink-0 rounded-xl bg-primary flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-xl">videocam</span></span>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2"><span class="text-headline-sm font-bold">침실 카메라 (IR)</span><span class="px-2 py-0.5 rounded-full bg-primary text-on-primary text-label-sm font-bold">Edge AI</span></div>
+                <div class="text-body-sm text-on-surface-variant mt-1">침대 + 누움 → 수면 추정</div>
+              </div>
+            </div>
+            <div class="p-4 rounded-2xl bg-secondary-fixed/40 border border-dashed border-secondary/40 flex items-start gap-3">
+              <span class="w-10 h-10 flex-shrink-0 rounded-xl bg-secondary flex items-center justify-center text-on-secondary"><span class="material-symbols-outlined text-xl">sensors</span></span>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2"><span class="text-headline-sm font-bold">현관 문 센서 + PIR</span><span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-secondary text-label-sm font-bold">센서</span></div>
+                <div class="text-body-sm text-on-surface-variant mt-1">문 열림 → 외출·귀가 추정</div>
+              </div>
+            </div>
+            <div class="p-4 rounded-2xl bg-secondary-fixed/40 border border-dashed border-secondary/40 flex items-start gap-3">
+              <span class="w-10 h-10 flex-shrink-0 rounded-xl bg-secondary flex items-center justify-center text-on-secondary"><span class="material-symbols-outlined text-xl">sensors</span></span>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2"><span class="text-headline-sm font-bold">화장실 문 센서 + PIR</span><span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-secondary text-label-sm font-bold">센서</span><span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold">카메라 없음</span></div>
+                <div class="text-body-sm text-on-surface-variant mt-1">체류 시간 → 확인 필요</div>
+              </div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline self-center lg:hidden">arrow_downward</span>
+          <span class="material-symbols-outlined text-outline self-center hidden lg:inline">arrow_forward</span>
+          <!-- 통합 판단 -->
+          <div class="lg:flex-1 min-w-0 p-5 rounded-2xl bg-surface-container-low border-2 border-surface-container-highest">
+            <div class="flex items-center gap-3 mb-4"><span class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-on-surface"><span class="material-symbols-outlined text-xl">cloud</span></span><div><div class="text-label-sm text-outline">통합</div><div class="text-headline-sm font-bold">Cloud 통합 판단</div></div></div>
+            <ul class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
+              <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">my_location</span>재실 위치 통합</li>
+              <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">calendar_today</span>하루 생활 집계</li>
+              <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">query_stats</span>개인 기준선 비교</li>
+              <li class="flex gap-2"><span class="material-symbols-outlined text-base text-outline">rule</span>3단계 상태 판정</li>
+            </ul>
+          </div>
+          <span class="material-symbols-outlined text-outline self-center lg:hidden">arrow_downward</span>
+          <span class="material-symbols-outlined text-outline self-center hidden lg:inline">arrow_forward</span>
+          <!-- 출력 -->
+          <div class="lg:w-52 flex-shrink-0 p-5 rounded-2xl bg-surface-container-low border-2 border-surface-container-highest">
+            <div class="flex items-center gap-3"><span class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-on-surface"><span class="material-symbols-outlined text-xl">smartphone</span></span><div><div class="text-label-sm text-outline">출력</div><div class="text-headline-sm font-bold">보호자 앱</div></div></div>
+            <div class="text-body-sm text-on-surface-variant mt-3">Timeline · 알림</div>
+          </div>
+        </div>
+        <div class="mt-6 pt-5 border-t border-surface-container flex flex-col md:flex-row md:items-center gap-3 md:gap-6 text-body-sm text-on-surface-variant">
+          <span class="flex items-center gap-2"><span class="w-6 h-6 rounded-lg bg-primary flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-sm">videocam</span></span>카메라 + Edge AI (영상은 집 밖으로 나가지 않음)</span>
+          <span class="flex items-center gap-2"><span class="w-6 h-6 rounded-lg bg-secondary flex items-center justify-center text-on-secondary"><span class="material-symbols-outlined text-sm">sensors</span></span>센서</span>
+        </div>
+      </div>
+      <p class="mt-5 text-center text-body-md text-on-surface-variant">카메라에 보이지 않는다고 외출로 판단하지 않습니다. 외출은 현관 센서가 근거일 때만 추정합니다.</p>
     </div>
   </div>
 </section>

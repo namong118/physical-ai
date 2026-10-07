@@ -79,6 +79,7 @@ tailwind.config = {
     <nav class="hidden xl:flex items-center gap-space-lg text-body-md text-on-surface-variant" aria-label="주요 메뉴">
       <a class="hover:text-on-surface transition-colors" href="#problem">왜 필요한가</a>
       <a class="hover:text-on-surface transition-colors" href="#how">작동 방식</a>
+      <a class="hover:text-on-surface transition-colors" href="#pipeline">전처리·후처리</a>
       <a class="hover:text-on-surface transition-colors" href="#day">하루 시나리오</a>
       <a class="hover:text-on-surface transition-colors" href="#privacy">프라이버시</a>
       <a class="hover:text-on-surface transition-colors" href="#tech">기술 스택</a>
@@ -289,8 +290,8 @@ tailwind.config = {
         </div>
         <ol class="flex flex-col gap-2 text-body-sm text-on-surface-variant mb-5">
           <li class="flex gap-2"><span class="text-primary font-bold">1</span>사람 검출 (YOLO nano)</li>
-          <li class="flex gap-2"><span class="text-primary font-bold">2</span>자세 추정 — 관절 17점 (MediaPipe Pose)</li>
-          <li class="flex gap-2"><span class="text-primary font-bold">3</span>Zone 매칭 — 소파·식탁·침대·바닥</li>
+          <li class="flex gap-2"><span class="text-primary font-bold">2</span>자세 추정 — 관절 33점 (MediaPipe Pose)</li>
+          <li class="flex gap-2"><span class="text-primary font-bold">3</span>Zone 매칭 — 주방·식탁·소파·침대·바닥</li>
           <li class="flex gap-2"><span class="text-primary font-bold">4</span>체류 시간 계산 → 상태 머신 판단</li>
         </ol>
         <p class="text-body-sm text-on-surface-variant mt-auto">Cloud는 10분마다 하루 이벤트를 모아 최근 14일 개인 기준선(첫 활동 시각, 오전 활동 시간, 야간 화장실 횟수 등)과 비교합니다.</p>
@@ -315,12 +316,14 @@ tailwind.config = {
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
           <span class="text-label-sm text-secondary font-bold uppercase tracking-wider">Edge State Machine</span>
-          <h3 class="text-headline-lg font-bold mt-1">카메라가 읽는 다섯 가지 생활 상태</h3>
+          <h3 class="text-headline-lg font-bold mt-1">카메라가 읽는 일곱 가지 생활 상태</h3>
         </div>
         <p class="text-body-sm text-on-surface-variant max-w-md">상태가 바뀌는 순간에만 이벤트를 만들고, 1분 미만의 짧은 왕복 전환은 걸러냅니다.</p>
       </div>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div class="p-4 rounded-2xl bg-primary-fixed/30"><div class="font-mono text-label-md text-primary font-bold">ACTIVE</div><div class="text-body-sm text-on-surface-variant mt-1">거실·식탁 등에서 활동 중</div></div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="p-4 rounded-2xl bg-primary-fixed/30"><div class="font-mono text-label-md text-primary font-bold">ACTIVE</div><div class="text-body-sm text-on-surface-variant mt-1">거실 등에서 서서 활동 중</div></div>
+        <div class="p-4 rounded-2xl bg-primary-fixed/30"><div class="font-mono text-label-md text-primary font-bold">KITCHEN_<wbr/>ACTIVITY</div><div class="text-body-sm text-on-surface-variant mt-1">주방에서 서서 움직이는 중</div></div>
+        <div class="p-4 rounded-2xl bg-secondary-fixed/40"><div class="font-mono text-label-md text-secondary font-bold">TABLE_<wbr/>STAY</div><div class="text-body-sm text-on-surface-variant mt-1">식탁에 앉아 머무는 중</div></div>
         <div class="p-4 rounded-2xl bg-secondary-fixed/40"><div class="font-mono text-label-md text-secondary font-bold">REST</div><div class="text-body-sm text-on-surface-variant mt-1">소파 등에서 휴식 중</div></div>
         <div class="p-4 rounded-2xl bg-tertiary-fixed/50"><div class="font-mono text-label-md text-tertiary font-bold">BED_REST</div><div class="text-body-sm text-on-surface-variant mt-1">침대에서 휴식·수면 추정</div></div>
         <div class="p-4 rounded-2xl bg-surface-container"><div class="font-mono text-label-md text-on-surface-variant font-bold">NOT_IN_VIEW</div><div class="text-body-sm text-on-surface-variant mt-1">카메라 시야 밖에 계심</div></div>
@@ -330,15 +333,314 @@ tailwind.config = {
   </div>
 </section>
 
+<!-- ===== 04-1 PIPELINE ===== -->
+<section class="w-full py-20 bg-surface" id="pipeline">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">Vision Pipeline</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">전처리는 잘 보게, 후처리는 의미 있게.</h2>
+      <p class="text-body-lg text-on-surface-variant">
+        전처리는 모델이 잘 보게 만들고, 후처리는 모델 출력을 생활의 의미로 바꿉니다. 모든 단계는 저장 영상 검증(Phase A)에서 효과를 측정한 뒤 유지 여부를 결정합니다.
+      </p>
+    </div>
+
+    <!-- 전체 흐름 -->
+    <div class="bg-surface-container-lowest rounded-3xl p-6 md:p-8 lg:p-10 shadow-sm border border-[#E8EFF7] mb-6">
+      <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 lg:gap-4">
+        <div class="flex-1 p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex items-center gap-3 mb-2"><span class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-on-surface"><span class="material-symbols-outlined text-xl">image</span></span><div><div class="text-label-sm text-outline">이미지 공간 · 픽셀</div><div class="text-headline-sm font-bold">전처리</div></div></div>
+          <p class="text-body-sm text-on-surface-variant">모델에 넣기 전, 이미지를 다루는 단계</p>
+        </div>
+        <span class="material-symbols-outlined text-outline self-center lg:hidden">arrow_downward</span><span class="material-symbols-outlined text-outline self-center hidden lg:inline">arrow_forward</span>
+        <div class="flex-1 p-5 rounded-2xl bg-primary-fixed/30 border-2 border-primary/20">
+          <div class="flex items-center gap-3 mb-2"><span class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-xl">memory</span></span><div><div class="text-label-sm text-primary font-bold">관절 좌표 공간</div><div class="text-headline-sm font-bold">AI 추론</div></div></div>
+          <p class="text-body-sm text-on-surface-variant">사람 검출 → 자세 추정 (관절 33점)</p>
+        </div>
+        <span class="material-symbols-outlined text-outline self-center lg:hidden">arrow_downward</span><span class="material-symbols-outlined text-outline self-center hidden lg:inline">arrow_forward</span>
+        <div class="flex-1 p-5 rounded-2xl bg-secondary-fixed/40">
+          <div class="flex items-center gap-3 mb-2"><span class="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-on-secondary"><span class="material-symbols-outlined text-xl">event_note</span></span><div><div class="text-label-sm text-secondary font-bold">생활 이벤트 공간</div><div class="text-headline-sm font-bold">후처리</div></div></div>
+          <p class="text-body-sm text-on-surface-variant">박스·관절 좌표를 생활 이벤트로 바꾸는 단계</p>
+        </div>
+      </div>
+      <div class="mt-6 pt-5 border-t border-surface-container flex flex-col md:flex-row md:items-center gap-3">
+        <span class="text-label-sm text-outline font-mono flex-shrink-0">구현 상태 표시</span>
+        <div class="flex flex-wrap gap-2 text-label-sm">
+          <span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary font-bold">구현됨(로직 테스트)</span>
+          <span class="px-2.5 py-1 rounded-full bg-secondary-fixed text-secondary font-bold">적용 예정</span>
+          <span class="px-2.5 py-1 rounded-full bg-tertiary-fixed text-tertiary font-bold">비교 예정</span>
+          <span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-bold">실측 전</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 전처리 -->
+    <div class="bg-surface-container-lowest rounded-3xl p-6 md:p-8 lg:p-10 shadow-sm border border-[#E8EFF7] mb-6">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="w-12 h-12 rounded-2xl bg-surface-container-highest flex items-center justify-center text-on-surface"><span class="material-symbols-outlined text-2xl">tune</span></span>
+        <div><div class="text-label-sm text-outline">PRE-PROCESSING · 이미지 공간</div><h3 class="text-headline-md font-bold">전처리 — 모델이 잘 보게</h3></div>
+      </div>
+      <ol class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-primary mr-1">1</span>캡처 설정</h4><span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold">실측 전</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">카메라에서 해상도·FPS·노출 고정</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">항상</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">소프트웨어 보정보다 싸고 화질 손실이 없음</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-primary mr-1">2</span>프레임 샘플링</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">30fps 중 5~10fps만 처리</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">항상</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">판단 단위가 분 단위. Raspberry Pi 부하를 가장 크게 줄임</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-primary mr-1">3</span>검출용 축소본</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">640px 정도로 축소, <b>원본은 보존</b></dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">항상</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">검출은 축소본으로 충분하고, 원본은 Pose crop에 사용</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-primary mr-1">4</span>밝기 보정 · IR 처리</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">감마 LUT 또는 LAB L 채널 CLAHE. 침실 IR은 흑백 → 3채널 복제 + CLAHE</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">어둡거나 역광일 때만. 야간 IR은 항상</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">검출 실패를 막되, 정상 조도에서는 모델 입력 분포를 해치지 않도록</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-primary mr-1">5</span>Pose용 crop + RGB 변환</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">원본에서 사람 영역을 여백 포함해 crop → RGB 변환</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">사람이 검출됐을 때</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">광각 화면의 작은 사람도 관절을 정확히 잡기 위해. MediaPipe는 RGB를 요구하므로 작은 crop에만 한 번 변환</dd>
+          </dl>
+        </li>
+      </ol>
+    </div>
+
+    <!-- AI 추론 -->
+    <div class="bg-primary-fixed/20 rounded-3xl p-6 md:p-8 border-2 border-primary/20 mb-6">
+      <div class="flex flex-col lg:flex-row lg:items-center gap-5">
+        <div class="flex items-center gap-3 lg:w-64 flex-shrink-0">
+          <span class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-2xl">memory</span></span>
+          <div><div class="text-label-sm text-primary font-bold">INFERENCE</div><h3 class="text-headline-md font-bold">AI 추론</h3></div>
+        </div>
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-5 rounded-2xl bg-surface-container-lowest">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h4 class="text-headline-sm font-bold">사람 검출 — YOLO nano급</h4><span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold">실측 전</span></div>
+            <p class="text-body-sm text-on-surface-variant">letterbox·정규화는 라이브러리 내부에서 처리하므로 직접 중복하지 않습니다.</p>
+          </div>
+          <div class="p-5 rounded-2xl bg-surface-container-lowest">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h4 class="text-headline-sm font-bold">자세 추정 — MediaPipe Pose</h4><span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold">실측 전</span></div>
+            <p class="text-body-sm text-on-surface-variant">crop 이미지에서 관절 33점을 추정합니다.</p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-5 pt-4 border-t border-primary/15 flex flex-col sm:flex-row sm:items-center gap-2 text-body-sm text-on-surface-variant">
+        <span class="px-2.5 py-1 rounded-full bg-tertiary-fixed text-tertiary text-label-sm font-bold self-start sm:self-auto">비교 예정</span>
+        <span>모델 구성: 현재 YOLO + MediaPipe와 YOLO-pose 단독을 같은 영상으로 정확도·FPS 비교할 예정입니다.</span>
+      </div>
+    </div>
+
+    <!-- 후처리 -->
+    <div class="bg-surface-container-lowest rounded-3xl p-6 md:p-8 lg:p-10 shadow-sm border border-[#E8EFF7] mb-6">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-on-secondary"><span class="material-symbols-outlined text-2xl">route</span></span>
+        <div><div class="text-label-sm text-secondary font-bold">POST-PROCESSING · 생활 이벤트 공간</div><h3 class="text-headline-md font-bold">후처리 — 모델 출력을 생활의 의미로</h3></div>
+      </div>
+      <ol class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-secondary mr-1">1</span>검출 필터</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">신뢰도·크기 기준, 제외 영역(TV·거울·액자)</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">항상</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">거실 TV 속 사람, 거울 반사 오검출 제거</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-secondary mr-1">2</span>사람 선택</h4><span class="flex flex-wrap gap-1"><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span><span class="px-2.5 py-1 rounded-full bg-secondary-fixed text-secondary text-label-sm font-bold">적용 예정</span></span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">현재: 이전 박스와의 IoU로 한 사람 선택. ByteTrack 추적(Supervision)으로 교체 적용 예정</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">사람이 검출됐을 때</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">1인 가구 전제, 사람 1명만 추적</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-secondary mr-1">3</span>One-Euro 평활화</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">visibility 낮은 관절 제외, One-Euro 필터 (속도는 박스 높이/초로 정규화)</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">항상</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">가려진 관절의 튀는 값 제거. 느릴 땐 떨림을 지우고 빠를 땐 지연 없이 따라감</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-secondary mr-1">4</span>발 위치 계산</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">양 발목 중간점 → 가려지면 엉덩이 기준 아래로 보정 → 그것도 없으면 박스 하단</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">항상</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">위치 판정의 기준점. 몸 중심은 원근 때문에 실제보다 뒤쪽에 찍힘. 주방은 조리대에 발목이 자주 가려짐</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-secondary mr-1">5</span>Zone 판정</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">설치 시 지정한 바닥 기준 다각형 + <code class="font-mono text-label-sm">cv2.pointPolygonTest</code></dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">항상</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">주방·거실·식탁·소파·침대를 이미지 마스크 없이 좌표로 판정</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-secondary mr-1">6</span>자세 분류</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">관절 좌표로 서기·이동 / 앉음 / 누움 분류</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">사람이 검출됐을 때</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">판단은 위치(Zone) + 자세 두 축으로 함</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-secondary mr-1">7</span>상태 머신</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">위치 + 자세 + 체류 시간 + 히스테리시스로 상태 확정</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">항상</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">Zone 경계·자세 경계에서의 떨림 방지</dd>
+          </dl>
+        </li>
+        <li class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h4 class="text-headline-sm font-bold"><span class="font-mono text-secondary mr-1">8</span>이벤트 생성</h4><span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-label-sm font-bold">구현됨(로직 테스트)</span></div>
+          <dl class="grid grid-cols-[3rem_1fr] gap-x-3 gap-y-1.5 text-body-sm">
+            <dt class="text-label-sm text-outline pt-[3px]">무엇을</dt><dd class="text-on-surface">확정된 상태 구간을 위치·상태·시작·종료 시각으로 묶음</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">언제</dt><dd class="text-on-surface">상태가 바뀔 때</dd>
+            <dt class="text-label-sm text-outline pt-[3px]">왜</dt><dd class="text-on-surface-variant">영상 대신 생활 이벤트만 밖으로 보내기 위해</dd>
+          </dl>
+        </li>
+      </ol>
+
+      <div class="text-label-sm text-secondary font-bold uppercase tracking-wider mb-3">위치 + 자세 → 상태</div>
+      <div class="overflow-x-auto rounded-2xl border border-surface-container">
+        <table class="w-full min-w-[520px] text-left text-body-sm">
+          <thead class="bg-surface-container-low text-label-sm text-outline">
+            <tr><th class="px-4 py-3 font-semibold">위치</th><th class="px-4 py-3 font-semibold">자세</th><th class="px-4 py-3 font-semibold">체류</th><th class="px-4 py-3 font-semibold">상태</th></tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container text-on-surface-variant">
+            <tr><td class="px-4 py-3 text-on-surface font-semibold">주방</td><td class="px-4 py-3">서기·이동</td><td class="px-4 py-3">N초 이상</td><td class="px-4 py-3"><span class="text-on-surface font-semibold">주방 활동</span> <span class="font-mono text-label-sm text-primary">kitchen_activity</span></td></tr>
+            <tr><td class="px-4 py-3 text-on-surface font-semibold">식탁</td><td class="px-4 py-3">앉음</td><td class="px-4 py-3">N분 이상</td><td class="px-4 py-3"><span class="text-on-surface font-semibold">식탁 체류</span> <span class="font-mono text-label-sm text-secondary">table_stay</span></td></tr>
+            <tr><td class="px-4 py-3 text-on-surface font-semibold">소파</td><td class="px-4 py-3">앉음 / 누움</td><td class="px-4 py-3">N분 이상</td><td class="px-4 py-3"><span class="text-on-surface font-semibold">휴식</span> <span class="font-mono text-label-sm text-secondary">rest</span></td></tr>
+            <tr><td class="px-4 py-3 text-on-surface font-semibold">거실</td><td class="px-4 py-3">서기·이동</td><td class="px-4 py-3">—</td><td class="px-4 py-3"><span class="text-on-surface font-semibold">활동</span> <span class="font-mono text-label-sm text-primary">active</span></td></tr>
+            <tr><td class="px-4 py-3 text-on-surface font-semibold">침대</td><td class="px-4 py-3">누움</td><td class="px-4 py-3">장시간, 낮은 움직임</td><td class="px-4 py-3"><span class="text-on-surface font-semibold">침대 휴식 (수면 추정)</span> <span class="font-mono text-label-sm text-tertiary">bed_rest</span></td></tr>
+            <tr><td class="px-4 py-3 text-on-surface font-semibold">그 외 바닥</td><td class="px-4 py-3">누움</td><td class="px-4 py-3">N분 이상</td><td class="px-4 py-3"><span class="text-error font-semibold">확인 필요</span> <span class="font-mono text-label-sm text-error">floor_lying</span></td></tr>
+            <tr><td class="px-4 py-3 text-on-surface font-semibold">—</td><td class="px-4 py-3">사람 없음</td><td class="px-4 py-3">일정 시간</td><td class="px-4 py-3"><span class="text-on-surface font-semibold">시야 밖 (외출 아님)</span> <span class="font-mono text-label-sm text-on-surface-variant">not_in_view</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-body-sm text-outline mt-3">"시야 밖"은 외출로 판정하지 않습니다. 외출은 현관 센서가 근거일 때만 추정합니다.</p>
+    </div>
+
+    <!-- 순서의 근거 + 사용하지 않는 기법 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+      <div class="lg:col-span-7 bg-surface-container-lowest rounded-3xl p-6 md:p-8 shadow-sm border border-[#E8EFF7]">
+        <div class="text-label-sm text-primary font-bold uppercase tracking-wider mb-1">Why This Order</div>
+        <h3 class="text-headline-md font-bold mb-5">순서의 근거</h3>
+        <ol class="flex flex-col gap-4 text-body-sm text-on-surface-variant">
+          <li class="flex gap-3"><span class="w-7 h-7 flex-shrink-0 rounded-lg bg-primary-fixed/50 text-primary font-bold flex items-center justify-center">1</span><div><b class="text-on-surface">버리는 연산을 먼저 한다.</b> 샘플링 → 축소를 앞에 두면 뒤의 모든 연산이 처리하는 프레임 수와 픽셀 수가 함께 줄어듭니다.</div></li>
+          <li class="flex gap-3"><span class="w-7 h-7 flex-shrink-0 rounded-lg bg-primary-fixed/50 text-primary font-bold flex items-center justify-center">2</span><div><b class="text-on-surface">되돌릴 수 없는 손실은 늦게 한다.</b> 검출은 축소본으로, Pose crop은 원본으로 합니다. 축소본에서 crop하면 2단계 처리의 이점이 사라집니다.</div></li>
+          <li class="flex gap-3"><span class="w-7 h-7 flex-shrink-0 rounded-lg bg-primary-fixed/50 text-primary font-bold flex items-center justify-center">3</span><div><b class="text-on-surface">검출을 살리는 보정은 검출 앞에, 단 조건부로.</b> 항상 보정하면 정상 이미지의 분포가 바뀌어 성능이 오히려 떨어질 수 있습니다.</div></li>
+          <li class="flex gap-3"><span class="w-7 h-7 flex-shrink-0 rounded-lg bg-primary-fixed/50 text-primary font-bold flex items-center justify-center">4</span><div><b class="text-on-surface">색 변환은 한 번만, 작은 이미지에.</b> OpenCV는 BGR로 읽고, Ultralytics YOLO는 numpy 입력을 BGR로 가정하며, MediaPipe는 RGB를 요구합니다. 그래서 Pose 직전 crop 이미지에만 변환합니다.</div></li>
+          <li class="flex gap-3"><span class="w-7 h-7 flex-shrink-0 rounded-lg bg-primary-fixed/50 text-primary font-bold flex items-center justify-center">5</span><div><b class="text-on-surface">Zone은 전처리가 아니라 추론 후 판정이다.</b> 이미지를 Zone으로 가리면 경계에 걸친 사람의 몸이 잘려 검출과 Pose가 망가집니다.</div></li>
+          <li class="flex gap-3"><span class="w-7 h-7 flex-shrink-0 rounded-lg bg-primary-fixed/50 text-primary font-bold flex items-center justify-center">6</span><div><b class="text-on-surface">떨림은 두 번 막는다.</b> 키포인트 평활화와 상태 히스테리시스가 "상태 떨림" KPI를 결정합니다. EMA는 떨림 제거를 강하게 할수록 움직임을 늦게 따라가지만, One-Euro는 관절 속도에 따라 강도를 바꿔 두 가지를 함께 얻습니다.</div></li>
+        </ol>
+      </div>
+      <div class="lg:col-span-5 bg-surface-container-lowest rounded-3xl p-6 md:p-8 shadow-sm border border-[#E8EFF7]">
+        <div class="text-label-sm text-outline font-bold uppercase tracking-wider mb-1">Not Used</div>
+        <h3 class="text-headline-md font-bold mb-5">사용하지 않는 기법과 이유</h3>
+        <ul class="flex flex-col divide-y divide-surface-container text-body-sm">
+          <li class="py-3 first:pt-0"><div class="flex items-center gap-2 text-on-surface font-semibold"><span class="material-symbols-outlined text-base text-outline">block</span>렌즈 왜곡 보정</div><p class="text-on-surface-variant mt-1 pl-6">비용이 크고, Zone을 원본 화면 위에 그리면 같은 효과. Zone 판정 오류가 확인될 때만 도입</p></li>
+          <li class="py-3"><div class="flex items-center gap-2 text-on-surface font-semibold"><span class="material-symbols-outlined text-base text-outline">block</span>강한 노이즈 제거 (Non-local Means 등)</div><p class="text-on-surface-variant mt-1 pl-6">Pi에서 너무 느림. 노출·IR 조명 조정으로 먼저 해결</p></li>
+          <li class="py-3"><div class="flex items-center gap-2 text-on-surface font-semibold"><span class="material-symbols-outlined text-base text-outline">block</span>배경 차분</div><p class="text-on-surface-variant mt-1 pl-6">YOLO가 사람을 직접 찾으므로 불필요하고 조명 변화에 약함</p></li>
+          <li class="py-3"><div class="flex items-center gap-2 text-on-surface font-semibold"><span class="material-symbols-outlined text-base text-outline">block</span>RGB 채널별 히스토그램 평활화</div><p class="text-on-surface-variant mt-1 pl-6">색 왜곡. 밝기 보정은 L 채널에만</p></li>
+          <li class="py-3"><div class="flex items-center gap-2 text-on-surface font-semibold"><span class="material-symbols-outlined text-base text-outline">block</span>샤프닝</div><p class="text-on-surface-variant mt-1 pl-6">노이즈 증폭, 모델 학습 분포와 달라짐</p></li>
+          <li class="py-3"><div class="flex items-center gap-2 text-on-surface font-semibold"><span class="material-symbols-outlined text-base text-outline">block</span>자동 공간 인식</div><p class="text-on-surface-variant mt-1 pl-6">Zone은 설치 시 사람이 지정하는 쪽이 정확하고 설명 가능</p></li>
+          <li class="py-3 last:pb-0"><div class="flex items-center gap-2 text-on-surface font-semibold"><span class="material-symbols-outlined text-base text-outline">block</span>얼굴 블러</div><p class="text-on-surface-variant mt-1 pl-6">원본을 저장·전송하지 않으므로 처리 경로상 불필요. 디버그 녹화를 남길 때만 고려</p></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 검증 방법 -->
+    <div class="bg-surface-container-lowest rounded-3xl p-6 md:p-8 lg:p-10 shadow-sm border border-[#E8EFF7] mb-6">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+          <span class="text-label-sm text-secondary font-bold uppercase tracking-wider">Verification</span>
+          <h3 class="text-headline-lg font-bold mt-1">단계를 하나씩 켜고 끄며 검증합니다</h3>
+        </div>
+        <p class="text-body-sm text-on-surface-variant max-w-md">영상을 조도(낮·저녁·역광·야간 IR)와 구역(주방·거실·식탁·소파·침대)별로 나눠 비교합니다. 효과가 숫자로 확인되지 않는 단계는 뺍니다.</p>
+      </div>
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div>
+          <div class="text-label-sm text-outline font-bold mb-3">단계별 on/off 비교</div>
+          <div class="overflow-x-auto rounded-2xl border border-surface-container">
+            <table class="w-full min-w-[480px] text-left text-body-sm">
+              <thead class="bg-surface-container-low text-label-sm text-outline">
+                <tr><th class="px-4 py-3 font-semibold">단계</th><th class="px-4 py-3 font-semibold">측정 지표</th><th class="px-4 py-3 font-semibold">결과</th></tr>
+              </thead>
+              <tbody class="divide-y divide-surface-container text-on-surface-variant">
+                <tr><td class="px-4 py-3 text-on-surface">밝기 보정, IR 처리</td><td class="px-4 py-3">조도별 사람 검출률</td><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold whitespace-nowrap">실측 전</span></td></tr>
+                <tr><td class="px-4 py-3 text-on-surface">2단계 crop</td><td class="px-4 py-3">키포인트 평균 visibility, 자세 분류 정확도</td><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold whitespace-nowrap">실측 전</span></td></tr>
+                <tr><td class="px-4 py-3 text-on-surface">발 위치 보정 (엉덩이 기준)</td><td class="px-4 py-3">주방 구간의 Zone 판정 정확도</td><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold whitespace-nowrap">실측 전</span></td></tr>
+                <tr><td class="px-4 py-3 text-on-surface">제외 영역</td><td class="px-4 py-3">TV를 켠 영상의 오검출 수</td><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold whitespace-nowrap">실측 전</span></td></tr>
+                <tr><td class="px-4 py-3 text-on-surface">평활화, 히스테리시스</td><td class="px-4 py-3">시간당 상태 떨림 횟수</td><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold whitespace-nowrap">실측 전</span></td></tr>
+                <tr><td class="px-4 py-3 text-on-surface">One-Euro vs EMA</td><td class="px-4 py-3">상태 떨림 횟수 + 상태 전환 지연</td><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold whitespace-nowrap">실측 전</span></td></tr>
+                <tr><td class="px-4 py-3 text-on-surface">전체</td><td class="px-4 py-3">Raspberry Pi에서의 처리 FPS</td><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant text-label-sm font-bold whitespace-nowrap">실측 전</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <span class="text-label-sm text-outline font-bold">One-Euro vs EMA</span>
+            <span class="px-2.5 py-1 rounded-full bg-tertiary-fixed text-tertiary text-label-sm font-bold">합성 신호 결과 · 실제 영상 측정 전</span>
+          </div>
+          <div class="overflow-x-auto rounded-2xl border border-surface-container">
+            <table class="w-full min-w-[440px] text-left text-body-sm">
+              <thead class="bg-surface-container-low text-label-sm text-outline">
+                <tr><th class="px-4 py-3 font-semibold">지표</th><th class="px-4 py-3 font-semibold text-right">원본</th><th class="px-4 py-3 font-semibold text-right">EMA</th><th class="px-4 py-3 font-semibold text-right">One-Euro</th></tr>
+              </thead>
+              <tbody class="divide-y divide-surface-container text-on-surface-variant">
+                <tr><td class="px-4 py-3 text-on-surface">정지 중 관절 떨림 (표준편차)</td><td class="px-4 py-3 text-right font-mono">3.77px</td><td class="px-4 py-3 text-right font-mono">2.00px</td><td class="px-4 py-3 text-right font-mono">2.07px</td></tr>
+                <tr><td class="px-4 py-3 text-on-surface">이동 시 평균 지연 (1.5 박스 높이/초)</td><td class="px-4 py-3 text-right font-mono">—</td><td class="px-4 py-3 text-right font-mono">143.2px</td><td class="px-4 py-3 text-right font-mono text-primary font-bold">31.0px</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-body-sm text-outline mt-3">조건: 6fps, 정지 시 평활화 강도를 EMA와 같게 맞춤. 합성 신호에서는 정지 중 떨림이 비슷하고 이동 중 지연이 더 작게 나왔으며, 실제 영상에서의 효과는 아직 측정하지 않았습니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 구현 상태 + 문서 링크 -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl bg-surface-container-low border-l-4 border-primary">
+      <div class="text-body-md text-on-surface">
+        <b>현재 구현 상태.</b> 파이프라인 코드는 작성했고, 가짜 검출기·Pose와 합성 신호로 로직 테스트 18개가 통과했습니다.
+        <span class="text-on-surface-variant">실제 YOLO/MediaPipe 실행, 실제 영상 정확도, Raspberry Pi FPS는 아직 측정 전입니다.</span>
+      </div>
+      <a class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-surface-container-lowest text-on-surface text-label-md font-semibold hover:bg-surface-container transition-all shadow-sm flex-shrink-0 self-start md:self-auto" href="report/vision-preprocessing-design.md">
+        <span class="material-symbols-outlined text-lg text-secondary">description</span><span>전처리 설계 문서 보기</span>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- ===== 05 SPACES ===== -->
-<section class="w-full py-20 bg-surface" id="spaces">
+<section class="w-full py-20 bg-surface-container-low" id="spaces">
   <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
       <div class="lg:col-span-4 flex flex-col gap-5 lg:sticky lg:top-28">
         <span class="text-label-md text-primary font-bold tracking-wider uppercase">Installation</span>
         <h2 class="text-display-lg text-on-surface font-bold">공간마다,<br/>꼭 필요한 만큼만.</h2>
         <p class="text-body-lg text-on-surface-variant">설치 기사가 1시간 안에 장치 4종을 설치합니다. 카메라 화면은 설치할 때 Zone을 지정하려고 딱 한 번만 보고, 그 뒤로는 영상 보기 기능이 꺼집니다.</p>
-        <div class="p-5 rounded-2xl bg-surface-container-low border-l-4 border-primary text-body-md text-on-surface">
+        <div class="p-5 rounded-2xl bg-surface border-l-4 border-primary text-body-md text-on-surface">
           화장실에는 카메라를 두지 않습니다. 문 센서와 PIR만으로 들어가고 나오는 것과 머무는 시간을 판단합니다.
         </div>
       </div>
@@ -369,7 +671,7 @@ tailwind.config = {
 </section>
 
 <!-- ===== 06 A DAY ===== -->
-<section class="w-full py-20 bg-surface-container-low" id="day">
+<section class="w-full py-20 bg-surface" id="day">
   <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
     <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
       <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">A Day with 별일없지</span>
@@ -435,7 +737,7 @@ tailwind.config = {
 </section>
 
 <!-- ===== 07 WHY AI ===== -->
-<section class="w-full py-20 bg-surface">
+<section class="w-full py-20 bg-surface-container-low">
   <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
       <div class="lg:col-span-6 bg-surface-container-lowest rounded-3xl p-8 shadow-md border border-[#E8EFF7]">
@@ -481,7 +783,7 @@ tailwind.config = {
 </section>
 
 <!-- ===== 08 PRIVACY ===== -->
-<section class="w-full py-20 bg-surface-container-low" id="privacy">
+<section class="w-full py-20 bg-surface" id="privacy">
   <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
     <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
       <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">Privacy-First by Design</span>
@@ -501,7 +803,14 @@ tailwind.config = {
       </div>
       <div class="mt-8 pt-6 border-t border-surface-container flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <span class="text-label-sm text-outline font-mono">EVENT PAYLOAD EXAMPLE</span>
-        <code class="px-4 py-2 rounded-xl bg-surface-container-low font-mono text-body-sm text-primary font-semibold break-all">{"time": "07:42", "zone": "living_room", "state": "ACTIVE"}</code>
+        <pre class="w-full md:w-auto min-w-0 max-w-full overflow-x-auto px-4 py-3 rounded-xl bg-surface-container-low font-mono text-body-sm text-primary font-semibold"><code>{
+  "location": "kitchen",
+  "state": "kitchen_activity",
+  "startedAt": "2026-10-08T07:42:10+09:00",
+  "endedAt": "2026-10-08T07:58:03+09:00",
+  "confidence": 0.87,
+  "source": { "id": "edge-cam-living", "type": "EDGE_VISION" }
+}</code></pre>
         <span class="text-label-sm text-outline">이미지·영상 데이터: 0 KB</span>
       </div>
     </div>
@@ -527,7 +836,7 @@ tailwind.config = {
 </section>
 
 <!-- ===== 09 KPI ===== -->
-<section class="w-full py-20 bg-surface" id="metrics">
+<section class="w-full py-20 bg-surface-container-low" id="metrics">
   <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
     <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
       <span class="text-label-md text-secondary font-bold tracking-wider uppercase mb-2">Success Metrics</span>
@@ -535,10 +844,10 @@ tailwind.config = {
       <p class="text-body-lg text-on-surface-variant">별일없지가 검증하려는 목표치입니다. 시나리오 영상, 수면·외출 일지, 실가구 파일럿 로그로 측정합니다.</p>
     </div>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
-      <div class="p-6 rounded-2xl bg-surface-container-low"><div class="text-label-sm text-outline mb-2">생활상태 분류 정확도</div><div class="text-display-lg text-primary font-bold">≥ 90<span class="text-headline-sm">%</span></div><div class="text-body-sm text-on-surface-variant mt-1">ACTIVE · REST · NOT_IN_VIEW</div></div>
-      <div class="p-6 rounded-2xl bg-surface-container-low"><div class="text-label-sm text-outline mb-2">바닥 누운 상태 검출 재현율</div><div class="text-display-lg text-primary font-bold">≥ 95<span class="text-headline-sm">%</span></div><div class="text-body-sm text-on-surface-variant mt-1">오검출 가구당 월 1회 이하</div></div>
-      <div class="p-6 rounded-2xl bg-surface-container-low"><div class="text-label-sm text-outline mb-2">상태 변화 → 보호자 앱</div><div class="text-display-lg text-secondary font-bold">≤ 60<span class="text-headline-sm">초</span></div><div class="text-body-sm text-on-surface-variant mt-1">EMERGENCY 후보 푸시도 60초 이내</div></div>
-      <div class="p-6 rounded-2xl bg-surface-container-low"><div class="text-label-sm text-outline mb-2">야간 침대 이탈 → 조명</div><div class="text-display-lg text-secondary font-bold">≤ 3<span class="text-headline-sm">초</span></div><div class="text-body-sm text-on-surface-variant mt-1">동선 LED 자동 점등</div></div>
+      <div class="p-6 rounded-2xl bg-surface"><div class="text-label-sm text-outline mb-2">생활상태 분류 정확도</div><div class="text-display-lg text-primary font-bold">≥ 90<span class="text-headline-sm">%</span></div><div class="text-body-sm text-on-surface-variant mt-1">ACTIVE · REST · NOT_IN_VIEW</div></div>
+      <div class="p-6 rounded-2xl bg-surface"><div class="text-label-sm text-outline mb-2">바닥 누운 상태 검출 재현율</div><div class="text-display-lg text-primary font-bold">≥ 95<span class="text-headline-sm">%</span></div><div class="text-body-sm text-on-surface-variant mt-1">오검출 가구당 월 1회 이하</div></div>
+      <div class="p-6 rounded-2xl bg-surface"><div class="text-label-sm text-outline mb-2">상태 변화 → 보호자 앱</div><div class="text-display-lg text-secondary font-bold">≤ 60<span class="text-headline-sm">초</span></div><div class="text-body-sm text-on-surface-variant mt-1">EMERGENCY 후보 푸시도 60초 이내</div></div>
+      <div class="p-6 rounded-2xl bg-surface"><div class="text-label-sm text-outline mb-2">야간 침대 이탈 → 조명</div><div class="text-display-lg text-secondary font-bold">≤ 3<span class="text-headline-sm">초</span></div><div class="text-body-sm text-on-surface-variant mt-1">동선 LED 자동 점등</div></div>
     </div>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
       <div class="p-5 rounded-2xl border border-[#E8EFF7]"><div class="text-label-sm text-outline mb-1">외출·귀가 추정 정확도</div><div class="text-headline-md font-bold">≥ 95%</div></div>
@@ -550,7 +859,7 @@ tailwind.config = {
 </section>
 
 <!-- ===== 10 TECH STACK ===== -->
-<section class="w-full py-20 bg-surface-container-low" id="tech">
+<section class="w-full py-20 bg-surface" id="tech">
   <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
     <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
       <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">End-to-End Tech Stack</span>
@@ -607,7 +916,7 @@ tailwind.config = {
 </section>
 
 <!-- ===== 11 SCOPE & POC ===== -->
-<section class="w-full py-20 bg-surface" id="poc">
+<section class="w-full py-20 bg-surface-container-low" id="poc">
   <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
     <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
       <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">Scope & Roadmap</span>
@@ -646,7 +955,7 @@ tailwind.config = {
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-surface-container-low p-7 rounded-2xl">
+      <div class="bg-surface p-7 rounded-2xl">
         <div class="flex items-center justify-between mb-4"><span class="px-2.5 py-1 rounded-full bg-secondary-fixed text-secondary text-label-sm font-bold">4주 PoC</span><span class="material-symbols-outlined text-secondary text-xl">biotech</span></div>
         <h3 class="text-headline-md font-bold mb-3">거실 카메라 파이프라인과 앱 연동 검증</h3>
         <ul class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
@@ -656,7 +965,7 @@ tailwind.config = {
           <li class="flex gap-2"><span class="material-symbols-outlined text-base text-secondary">arrow_right</span>침실은 2주차에 판단 후 낮 조도에서 검증</li>
         </ul>
       </div>
-      <div class="bg-surface-container-low p-7 rounded-2xl">
+      <div class="bg-surface p-7 rounded-2xl">
         <div class="flex items-center justify-between mb-4"><span class="px-2.5 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-label-sm font-bold">다음 단계</span><span class="material-symbols-outlined text-outline text-xl">route</span></div>
         <h3 class="text-headline-md font-bold mb-3">센서·조명·기준선·대시보드로 확장</h3>
         <ul class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
@@ -671,7 +980,7 @@ tailwind.config = {
 </section>
 
 <!-- ===== 12 ROI ===== -->
-<section class="w-full py-20 bg-surface-container-low" id="roi">
+<section class="w-full py-20 bg-surface" id="roi">
   <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
     <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
       <span class="text-label-md text-secondary font-bold tracking-wider uppercase mb-2">For Care Organizations</span>
@@ -716,7 +1025,7 @@ tailwind.config = {
 </section>
 
 <!-- ===== 13 CTA ===== -->
-<section class="w-full py-24 bg-gradient-to-b from-surface-container-low to-surface">
+<section class="w-full py-24 bg-gradient-to-b from-surface to-surface-container-low">
   <div class="max-w-3xl mx-auto px-margin text-center flex flex-col items-center">
     <img src="images/logo.png" alt="별일없지 앱 아이콘" class="w-24 h-24 rounded-[22%] shadow-xl mb-8" width="96" height="96"/>
     <span class="text-label-md text-primary font-bold tracking-widest uppercase mb-4">Small Signals, A Safer Tomorrow</span>
@@ -747,6 +1056,7 @@ tailwind.config = {
       <nav class="flex flex-wrap items-center gap-space-md text-body-sm text-on-surface-variant" aria-label="하단 메뉴">
         <a class="hover:text-on-surface" href="#problem">왜 필요한가</a>
         <a class="hover:text-on-surface" href="#how">작동 방식</a>
+        <a class="hover:text-on-surface" href="#pipeline">전처리·후처리</a>
         <a class="hover:text-on-surface" href="#day">하루 시나리오</a>
         <a class="hover:text-on-surface" href="#privacy">프라이버시</a>
         <a class="hover:text-on-surface" href="#tech">기술 스택</a>

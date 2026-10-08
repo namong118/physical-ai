@@ -114,8 +114,33 @@ tailwind.config = {
 </header>
 
 <main class="w-full pt-[83px]">
-  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-10 md:py-14">
-    <div class="max-w-[820px] mx-auto">
+  <div class="max-w-[1200px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-10 md:py-14 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
+    <!-- 사이드바 (1024px 이상): 문서 목록 + 이 문서의 목차 -->
+    <aside class="hidden lg:block">
+      <div class="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto flex flex-col gap-8 pb-6 pr-1">
+        <nav aria-label="문서 목록">
+          <div class="text-label-sm text-outline font-bold tracking-wider mb-3">문서 목록</div>
+          <div id="doc-list-side" class="flex flex-col gap-4 text-body-sm"><p class="text-on-surface-variant">불러오는 중…</p></div>
+        </nav>
+        <nav id="toc-side-wrap" class="hidden" aria-label="이 문서의 목차">
+          <div class="text-label-sm text-outline font-bold tracking-wider mb-3">이 문서의 목차</div>
+          <ol id="toc-side" class="flex flex-col gap-0.5 text-body-sm border-l border-surface-container"></ol>
+        </nav>
+      </div>
+    </aside>
+    <div class="min-w-0 w-full max-w-[820px] mx-auto lg:mx-0">
+      <!-- 좁은 화면: 문서 선택 + 목차 -->
+      <div class="lg:hidden flex flex-col gap-3 mb-5">
+        <label id="doc-select-wrap" class="flex flex-col gap-1.5 text-label-sm text-outline font-bold">문서 선택
+          <select id="doc-select" class="w-full rounded-xl border border-[#E8EFF7] bg-surface-container-lowest px-4 py-3 text-body-md font-normal text-on-surface">
+            <option>불러오는 중…</option>
+          </select>
+        </label>
+        <details id="toc-mobile-wrap" class="hidden bg-surface-container-lowest rounded-2xl border border-[#E8EFF7]">
+          <summary class="px-4 py-3 cursor-pointer text-label-md font-semibold text-on-surface">이 문서의 목차</summary>
+          <ol id="toc-mobile" class="flex flex-col gap-0.5 px-2 pb-3 text-body-sm"></ol>
+        </details>
+      </div>
       <div class="flex flex-wrap items-center gap-2 mb-5 text-label-sm">
         <span class="px-2.5 py-1 rounded-full bg-primary-fixed/60 text-primary font-bold">문서</span>
         <span id="doc-path" class="font-mono text-outline break-all"></span>
@@ -200,6 +225,81 @@ tailwind.config = {
   }
 
   var file = new URLSearchParams(location.search).get('file');
+
+  // ===== 문서 목록 (docs.json) — 본문과 따로 불러오므로 실패해도 본문은 표시 =====
+  function viewerHref(path) { return 'doc.html?file=' + encodeURIComponent(path).replace(/%2F/g, '/'); }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text) e.textContent = text;
+    return e;
+  }
+  function renderDocList(data) {
+    var side = document.getElementById('doc-list-side');
+    var select = document.getElementById('doc-select');
+    var docs = (data.docs || []).filter(function (d) { return d && d.title && isAllowed(d.file); });
+    if (!docs.length) throw new Error('empty');
+    var groups = (data.groups || []).slice();
+    docs.forEach(function (d) { if (groups.indexOf(d.group) < 0) groups.push(d.group); });
+    var current = docs.some(function (d) { return d.file === file; });
+    side.innerHTML = '';
+    select.innerHTML = '';
+    if (!current) {
+      var ph = el('option', '', '문서를 선택하세요');
+      ph.disabled = true; ph.selected = true; ph.value = '';
+      select.appendChild(ph);
+    }
+    groups.forEach(function (g) {
+      var items = docs.filter(function (d) { return d.group === g; });
+      if (!items.length) return;
+      var box = el('div', '');
+      box.appendChild(el('div', 'text-label-sm text-on-surface-variant font-semibold mb-1.5', g));
+      var ul = el('ul', 'flex flex-col gap-0.5');
+      var og = el('optgroup'); og.label = g;
+      items.forEach(function (d) {
+        var on = d.file === file;
+        var a = el('a', 'block px-3 py-2 rounded-xl transition-colors ' +
+          (on ? 'bg-primary-fixed/40 text-primary font-semibold' : 'text-on-surface hover:bg-surface-container-low'), d.title);
+        a.href = viewerHref(d.file);
+        if (on) a.setAttribute('aria-current', 'page');
+        var li = el('li'); li.appendChild(a); ul.appendChild(li);
+        var opt = el('option', '', d.title); opt.value = d.file; if (on) opt.selected = true;
+        og.appendChild(opt);
+      });
+      box.appendChild(ul);
+      side.appendChild(box);
+      select.appendChild(og);
+    });
+    select.addEventListener('change', function () { if (select.value) location.href = viewerHref(select.value); });
+  }
+  fetch('docs.json', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(renderDocList)
+    .catch(function () {
+      document.getElementById('doc-list-side').innerHTML = '';
+      document.getElementById('doc-list-side').appendChild(el('p', 'text-on-surface-variant', '문서 목록을 불러오지 못했어요.'));
+      document.getElementById('doc-select-wrap').classList.add('hidden');
+    });
+
+  // ===== 이 문서의 목차 (## · ###) =====
+  function renderToc(root) {
+    var heads = root.querySelectorAll('h2, h3');
+    if (!heads.length) return;
+    ['toc-side', 'toc-mobile'].forEach(function (listId) {
+      var ol = document.getElementById(listId);
+      heads.forEach(function (h) {
+        var a = el('a', 'block py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors ' +
+          (h.tagName === 'H3' ? 'pl-6 pr-2 text-label-md font-normal' : 'pl-3 pr-2 font-medium'), h.textContent.trim());
+        a.href = '#' + h.id;
+        var li = el('li'); li.appendChild(a); ol.appendChild(li);
+      });
+    });
+    document.getElementById('toc-side-wrap').classList.remove('hidden');
+    var mob = document.getElementById('toc-mobile-wrap');
+    mob.classList.remove('hidden');
+    mob.addEventListener('click', function (e) { if (e.target.closest('a')) mob.open = false; });
+  }
+
   if (!file) {
     showError('문서를 지정하지 않았습니다', '주소에 ?file=PRD/PRD.md 처럼 열 문서를 지정해 주세요.');
     return;
@@ -231,7 +331,9 @@ tailwind.config = {
 
       rewrite(frag, mdUrl);
 
+      // 페이지에 이미 있는 id 와 겹치지 않게 예약
       var used = {};
+      document.querySelectorAll('[id]').forEach(function (e) { used[e.id] = true; });
       frag.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(function (h) {
         if (!h.id) h.id = slugify(h.textContent, used);
       });
@@ -247,6 +349,7 @@ tailwind.config = {
 
       article.innerHTML = '';
       article.appendChild(frag);
+      renderToc(article);
       if (location.hash) {
         var target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
         if (target) target.scrollIntoView();

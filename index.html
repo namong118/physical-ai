@@ -76,7 +76,7 @@ tailwind.config = {
         <span class="text-label-sm text-on-surface-variant font-medium">Physical AI 생활안심 시스템</span>
       </span>
     </a>
-    <nav class="hidden xl:flex items-center gap-space-lg text-body-md text-on-surface-variant" aria-label="주요 메뉴">
+    <nav class="hidden lg:flex items-center gap-3.5 xl:gap-space-lg text-body-sm xl:text-body-md text-on-surface-variant whitespace-nowrap" aria-label="주요 메뉴">
       <a class="hover:text-on-surface transition-colors" href="#problem">왜 필요한가</a>
       <a class="hover:text-on-surface transition-colors" href="#how">작동 방식</a>
       <a class="hover:text-on-surface transition-colors" href="#pipeline">전처리·후처리</a>
@@ -86,13 +86,29 @@ tailwind.config = {
       <a class="hover:text-on-surface transition-colors" href="#roi">도입 효과</a>
     </nav>
     <div class="flex items-center gap-space-sm sm:gap-space-md">
-      <div class="hidden md:flex items-center gap-space-xs bg-surface-container-low px-space-md py-space-xs rounded-full">
+      <div class="hidden xl:flex items-center gap-space-xs bg-surface-container-low px-space-md py-space-xs rounded-full">
         <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-fixed-dim opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span></span>
         <span class="text-label-sm text-primary font-semibold">오늘도 별일 없어요</span>
       </div>
-      <a class="inline-flex items-center justify-center text-label-md bg-primary text-on-primary hover:bg-primary-container px-space-lg py-space-sm rounded-full transition-all shadow-[0_12px_32px_-6px_rgba(11,127,120,0.28)]" href="#poc">PoC 보기</a>
+      <a class="hidden sm:inline-flex items-center justify-center text-label-md bg-primary text-on-primary hover:bg-primary-container px-space-lg py-space-sm rounded-full transition-all shadow-[0_12px_32px_-6px_rgba(11,127,120,0.28)] whitespace-nowrap" href="#poc">PoC 보기</a>
+      <button type="button" id="menu-toggle" class="lg:hidden inline-flex items-center justify-center w-10 h-10 flex-shrink-0 rounded-full text-on-surface hover:bg-surface-container-low transition-colors" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-menu">
+        <span class="material-symbols-outlined text-2xl" aria-hidden="true">menu</span>
+      </button>
     </div>
   </div>
+  <!-- 모바일 메뉴 (lg 미만) -->
+  <nav id="mobile-menu" class="hidden lg:hidden border-t border-surface-container bg-surface-container-lowest/95 backdrop-blur-xl" aria-label="주요 메뉴 (모바일)">
+    <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet py-space-sm flex flex-col">
+      <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#problem">왜 필요한가</a>
+      <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#how">작동 방식</a>
+      <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#pipeline">전처리·후처리</a>
+      <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#day">하루 시나리오</a>
+      <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#privacy">프라이버시</a>
+      <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#tech">기술 스택</a>
+      <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#roi">도입 효과</a>
+      <a class="mt-space-sm mb-space-xs inline-flex items-center justify-center text-label-md bg-primary text-on-primary hover:bg-primary-container px-space-lg py-3 rounded-full transition-all" href="#poc">PoC 보기</a>
+    </div>
+  </nav>
 </header>
 
 <main id="top" class="w-full pt-[83px]">
@@ -1150,5 +1166,26 @@ tailwind.config = {
   </div>
 </footer>
 
+<script>
+// 모바일 메뉴: 버튼으로 열고 닫기, 항목 클릭·바깥 클릭·Esc 로 닫기
+(function () {
+  var btn = document.getElementById('menu-toggle');
+  var menu = document.getElementById('mobile-menu');
+  var header = btn.closest('header');
+  var icon = btn.querySelector('.material-symbols-outlined');
+  function isOpen() { return btn.getAttribute('aria-expanded') === 'true'; }
+  function setOpen(open) {
+    menu.classList.toggle('hidden', !open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+    icon.textContent = open ? 'close' : 'menu';
+  }
+  btn.addEventListener('click', function () { setOpen(!isOpen()); });
+  header.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
+  document.addEventListener('click', function (e) { if (isOpen() && !header.contains(e.target)) setOpen(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isOpen()) { setOpen(false); btn.focus(); } });
+  window.matchMedia('(min-width: 1024px)').addEventListener('change', function (m) { if (m.matches) setOpen(false); });
+})();
+</script>
 </body>
 </html>

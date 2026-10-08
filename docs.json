@@ -1,0 +1,51 @@
+{
+  "groups": ["제품", "설계·검증", "기록"],
+  "docs": [
+    {
+      "id": "prd",
+      "group": "제품",
+      "title": "PRD",
+      "description": "문제 정의, 사용자 시나리오, 성공 지표, 기술 스택, 개발 범위·로드맵, ROI",
+      "file": "PRD/PRD.md",
+      "version": "v1.2",
+      "date": "2026-10-07",
+      "status": "확정",
+      "downloads": [
+        { "label": "Word 다운로드", "file": "PRD/PRD_v1.2.docx" }
+      ]
+    },
+    {
+      "id": "vision-preprocessing-design",
+      "group": "설계·검증",
+      "title": "Vision 전처리·후처리 설계",
+      "description": "전처리·후처리 단계와 적용 조건, 순서의 근거, 사용하지 않는 기법, 검증 방법",
+      "file": "report/vision-preprocessing-design.md",
+      "version": "v1.1",
+      "date": "2026-10-07",
+      "status": "진행 중",
+      "downloads": []
+    },
+    {
+      "id": "model-training-validation",
+      "group": "설계·검증",
+      "title": "모델·학습·검증 계획",
+      "description": "모델 선택 근거, 학습이 필요한지 판단하는 기준, 데이터·학습 설정, 장면별 검증 방법",
+      "file": "report/model-training-validation.md",
+      "version": "v1.0",
+      "date": "2026-10-08",
+      "status": "계획",
+      "downloads": []
+    },
+    {
+      "id": "devlog",
+      "group": "기록",
+      "title": "개발일지",
+      "description": "날짜별 작업 내용, 확인한 것, 결정 근거와 남은 일",
+      "file": "report/devlog.md",
+      "version": "",
+      "date": "",
+      "status": "진행 중",
+      "downloads": []
+    }
+  ]
+}

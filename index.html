@@ -84,6 +84,7 @@ tailwind.config = {
       <a class="hover:text-on-surface transition-colors" href="#privacy">프라이버시</a>
       <a class="hover:text-on-surface transition-colors" href="#tech">기술 스택</a>
       <a class="hover:text-on-surface transition-colors" href="#roi">도입 효과</a>
+      <a class="hover:text-on-surface transition-colors" href="#docs">문서</a>
     </nav>
     <div class="flex items-center gap-space-sm sm:gap-space-md">
       <div class="hidden xl:flex items-center gap-space-xs bg-surface-container-low px-space-md py-space-xs rounded-full">
@@ -106,6 +107,7 @@ tailwind.config = {
       <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#privacy">프라이버시</a>
       <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#tech">기술 스택</a>
       <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#roi">도입 효과</a>
+      <a class="px-4 py-3 rounded-xl text-body-md text-on-surface hover:bg-surface-container-low transition-colors" href="#docs">문서</a>
       <a class="mt-space-sm mb-space-xs inline-flex items-center justify-center text-label-md bg-primary text-on-primary hover:bg-primary-container px-space-lg py-3 rounded-full transition-all" href="#poc">PoC 보기</a>
     </div>
   </nav>
@@ -1120,6 +1122,20 @@ tailwind.config = {
   </div>
 </section>
 
+<!-- ===== 12-1 DOCS ===== -->
+<section class="w-full py-20 bg-surface-container-low" id="docs">
+  <div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
+      <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">Documents</span>
+      <h2 class="text-display-lg text-on-surface font-bold mb-4">문서 모음</h2>
+      <p class="text-body-lg text-on-surface-variant">제품 요구사항부터 설계·검증 계획, 개발 기록까지 한곳에서 볼 수 있습니다.</p>
+    </div>
+    <div id="docs-list" class="flex flex-col gap-10" aria-live="polite">
+      <p class="text-center text-body-md text-on-surface-variant">문서 목록을 불러오는 중입니다…</p>
+    </div>
+  </div>
+</section>
+
 <!-- ===== 13 CTA ===== -->
 <section class="w-full py-24 bg-gradient-to-b from-surface to-surface-container-low">
   <div class="max-w-3xl mx-auto px-margin text-center flex flex-col items-center">
@@ -1185,6 +1201,82 @@ tailwind.config = {
   document.addEventListener('click', function (e) { if (isOpen() && !header.contains(e.target)) setOpen(false); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isOpen()) { setOpen(false); btn.focus(); } });
   window.matchMedia('(min-width: 1024px)').addEventListener('change', function (m) { if (m.matches) setOpen(false); });
+})();
+</script>
+<script>
+// 문서 모음: docs.json 을 읽어 그룹별 카드로 표시 (뷰어와 같은 경로 규칙)
+(function () {
+  var box = document.getElementById('docs-list');
+  var MD = /^(PRD|report)\/[^\\:?#]+\.md$/i;
+  var FILE = /^(PRD|report)\/[^\\:?#]+\.(docx|pdf)$/i;
+  function safe(path, re) {
+    return typeof path === 'string' && re.test(path) &&
+      path.split('/').every(function (seg) { return seg !== '' && seg !== '.' && seg !== '..'; });
+  }
+  var STATUS = {
+    '계획': 'bg-tertiary-fixed text-tertiary',
+    '진행 중': 'bg-secondary-fixed text-secondary',
+    '확정': 'bg-primary-fixed/60 text-primary'
+  };
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text) e.textContent = text;
+    return e;
+  }
+  function viewerHref(path) { return 'doc.html?file=' + encodeURIComponent(path).replace(/%2F/g, '/'); }
+  function card(d) {
+    var c = el('article', 'bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-[#E8EFF7] flex flex-col');
+    var top = el('div', 'flex flex-wrap items-center gap-2 mb-3');
+    if (STATUS[d.status]) top.appendChild(el('span', 'px-2.5 py-1 rounded-full text-label-sm font-bold ' + STATUS[d.status], d.status));
+    var meta = [d.version, d.date].filter(Boolean).join(' · ');
+    if (meta) top.appendChild(el('span', 'text-label-sm text-outline font-mono', meta));
+    c.appendChild(top);
+    c.appendChild(el('h4', 'text-headline-md font-bold mb-2', d.title));
+    if (d.description) c.appendChild(el('p', 'text-body-md text-on-surface-variant mb-5', d.description));
+    var acts = el('div', 'mt-auto flex flex-wrap gap-2');
+    var view = el('a', 'inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-container transition-all');
+    view.href = viewerHref(d.file);
+    view.appendChild(el('span', 'material-symbols-outlined text-lg', 'description'));
+    view.appendChild(el('span', '', '문서 보기'));
+    acts.appendChild(view);
+    (d.downloads || []).forEach(function (dl) {
+      if (!safe(dl.file, FILE)) return;
+      var a = el('a', 'inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-low text-on-surface text-label-md hover:bg-surface-container transition-all');
+      a.href = dl.file;
+      a.setAttribute('download', '');
+      a.appendChild(el('span', 'material-symbols-outlined text-lg text-secondary', 'download'));
+      a.appendChild(el('span', '', dl.label || '다운로드'));
+      acts.appendChild(a);
+    });
+    c.appendChild(acts);
+    return c;
+  }
+  function fail() {
+    box.innerHTML = '';
+    var p = el('p', 'text-center text-body-md text-on-surface-variant', '문서 목록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+    box.appendChild(p);
+  }
+  fetch('docs.json', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (data) {
+      var docs = (data.docs || []).filter(function (d) { return d && d.title && safe(d.file, MD); });
+      if (!docs.length) return fail();
+      var groups = (data.groups || []).slice();
+      docs.forEach(function (d) { if (groups.indexOf(d.group) < 0) groups.push(d.group); });
+      box.innerHTML = '';
+      groups.forEach(function (g) {
+        var items = docs.filter(function (d) { return d.group === g; });
+        if (!items.length) return;
+        var wrap = el('div', '');
+        wrap.appendChild(el('h3', 'text-label-md text-outline font-bold tracking-wider mb-4', g));
+        var grid = el('div', 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6');
+        items.forEach(function (d) { grid.appendChild(card(d)); });
+        wrap.appendChild(grid);
+        box.appendChild(wrap);
+      });
+    })
+    .catch(fail);
 })();
 </script>
 </body>

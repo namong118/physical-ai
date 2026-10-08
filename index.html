@@ -1128,7 +1128,7 @@ tailwind.config = {
     <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
       <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">Documents</span>
       <h2 class="text-display-lg text-on-surface font-bold mb-4">문서 모음</h2>
-      <p class="text-body-lg text-on-surface-variant">제품 요구사항부터 설계·검증 계획, 개발 기록까지 한곳에서 볼 수 있습니다.</p>
+      <p class="text-body-lg text-on-surface-variant">제품 요구사항과 설계·검증 문서를 한곳에서 볼 수 있습니다.</p>
     </div>
     <div id="docs-list" class="flex flex-col gap-10" aria-live="polite">
       <p class="text-center text-body-md text-on-surface-variant">문서 목록을 불러오는 중입니다…</p>
@@ -1227,12 +1227,17 @@ tailwind.config = {
   function viewerHref(path) { return 'doc.html?file=' + encodeURIComponent(path).replace(/%2F/g, '/'); }
   function card(d) {
     var c = el('article', 'bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-[#E8EFF7] flex flex-col');
-    var top = el('div', 'flex flex-wrap items-center gap-2 mb-3');
-    if (STATUS[d.status]) top.appendChild(el('span', 'px-2.5 py-1 rounded-full text-label-sm font-bold ' + STATUS[d.status], d.status));
-    var meta = [d.version, d.date].filter(Boolean).join(' · ');
-    if (meta) top.appendChild(el('span', 'text-label-sm text-outline font-mono', meta));
+    // 윗줄: 그룹 이름(배경 없는 라벨) · 상태 배지(색 pill)
+    var top = el('div', 'flex items-center justify-between gap-3 mb-3');
+    var grp = el('span', 'inline-flex items-center gap-1 text-label-sm text-outline font-semibold tracking-wider');
+    grp.appendChild(el('span', 'material-symbols-outlined text-base', 'folder'));
+    grp.appendChild(el('span', '', d.group || ''));
+    top.appendChild(grp);
+    if (STATUS[d.status]) top.appendChild(el('span', 'px-2.5 py-1 rounded-full text-label-sm font-bold flex-shrink-0 ' + STATUS[d.status], d.status));
     c.appendChild(top);
-    c.appendChild(el('h4', 'text-headline-md font-bold mb-2', d.title));
+    c.appendChild(el('h4', 'text-headline-md font-bold mb-1', d.title));
+    var meta = [d.version, d.date].filter(Boolean).join(' · ');
+    if (meta) c.appendChild(el('div', 'text-label-sm text-outline font-mono mb-3', meta));
     if (d.description) c.appendChild(el('p', 'text-body-md text-on-surface-variant mb-5', d.description));
     var acts = el('div', 'mt-auto flex flex-wrap gap-2');
     var view = el('a', 'inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-container transition-all');
@@ -1262,19 +1267,11 @@ tailwind.config = {
     .then(function (data) {
       var docs = (data.docs || []).filter(function (d) { return d && d.title && safe(d.file, MD); });
       if (!docs.length) return fail();
-      var groups = (data.groups || []).slice();
-      docs.forEach(function (d) { if (groups.indexOf(d.group) < 0) groups.push(d.group); });
+      // 그룹 줄 구분 없이 docs.json 순서대로 한 격자에 배치 (그룹은 카드 안 라벨로 표시)
       box.innerHTML = '';
-      groups.forEach(function (g) {
-        var items = docs.filter(function (d) { return d.group === g; });
-        if (!items.length) return;
-        var wrap = el('div', '');
-        wrap.appendChild(el('h3', 'text-label-md text-outline font-bold tracking-wider mb-4', g));
-        var grid = el('div', 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6');
-        items.forEach(function (d) { grid.appendChild(card(d)); });
-        wrap.appendChild(grid);
-        box.appendChild(wrap);
-      });
+      var grid = el('div', 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6');
+      docs.forEach(function (d) { grid.appendChild(card(d)); });
+      box.appendChild(grid);
     })
     .catch(fail);
 })();

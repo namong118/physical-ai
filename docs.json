@@ -1,5 +1,5 @@
 {
-  "groups": ["제품", "설계·검증", "기록"],
+  "groups": ["제품", "설계·검증"],
   "docs": [
     {
       "id": "prd",
@@ -34,17 +34,6 @@
       "version": "v1.0",
       "date": "2026-10-08",
       "status": "계획",
-      "downloads": []
-    },
-    {
-      "id": "devlog",
-      "group": "기록",
-      "title": "개발일지",
-      "description": "날짜별 작업 내용, 확인한 것, 결정 근거와 남은 일",
-      "file": "report/devlog.md",
-      "version": "",
-      "date": "",
-      "status": "진행 중",
       "downloads": []
     }
   ]

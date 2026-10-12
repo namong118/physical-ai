@@ -1,5 +1,5 @@
 {
-  "groups": ["제품", "설계·검증"],
+  "groups": ["제품", "설계·검증", "실습"],
   "docs": [
     {
       "id": "prd",
@@ -34,6 +34,17 @@
       "version": "v1.1",
       "date": "2026-10-12",
       "status": "계획",
+      "downloads": []
+    },
+    {
+      "id": "vision-models-practice",
+      "group": "실습",
+      "title": "비전 모델 실습 보고서",
+      "description": "YOLOE, DINO-X, SAM, SigLIP, OCR, MediaPipe의 기능·입출력·사용 예시와 실습 결과",
+      "file": "report/vision-models-practice.md",
+      "version": "v1.0",
+      "date": "2026-10-12",
+      "status": "확정",
       "downloads": []
     }
   ]

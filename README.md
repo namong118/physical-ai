@@ -18,24 +18,28 @@ physicalAI/
 
 ## GitHub Pages 배포 방법
 
-cd 
+GitHub Pages는 `main` 브랜치를 그대로 서비스합니다. `main`에 push하면 곧 공개됩니다.
+
+### 처음 한 번 (빈 원격 레포에 올릴 때)
+
+```bash
 git init
 git add .
 git commit -m "처음 커밋"
-
-git remote remove origin
-
-git remote add origin 
 git branch -M main
-git push -u origin main --force
+git remote add origin https://github.com/namong118/physical-ai.git
+git push -u origin main
+```
 
+### 평소 수정할 때
 
----
-
-git init
-git branch -M main
-git remote remove origin
-git remote add origin 
-git add .
+```bash
+git status                       # 바뀐 파일 확인
+git add <수정한 파일>              # 필요한 파일만 (미추적 파일을 한꺼번에 넣지 않음)
 git commit -m "수정 내용에 대한 설명"
-git push -u origin main --force
+git push origin main
+```
+
+- 강제 push(`--force`, `-f`)는 **원칙적으로 사용하지 않습니다.** 원격의 기록을 덮어써 다른 곳에서 올린 커밋이 사라질 수 있습니다.
+- push가 거절되면(원격에 새 커밋이 있으면) 강제로 덮지 말고 `git pull --rebase origin main`으로 받은 뒤 다시 push합니다.
+- 이미 push한 커밋은 고쳐 쓰지(amend, rebase) 않고 새 커밋으로 수정합니다.

@@ -31,8 +31,8 @@
       "title": "모델·학습·검증 계획",
       "description": "모델 선택 근거, 학습이 필요한지 판단하는 기준, 데이터·학습 설정, 장면별 검증 방법",
       "file": "report/model-training-validation.md",
-      "version": "v1.0",
-      "date": "2026-10-08",
+      "version": "v1.1",
+      "date": "2026-10-12",
       "status": "계획",
       "downloads": []
     }

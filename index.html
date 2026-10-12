@@ -390,6 +390,7 @@ tailwind.config = {
           <span class="px-2.5 py-1 rounded-full bg-secondary-fixed text-secondary font-bold">적용 예정</span>
           <span class="px-2.5 py-1 rounded-full bg-tertiary-fixed text-tertiary font-bold">비교 예정</span>
           <span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-bold">실측 전</span>
+          <span class="inline-flex items-center gap-1.5"><span class="inline-flex items-center gap-1 px-[9px] py-[3px] rounded-full border border-dashed border-outline text-on-surface-variant font-bold whitespace-nowrap"><span class="material-symbols-outlined text-sm leading-none" aria-hidden="true">pending</span>검토 예정</span><span class="text-outline">아직 사용해 보지 않은 보조 모델</span></span>
         </div>
       </div>
     </div>
@@ -636,6 +637,50 @@ tailwind.config = {
             </table>
           </div>
           <p class="text-body-sm text-outline mt-3">조건: 6fps, 정지 시 평활화 강도를 EMA와 같게 맞춤. 합성 신호에서는 정지 중 떨림이 비슷하고 이동 중 지연이 더 작게 나왔으며, 실제 영상에서의 효과는 아직 측정하지 않았습니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 보조 모델 -->
+    <div class="bg-surface-container-lowest rounded-3xl p-6 md:p-8 lg:p-10 shadow-sm border border-[#E8EFF7] mb-6">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+          <span class="text-label-sm text-secondary font-bold uppercase tracking-wider">Supporting Models</span>
+          <h3 class="text-headline-lg font-bold mt-1">보조 모델 — 실시간이 아닌 곳에서 돕는 AI</h3>
+        </div>
+        <p class="text-body-sm text-on-surface-variant max-w-md">실시간 모델은 YOLO26n + 자세 추정뿐입니다. 다른 모델은 설치할 때 한 번, 또는 개발할 때만 씁니다. 어느 경우에도 집 안 영상을 외부로 보내지 않습니다.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h4 class="text-headline-sm font-bold flex items-center gap-2"><span class="material-symbols-outlined text-xl text-primary">home_pin</span>설치 시 1회</h4>
+            <span class="inline-flex items-center gap-1 px-[9px] py-[3px] rounded-full border border-dashed border-outline text-on-surface-variant text-label-sm font-bold whitespace-nowrap"><span class="material-symbols-outlined text-sm leading-none" aria-hidden="true">pending</span>검토 예정</span>
+          </div>
+          <div class="text-label-md text-on-surface font-semibold mb-2">YOLOE</div>
+          <p class="text-body-sm text-on-surface-variant">침대·소파·식탁·TV 위치를 글자 입력으로 찾아 <b class="text-on-surface">Zone 초안과 TV 제외 영역을 제안</b>하고, 사람이 확인·수정합니다. 학습 없이 원하는 물체를 찾을 수 있어 설치 작업을 줄이고, 한 번만 돌리므로 속도 부담이 없습니다. 처리는 집 안에서 합니다.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-surface-container-low">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h4 class="text-headline-sm font-bold flex items-center gap-2"><span class="material-symbols-outlined text-xl text-secondary">dataset</span>데이터 준비</h4>
+            <span class="inline-flex items-center gap-1 px-[9px] py-[3px] rounded-full border border-dashed border-outline text-on-surface-variant text-label-sm font-bold whitespace-nowrap"><span class="material-symbols-outlined text-sm leading-none" aria-hidden="true">pending</span>검토 예정</span>
+          </div>
+          <div class="text-label-md text-on-surface font-semibold mb-2">SigLIP → SAM 3 → 사람 검수</div>
+          <ol class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
+            <li><b class="text-on-surface">SigLIP</b> — 녹화한 프레임을 "바닥에 누운 사람", "어두운 방" 같은 문장으로 검색해 약점 장면을 골라냄</li>
+            <li><b class="text-on-surface">SAM 3</b> — 사람 영역을 잡아 라벨 초안을 만들고 박스로 변환. 바닥 영역을 따서 Zone 그리기 보조</li>
+            <li><b class="text-on-surface">사람 검수</b> — 초안을 사람이 확인해 라벨로 확정</li>
+          </ol>
+          <p class="text-body-sm text-outline mt-3">개발자 PC에서 직접 촬영한 영상에만 씁니다. SigLIP으로 생활 상태를 직접 판단하지는 않습니다.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-surface-container-low md:col-span-2 xl:col-span-1">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h4 class="text-headline-sm font-bold flex items-center gap-2"><span class="material-symbols-outlined text-xl text-outline">block</span>쓰지 않는 것</h4>
+            <span class="inline-flex items-center gap-1 px-[9px] py-[3px] rounded-full border border-dashed border-outline text-on-surface-variant text-label-sm font-bold whitespace-nowrap"><span class="material-symbols-outlined text-sm leading-none" aria-hidden="true">pending</span>검토 예정</span>
+          </div>
+          <ul class="flex flex-col divide-y divide-surface-container text-body-sm">
+            <li class="py-3 first:pt-0"><div class="text-on-surface font-semibold">DINO-X</div><p class="text-on-surface-variant mt-1">클라우드 API로 이미지를 보내야 해 "영상은 집 밖으로 나가지 않는다"는 원칙과 충돌. 같은 역할은 YOLOE·SAM 3로 로컬에서 수행</p></li>
+            <li class="py-3 last:pb-0"><div class="text-on-surface font-semibold">OCR</div><p class="text-on-surface-variant mt-1">별일없지는 글자를 읽을 일이 없음. 복약 판정은 PRD에서 제외 범위</p></li>
+          </ul>
         </div>
       </div>
     </div>

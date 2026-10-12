@@ -1173,7 +1173,7 @@ tailwind.config = {
     <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
       <span class="text-label-md text-primary font-bold tracking-wider uppercase mb-2">Documents</span>
       <h2 class="text-display-lg text-on-surface font-bold mb-4">문서 모음</h2>
-      <p class="text-body-lg text-on-surface-variant">제품 요구사항과 설계·검증 문서를 한곳에서 볼 수 있습니다.</p>
+      <p class="text-body-lg text-on-surface-variant">별일없지의 제품·설계·검증 문서와 비전 모델 실습 보고서를 한곳에서 볼 수 있습니다.</p>
     </div>
     <div id="docs-list" class="flex flex-col gap-10" aria-live="polite">
       <p class="text-center text-body-md text-on-surface-variant">문서 목록을 불러오는 중입니다…</p>
@@ -1312,11 +1312,29 @@ tailwind.config = {
     .then(function (data) {
       var docs = (data.docs || []).filter(function (d) { return d && d.title && safe(d.file, MD); });
       if (!docs.length) return fail();
-      // 그룹 줄 구분 없이 docs.json 순서대로 한 격자에 배치 (그룹은 카드 안 라벨로 표시)
+      // sections 에 적힌 그룹은 아래에 제목과 함께 따로, 나머지 그룹은 docs.json 순서대로 한 격자에 배치
+      // (그룹은 카드 안 라벨로도 표시)
+      var sections = (data.sections || []).filter(function (s) { return s && s.title && Array.isArray(s.groups); });
+      function inSection(d) { return sections.some(function (s) { return s.groups.indexOf(d.group) >= 0; }); }
+      function grid(list) {
+        var g = el('div', 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6');
+        list.forEach(function (d) { g.appendChild(card(d)); });
+        return g;
+      }
       box.innerHTML = '';
-      var grid = el('div', 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6');
-      docs.forEach(function (d) { grid.appendChild(card(d)); });
-      box.appendChild(grid);
+      var main = docs.filter(function (d) { return !inSection(d); });
+      if (main.length) box.appendChild(grid(main));
+      sections.forEach(function (s) {
+        var list = docs.filter(function (d) { return s.groups.indexOf(d.group) >= 0; });
+        if (!list.length) return;
+        var wrap = el('div', 'flex flex-col gap-6 pt-10 border-t border-surface-container');
+        var head = el('div', '');
+        head.appendChild(el('h3', 'text-headline-md font-bold text-on-surface', s.title));
+        if (s.description) head.appendChild(el('p', 'text-body-md text-on-surface-variant mt-1', s.description));
+        wrap.appendChild(head);
+        wrap.appendChild(grid(list));
+        box.appendChild(wrap);
+      });
     })
     .catch(fail);
 })();

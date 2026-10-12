@@ -1,5 +1,8 @@
 {
   "groups": ["제품", "설계·검증", "실습"],
+  "sections": [
+    { "groups": ["실습"], "title": "실습", "description": "비전 모델 실습 기록" }
+  ],
   "docs": [
     {
       "id": "prd",

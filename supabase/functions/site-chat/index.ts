@@ -85,7 +85,7 @@ function corsHeaders(origin: string | null): Record<string, string> {
   return h;
 }
 
-type Quota = { remaining: number; limit: number };
+type Quota = { remaining: number; limit: number; next_at: string | null };
 
 function reply(origin: string | null, httpStatus: number, status: Status, answer: string, sources: Source[] = [], topSimilarity: number | null = null, quota: Quota | null = null) {
   return new Response(
@@ -176,13 +176,15 @@ async function generate(question: string, chunks: Chunk[]): Promise<string> {
 }
 
 // 남은 질문 횟수 — 최근 24시간 기록 건수만 셈 (기록하지 않음, site_check_rate 와 같은 24시간 기준)
+// next_at: 가장 오래된 기록 + 24시간 = 다음 1회가 다시 생기는 시각
 async function quotaOf(ipHash: string): Promise<Quota> {
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const url = `${SUPABASE_URL}/rest/v1/site_rate_events?select=id&ip_hash=eq.${ipHash}&created_at=gte.${encodeURIComponent(since)}`;
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const since = new Date(Date.now() - DAY_MS).toISOString();
+  const url = `${SUPABASE_URL}/rest/v1/site_rate_events?select=created_at&ip_hash=eq.${ipHash}` +
+    `&created_at=gte.${encodeURIComponent(since)}&order=created_at.asc&limit=1`;
   let res: Response;
   try {
     res = await fetch(url, {
-      method: "HEAD",
       headers: { apikey: SECRET_KEY, Prefer: "count=exact" },
       signal: AbortSignal.timeout(DB_TIMEOUT_MS),
     });
@@ -192,10 +194,13 @@ async function quotaOf(ipHash: string): Promise<Quota> {
   }
   const used = Number((res.headers.get("content-range") ?? "").split("/")[1]);
   if (!res.ok || !Number.isFinite(used)) {
+    await res.body?.cancel();
     console.error(`quota: HTTP ${res.status}`);
     throw new UpstreamError("quota");
   }
-  return { remaining: Math.max(0, PER_DAY - used), limit: PER_DAY };
+  const [oldest]: { created_at: string }[] = await res.json();
+  const nextAt = oldest ? new Date(new Date(oldest.created_at).getTime() + DAY_MS).toISOString() : null;
+  return { remaining: Math.max(0, PER_DAY - used), limit: PER_DAY, next_at: nextAt };
 }
 
 // 검색된 조각의 문서 버전 — site_match_chunks 는 version 을 돌려주지 않아 따로 읽음 (DB 변경 없이)

@@ -1402,12 +1402,19 @@ tailwind.config = {
     return b;
   }
 
-  // 출처: 문서마다 하나씩, 뷰어 링크로. 허용 경로(PRD/·report/ 의 .md)만
+  // 출처: 파일마다 하나씩. 문서(.md)는 뷰어 링크, 홈페이지(index.html)는 그 파일로 바로
+  var PAGE = /^index\.html$/;
+  function sourceHref(file) { return PAGE.test(file) ? file : viewerHref(file); }
+  function sourceLabel(s) {
+    if (PAGE.test(s.file)) return [s.title, (s.heading || '').replace(/^홈페이지\s*>\s*/, '')].filter(Boolean).join(' · ');
+    return [s.title, s.version].filter(Boolean).join(' · ');
+  }
   function sources(list) {
     var seen = {};
     var docs = (list || []).filter(function (s) {
-      if (!s || !MD.test(s.file || '') || seen[s.file]) return false;
-      seen[s.file] = true;
+      var f = s && s.file || '';
+      if (!(MD.test(f) || PAGE.test(f)) || seen[f]) return false;
+      seen[f] = true;
       return true;
     });
     if (!docs.length) return;
@@ -1415,9 +1422,9 @@ tailwind.config = {
     box.appendChild(el('span', 'text-label-sm text-outline', '출처'));
     docs.forEach(function (s) {
       var a = el('a', 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container text-secondary text-label-sm hover:bg-surface-container-high transition-colors');
-      a.href = viewerHref(s.file);
-      a.appendChild(el('span', 'material-symbols-outlined text-sm', 'description'));
-      a.appendChild(el('span', '', [s.title, s.version].filter(Boolean).join(' · ')));
+      a.href = sourceHref(s.file);
+      a.appendChild(el('span', 'material-symbols-outlined text-sm', PAGE.test(s.file) ? 'home' : 'description'));
+      a.appendChild(el('span', '', sourceLabel(s)));
       box.appendChild(a);
     });
     log.appendChild(box);

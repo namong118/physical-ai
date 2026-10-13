@@ -1406,9 +1406,36 @@ tailwind.config = {
     return b;
   }
 
-  // 출처: 파일마다 하나씩. 문서(.md)는 뷰어 링크, 홈페이지(index.html)는 그 파일로 바로
+  // 출처: 파일마다 하나씩. 문서(.md)는 뷰어 링크 + 제목 위치, 홈페이지(index.html)는 같은 페이지 안 섹션으로 스크롤
   var PAGE = /^index\.html$/;
-  function sourceHref(file) { return PAGE.test(file) ? file : viewerHref(file); }
+  function lastHeading(heading) {
+    var parts = (heading || '').split(' > ');
+    return parts.length > 1 ? parts[parts.length - 1] : '';   // 문서 제목만 있으면 맨 위
+  }
+  // doc.html 의 slugify 와 같은 규칙 (doc.html 의 기존 id 와 겹치면 doc.html 이 -1 을 붙이므로 그것도 맞춤)
+  var DOC_IDS = { 'doc': 1, 'doc-list-side': 1, 'doc-path': 1, 'doc-raw': 1, 'doc-select': 1, 'doc-select-wrap': 1,
+    'tailwind-config': 1, 'toc-mobile': 1, 'toc-mobile-wrap': 1, 'toc-side': 1, 'toc-side-wrap': 1 };
+  function docSlug(text) {
+    var base = text.trim().toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, '').replace(/\s/g, '-') || 'section';
+    return DOC_IDS[base] ? base + '-1' : base;
+  }
+  function sourceHref(s) {
+    if (PAGE.test(s.file)) return s.file;
+    var h = lastHeading(s.heading);
+    return viewerHref(s.file) + (h ? '#' + encodeURIComponent(docSlug(h)) : '');
+  }
+  // 홈페이지: heading 의 섹션 제목과 글자가 같은 h1·h2 로 이동 (공백·줄바꿈 차이는 무시), 못 찾으면 맨 위
+  function squash(t) { return (t || '').replace(/\s+/g, ''); }
+  function scrollToSection(s) {
+    var want = squash(lastHeading(s.heading));
+    var target = null;
+    if (want) document.querySelectorAll('main h1, main h2').forEach(function (h) {
+      if (!target && squash(h.textContent) === want) target = h;
+    });
+    if (window.matchMedia('(max-width: 639px)').matches) setOpen(false);   // 패널이 화면을 가리는 폭
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   function sourceLabel(s) {
     if (PAGE.test(s.file)) return [s.title, (s.heading || '').replace(/^홈페이지\s*>\s*/, '')].filter(Boolean).join(' · ');
     return [s.title, s.version].filter(Boolean).join(' · ');
@@ -1426,7 +1453,8 @@ tailwind.config = {
     box.appendChild(el('span', 'text-label-sm text-outline', '출처'));
     docs.forEach(function (s) {
       var a = el('a', 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container text-secondary text-label-sm hover:bg-surface-container-high transition-colors');
-      a.href = sourceHref(s.file);
+      a.href = sourceHref(s);
+      if (PAGE.test(s.file)) a.addEventListener('click', function (e) { e.preventDefault(); scrollToSection(s); });
       a.appendChild(el('span', 'material-symbols-outlined text-sm', PAGE.test(s.file) ? 'home' : 'description'));
       a.appendChild(el('span', '', sourceLabel(s)));
       box.appendChild(a);

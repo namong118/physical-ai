@@ -1487,7 +1487,41 @@ tailwind.config = {
       .catch(function () {});
   }
 
-  function setOpen(open) {
+  // 대화 내역: 탭을 닫기 전까지 sessionStorage 에 보관 (최근 20개, 남은 횟수는 저장하지 않음).
+  // 저장소를 쓸 수 없으면 저장 없이 동작
+  var STORE_KEY = 'byeolChat';
+  var MAX_SAVED = 20;
+  var saved = [];
+  var wasOpen = false;
+  function str(v) { return typeof v === 'string' ? v : ''; }
+  function cleanSources(list) {
+    return Array.isArray(list) ? list.filter(function (x) { return x && typeof x.file === 'string'; }).map(function (x) {
+      return { title: str(x.title), file: x.file, heading: str(x.heading), version: str(x.version) };
+    }) : [];
+  }
+  try {
+    var stored = JSON.parse(sessionStorage.getItem(STORE_KEY) || 'null');
+    if (stored && Array.isArray(stored.messages)) {
+      saved = stored.messages.filter(function (m) {
+        return m && (m.who === 'me' || m.who === 'bot') && typeof m.text === 'string';
+      }).slice(-MAX_SAVED).map(function (m) { return { who: m.who, text: m.text, sources: cleanSources(m.sources) }; });
+      wasOpen = stored.open === true;
+    }
+  } catch (e) { saved = []; }
+  function persist() {
+    try {
+      sessionStorage.setItem(STORE_KEY, JSON.stringify({
+        open: !panel.classList.contains('hidden'), messages: saved.slice(-MAX_SAVED)
+      }));
+    } catch (e) { /* 저장 없이 동작 */ }
+  }
+  function record(who, text, list) {
+    saved.push({ who: who, text: text, sources: cleanSources(list) });
+    if (saved.length > MAX_SAVED) saved = saved.slice(-MAX_SAVED);
+    persist();
+  }
+
+  function setOpen(open, restoring) {
     panel.classList.toggle('hidden', !open);
     panel.classList.toggle('flex', open);
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -1496,11 +1530,14 @@ tailwind.config = {
     if (open) {
       if (!log.childElementCount) {
         bubble('bot', '안녕하세요! 별일없지에 대해 궁금한 점을 물어보세요. 홈페이지와 문서에 있는 내용으로 답해 드려요.');
-        showExamples();
+        // 이전 대화가 있으면 복원하고 예시 질문은 숨김 (bubble·sources 모두 textContent 로만 넣음)
+        if (saved.length) saved.forEach(function (m) { bubble(m.who, m.text); if (m.sources.length) sources(m.sources); });
+        else showExamples();
       }
       loadQuota();
-      if (!exhausted) input.focus();
+      if (!exhausted && !restoring) input.focus();   // 복원할 때는 포커스를 주지 않음 (모바일 키보드)
     }
+    persist();
   }
 
   // 예시 질문 칩 — 누르면 바로 전송, 첫 질문을 보내면 사라짐
@@ -1523,6 +1560,7 @@ tailwind.config = {
     busy = true;
     send.disabled = true;
     bubble('me', question);
+    record('me', question);
     var wait = bubble('bot', '답변을 만들고 있어요…');
     wait.classList.add('animate-pulse');
     fetch(CHAT_URL, {
@@ -1540,11 +1578,13 @@ tailwind.config = {
         } else {
           wait.textContent = usedUp ? NOTICE.exhausted : (NOTICE[data.status] || NOTICE.unavailable);
         }
+        record('bot', wait.textContent, data.status === 'ok' ? data.sources : null);
         showQuota(data, usedUp);
       })
       .catch(function () {
         wait.classList.remove('animate-pulse');
         wait.textContent = NOTICE.unavailable;
+        record('bot', NOTICE.unavailable);
       })
       .then(function () {
         busy = false;
@@ -1558,7 +1598,7 @@ tailwind.config = {
     e.preventDefault();
     var q = input.value.trim();
     if (busy || exhausted || !q) return;
-    if (q.length > 300) { bubble('bot', NOTICE.invalid); return; }
+    if (q.length > 300) { bubble('bot', NOTICE.invalid); record('bot', NOTICE.invalid); return; }
     input.value = '';
     ask(q);
   });
@@ -1574,6 +1614,7 @@ tailwind.config = {
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && !panel.classList.contains('hidden')) { setOpen(false); toggle.focus(); }
   });
+  if (wasOpen) setOpen(true, true);   // 열린 채로 떠났으면 돌아왔을 때도 열어 둠
 })();
 </script>
 </body>

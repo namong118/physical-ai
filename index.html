@@ -1463,6 +1463,14 @@ tailwind.config = {
     scrollDown();
   }
 
+  // 0회 안내 — 서버가 준 next_at(다음 1회가 다시 생기는 시각)을 브라우저 시간대로 표시
+  function exhaustedText(nextAt) {
+    var d = new Date(nextAt || '');
+    if (isNaN(d.getTime())) return NOTICE.exhausted;
+    var when = d.toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    return '질문 횟수를 모두 사용했어요. ' + when + '부터 다시 이용할 수 있어요.';
+  }
+
   // 남은 질문 횟수 (최근 24시간, IP별) — 0이 되면 입력창·예시 버튼을 막음
   function showQuota(data, noticeShown) {
     if (!data || typeof data.remaining !== 'number' || typeof data.limit !== 'number') return;
@@ -1473,7 +1481,7 @@ tailwind.config = {
     input.disabled = true;
     send.disabled = true;
     if (examples) examples.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
-    if (!noticeShown) bubble('bot', NOTICE.exhausted);
+    if (!noticeShown) bubble('bot', exhaustedText(data.next_at));
   }
   // 창을 열 때 조회 — 횟수를 쓰지 않음
   function loadQuota() {
@@ -1576,7 +1584,7 @@ tailwind.config = {
           wait.textContent = data.answer || NOTICE.unavailable;
           if (data.status === 'ok') sources(data.sources);
         } else {
-          wait.textContent = usedUp ? NOTICE.exhausted : (NOTICE[data.status] || NOTICE.unavailable);
+          wait.textContent = usedUp ? exhaustedText(data.next_at) : (NOTICE[data.status] || NOTICE.unavailable);
         }
         record('bot', wait.textContent, data.status === 'ok' ? data.sources : null);
         showQuota(data, usedUp);

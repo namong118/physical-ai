@@ -352,7 +352,18 @@ tailwind.config = {
       renderToc(article);
       if (location.hash) {
         var target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
-        if (target) target.scrollIntoView();
+        if (target) {
+          target.scrollIntoView();
+          // 본문 이미지(lazy)가 스크롤 뒤에 로드되면 제목이 밀리므로, 로드될 때마다 다시 맞춤.
+          // 사용자가 스크롤·클릭·키 입력을 하면 그 뒤로는 맞추지 않음
+          var moved = false;
+          ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach(function (ev) {
+            window.addEventListener(ev, function () { moved = true; }, { once: true, passive: true });
+          });
+          Array.prototype.forEach.call(article.querySelectorAll('img'), function (img) {
+            if (!img.complete) img.addEventListener('load', function () { if (!moved) target.scrollIntoView(); }, { once: true });
+          });
+        }
       }
     })
     .catch(function (err) {

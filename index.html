@@ -1227,6 +1227,29 @@ tailwind.config = {
   </div>
 </footer>
 
+<!-- ===== 문서 챗봇 ===== -->
+<div id="chat" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60] flex flex-col items-end gap-3">
+  <div id="chat-panel" class="hidden w-[calc(100vw-2rem)] sm:w-[380px] h-[min(560px,calc(100dvh-6.5rem))] bg-surface-container-lowest rounded-2xl shadow-[0_8px_32px_rgba(17,28,45,0.18)] border border-[#E8EFF7] flex-col overflow-hidden" role="dialog" aria-labelledby="chat-title">
+    <div class="flex items-center justify-between gap-3 px-4 py-3 bg-primary text-on-primary">
+      <div>
+        <div id="chat-title" class="text-headline-sm font-bold">문서에게 물어보기</div>
+        <div class="text-label-sm font-normal opacity-90">PRD·설계 문서를 근거로 답해요</div>
+      </div>
+      <button id="chat-close" type="button" class="w-9 h-9 flex-shrink-0 rounded-full inline-flex items-center justify-center hover:bg-primary-container transition-colors" aria-label="챗봇 닫기"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+    </div>
+    <div id="chat-log" class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3" aria-live="polite"></div>
+    <form id="chat-form" class="border-t border-surface-container p-3 flex flex-col gap-2">
+      <div class="flex items-end gap-2">
+        <label for="chat-input" class="sr-only">질문</label>
+        <textarea id="chat-input" rows="2" maxlength="300" placeholder="질문을 입력하세요 (Enter로 전송)" class="flex-1 resize-none rounded-xl border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"></textarea>
+        <button id="chat-send" type="submit" class="w-11 h-11 flex-shrink-0 rounded-full bg-primary text-on-primary inline-flex items-center justify-center hover:bg-primary-container transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="보내기"><span class="material-symbols-outlined" aria-hidden="true">send</span></button>
+      </div>
+      <p class="text-label-sm font-normal text-outline">질문은 답변 생성을 위해 Google Gemini로 전송되며, 이 사이트는 질문 내용을 저장하지 않습니다.</p>
+    </form>
+  </div>
+  <button id="chat-toggle" type="button" class="w-14 h-14 rounded-full bg-primary text-on-primary shadow-[0_6px_20px_rgba(11,127,120,0.35)] inline-flex items-center justify-center hover:bg-primary-container transition-colors" aria-label="문서 챗봇 열기" aria-expanded="false" aria-controls="chat-panel"><span class="material-symbols-outlined text-[28px]" aria-hidden="true">chat</span></button>
+</div>
+
 <script>
 // 모바일 메뉴: 버튼으로 열고 닫기, 항목 클릭·바깥 클릭·Esc 로 닫기
 (function () {
@@ -1337,6 +1360,135 @@ tailwind.config = {
       });
     })
     .catch(fail);
+})();
+</script>
+<script>
+// 문서 챗봇: 질문 하나만 서버(site-chat)로 보내고, 이전 대화는 화면에만 남김. 답변은 textContent 로만 넣음
+(function () {
+  // 함수 주소와 공개용(publishable) 키만 둠 — 브라우저에 노출돼도 되는 값
+  var CHAT_URL = 'https://zerclhuaekfsseriyevp.supabase.co/functions/v1/site-chat';
+  var PUBLISHABLE_KEY = 'sb_publishable_5DQ1_ptSu1tN_lHMMZXLmA_3zUrgV2O';
+  var MD = /^(PRD|report)\/[^\\:?#]+\.md$/i;
+  var NOTICE = {
+    limited: '질문이 많아 잠시 쉬고 있어요. 조금 뒤 다시 시도해 주세요.',
+    unavailable: '지금은 답변을 만들 수 없어요. 잠시 뒤 다시 시도해 주세요.',
+    invalid: '질문은 1~300자로 입력해 주세요.'
+  };
+
+  var toggle = document.getElementById('chat-toggle');
+  var panel = document.getElementById('chat-panel');
+  var closeBtn = document.getElementById('chat-close');
+  var log = document.getElementById('chat-log');
+  var form = document.getElementById('chat-form');
+  var input = document.getElementById('chat-input');
+  var send = document.getElementById('chat-send');
+  var busy = false;
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text) e.textContent = text;
+    return e;
+  }
+  function viewerHref(path) { return 'doc.html?file=' + encodeURIComponent(path).replace(/%2F/g, '/'); }
+  function scrollDown() { log.scrollTop = log.scrollHeight; }
+
+  function bubble(who, text) {
+    var mine = who === 'me';
+    var b = el('div', 'max-w-[85%] rounded-2xl px-3.5 py-2.5 text-body-md whitespace-pre-line ' +
+      (mine ? 'self-end bg-primary text-on-primary' : 'self-start bg-surface-container-low text-on-surface'), text);
+    log.appendChild(b);
+    scrollDown();
+    return b;
+  }
+
+  // 출처: 문서마다 하나씩, 뷰어 링크로. 허용 경로(PRD/·report/ 의 .md)만
+  function sources(list) {
+    var seen = {};
+    var docs = (list || []).filter(function (s) {
+      if (!s || !MD.test(s.file || '') || seen[s.file]) return false;
+      seen[s.file] = true;
+      return true;
+    });
+    if (!docs.length) return;
+    var box = el('div', 'self-start flex flex-wrap items-center gap-1.5 -mt-1');
+    box.appendChild(el('span', 'text-label-sm text-outline', '출처'));
+    docs.forEach(function (s) {
+      var a = el('a', 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container text-secondary text-label-sm hover:bg-surface-container-high transition-colors');
+      a.href = viewerHref(s.file);
+      a.appendChild(el('span', 'material-symbols-outlined text-sm', 'description'));
+      a.appendChild(el('span', '', [s.title, s.version].filter(Boolean).join(' · ')));
+      box.appendChild(a);
+    });
+    log.appendChild(box);
+    scrollDown();
+  }
+
+  function setOpen(open) {
+    panel.classList.toggle('hidden', !open);
+    panel.classList.toggle('flex', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? '문서 챗봇 닫기' : '문서 챗봇 열기');
+    toggle.querySelector('.material-symbols-outlined').textContent = open ? 'close' : 'chat';
+    if (open) {
+      if (!log.childElementCount) bubble('bot', '별일없지 문서에 대해 물어보세요.\n예: 카메라 영상이 밖으로 나가나요?');
+      input.focus();
+    }
+  }
+
+  function ask(question) {
+    busy = true;
+    send.disabled = true;
+    bubble('me', question);
+    var wait = bubble('bot', '답변을 만들고 있어요…');
+    wait.classList.add('animate-pulse');
+    fetch(CHAT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': PUBLISHABLE_KEY },
+      body: JSON.stringify({ question: question })
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        wait.classList.remove('animate-pulse');
+        if (data.status === 'ok' || data.status === 'no_match') {
+          wait.textContent = data.answer || NOTICE.unavailable;
+          if (data.status === 'ok') sources(data.sources);
+        } else {
+          wait.textContent = NOTICE[data.status] || NOTICE.unavailable;
+        }
+      })
+      .catch(function () {
+        wait.classList.remove('animate-pulse');
+        wait.textContent = NOTICE.unavailable;
+      })
+      .then(function () {
+        busy = false;
+        send.disabled = false;
+        scrollDown();
+        input.focus();
+      });
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var q = input.value.trim();
+    if (busy || !q) return;
+    if (q.length > 300) { bubble('bot', NOTICE.invalid); return; }
+    input.value = '';
+    ask(q);
+  });
+  // Enter 로 전송, Shift+Enter 는 줄바꿈. 한글 조합 중 Enter 는 무시
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) {
+      e.preventDefault();
+      form.requestSubmit();
+    }
+  });
+  toggle.addEventListener('click', function () { setOpen(panel.classList.contains('hidden')); });
+  closeBtn.addEventListener('click', function () { setOpen(false); toggle.focus(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !panel.classList.contains('hidden')) { setOpen(false); toggle.focus(); }
+  });
 })();
 </script>
 </body>

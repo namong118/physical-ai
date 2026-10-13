@@ -1,0 +1,6 @@
+{
+  "model": "gemini-embedding-2",
+  "dimensions": 768,
+  "document_format": "title: {title} | text: {content}",
+  "query_format": "task: search result | query: {content}"
+}

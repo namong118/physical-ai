@@ -2,6 +2,57 @@
 
 ---
 
+## 2026-10-13 — 홈페이지 문서 챗봇 1~3단계 (준비, DB, 문서 넣기 스크립트)
+
+### 오늘 한 일
+
+| 커밋 | 내용 |
+|---|---|
+| `2670d67` | 챗봇 준비 — `.gitignore`·`.env.example`, CLAUDE.md에 코드 예외·Supabase 규칙 |
+| `ab8c4ff` | CLAUDE.md — 한국어 보고 규칙, DB 쓰기는 사용자가 SQL Editor에서 실행 |
+| `f662cf9` | 챗봇 마이그레이션 — `site_*` 테이블·RLS·검색·요청 횟수 RPC |
+| (아래 커밋) | 문서 넣기 스크립트 `scripts/ingest_docs.py`, 임베딩 설정 `embedding.json`, `.env.example` 키 이름 변경 |
+
+push 전.
+
+#### 1. Supabase 실습 프로젝트 정리
+- 무료 플랜 활성 프로젝트 수 제한 때문에 새 프로젝트 대신 실습 프로젝트를 재사용. MCP는 그 프로젝트 하나에만 로컬 범위로 연결.
+- 실습 Edge Function 2개, 실습 secret, 실습 계정 2명, 실습 테이블 `documents`·`chunks`와 `match_chunks` 함수 삭제. `vector` 확장은 남김.
+- 삭제·생성은 사용자가 대시보드에서 직접 실행하고, MCP 읽기 조회로 반영을 확인. 이후 MCP는 `read_only=true`로 되돌림.
+
+#### 2. 마이그레이션 (`supabase/migrations/20261013000000_site_chat.sql`)
+- `site_documents`(docs.json 항목), `site_chunks`(조각 + `vector(768)`, hnsw 코사인 인덱스), `site_rate_events`(IP 솔트 해시 + 시각만).
+- 세 테이블 모두 RLS 켜고 정책 없음, `anon`·`authenticated` 권한 회수.
+- `site_match_chunks`(검색), `site_check_rate`(분당·IP 일일·전체 일일 상한 확인 + 통과한 요청만 기록, 1일 지난 기록 정리) — `service_role`만 실행.
+- 질문 내용과 원문 IP는 저장하지 않음. 솔트는 Edge Function secret으로 둘 예정.
+
+#### 3. 문서 넣기 스크립트 (`scripts/ingest_docs.py`)
+- `docs.json` 문서를 제목 단위로 나누고(코드 블록 안 `#` 줄은 제목으로 보지 않음), 1,200자가 넘으면 빈 줄·줄 단위로 다시 나눔. 긴 표는 머리글을 조각마다 반복.
+- 임베딩은 `gemini-embedding-2`, 768차원. 모델·차원·입력 형식(문서 `title: … | text: …`, 질문 `task: search result | query: …`)은 `supabase/functions/_shared/embedding.json` 한 곳에 두고 site-chat도 같은 파일을 읽게 함. 차원이 DB `vector(768)`과 다르면 스크립트가 멈춤.
+- 처음 초안은 `gemini-embedding-001` + `taskType`이었으나, 앞서 정한 `gemini-embedding-2`로 맞춤 (두 모델의 임베딩 공간은 호환되지 않음).
+- Supabase 키는 새 secret 키(`SUPABASE_SECRET_KEY`, `apikey` 헤더로만 전송). legacy `service_role` 키는 쓰지 않음.
+- 바뀐 문서만 다시 넣고(`content_hash`, 설정이 바뀌면 전부 다시), `docs.json`에서 빠진 문서는 지움. 표준 라이브러리만 사용, 키 값은 출력하지 않음.
+- 실제 넣기(사용자 실행): 처음에는 `.env`에 secret 키가 아닌 키가 들어가 401(`anon` 역할로 처리돼 `site_documents` 권한 거절)로 멈춤 — 쓰기 전 단계라 DB 변경 없음. 키를 바꿔 다시 실행해 4개 문서 모두 넣음.
+- Windows 콘솔에서 오류 메시지 한글이 깨져 stderr도 UTF-8로 맞춤.
+
+### 확인한 것
+- MCP 조회: 세 테이블 RLS true, 브라우저 역할 테이블 권한 0행, RPC 2개 `anon`·`authenticated` 실행 불가·`service_role` 실행 가능·`search_path=""`, 인덱스 6개, `site_rate_events` 컬럼 3개·0행.
+- 상한 시험(사용자 실행): 분당 상한 2로 3번 호출 → 1·2번 통과, 3번 `ip_minute` 거절. 시험 기록은 지움.
+- `--dry-run`: 문서 4개 → 조각 71개(PRD 22, 전처리 설계 10, 모델·학습·검증 23, 비전 모델 실습 16). 코드 블록이 조각 사이에서 끊기지 않음.
+- 실제 넣기 후 MCP 조회: `site_documents` 4행(버전 docs.json과 같음), `site_chunks` 71행(문서별 22·10·23·16), 임베딩 빈 값 0, 차원 모두 768, 노름 모두 1.000. 문서마다 첫 조각의 가장 가까운 조각은 같은 문서 안 조각(유사도 0.82~0.89).
+
+### 배운 점
+- 401 + `GRANT … TO anon` 힌트는 키가 공개용(publishable/anon)으로 인식됐다는 뜻이다. RLS·권한 회수가 의도대로 막고 있다는 확인이기도 하다.
+- pgvector가 `extensions` 스키마에 있어 조회에서 `vector_dims`·`<=>`는 스키마를 붙이거나 `search_path`에 `extensions`를 넣어야 한다.
+- SQL Editor는 열려 있는 프로젝트와 선택 영역 기준으로 실행된다. 실행 뒤에는 반드시 다른 경로(MCP 조회)로 반영을 확인한다.
+- 터미널에서 긴 SQL을 복사하면 줄이 빠질 수 있다. 실행할 SQL은 파일로 두고 파일에서 복사한다.
+
+### 남은 일
+- Edge Function `site-chat`, 홈페이지 챗봇 창, 검증 질문으로 `min_similarity`·상한 값 조정
+- 구현이 끝나면 MCP `read_only` 상태 재확인
+
+---
+
 ## 2026-10-12 — 보조 모델, 비전 모델 실습 보고서, 문서 모음 구분, 작업 규칙
 
 ### 오늘 한 일

@@ -1,0 +1,18 @@
+# 비밀 값 — 키·토큰은 커밋하지 않음 (.env.example 만 커밋)
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 로컬 MCP·편집기 설정 (Supabase MCP 는 로컬 범위로만 등록)
+.mcp.json
+.claude/settings.local.json
+.vscode/
+
+# Supabase CLI 로컬 상태
+supabase/.temp/
+supabase/.branches/

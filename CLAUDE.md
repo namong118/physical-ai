@@ -6,6 +6,7 @@
 
 - **별일없지** 소개 홈페이지(GitHub Pages)와 제품·설계 문서를 두는 레포입니다.
 - 개발 코드는 별도 레포 [namong118/Byeolileopji](https://github.com/namong118/Byeolileopji)에 있습니다. 이 레포에서는 코드를 개발하지 않습니다.
+  - **예외:** 홈페이지 문서 챗봇용 `scripts/`(문서 넣기 스크립트·검증 질문)와 `supabase/`(마이그레이션 SQL·Edge Function)는 이 레포에 둡니다.
 
 ## 구조
 
@@ -17,6 +18,8 @@
 | `PRD/` | PRD (`PRD.md` + 버전별 docx) |
 | `report/` | 설계·검증 문서, 실습 보고서, 개발일지 |
 | `images/` | 홈페이지·문서 이미지 |
+| `scripts/` | 챗봇 문서 넣기 스크립트(`ingest_docs.py`)와 검증 질문 |
+| `supabase/` | 챗봇 마이그레이션 SQL(`migrations/`)과 Edge Function(`functions/site-chat/`) |
 | `stitch/` | 초기 디자인 시안과 스크린샷 (참고용, 사이트에서 링크하지 않음). 지시 없이 수정·삭제하거나 링크하지 않음 |
 
 - 배포: GitHub Pages가 `main` 브랜치를 그대로 서비스합니다. **`main`에 push하면 곧 공개됩니다.**
@@ -41,6 +44,14 @@
   - 가로 스크롤 없음, 콘솔 오류 없음 (Tailwind CDN 경고는 기존과 동일)
   - 문서를 고쳤으면 뷰어에서 목차·표·이미지 렌더링 확인
 - **확인하지 못한 항목은 보고에 명시합니다.**
+
+## Supabase (홈페이지 챗봇)
+
+- Supabase MCP는 **챗봇용(실습) 프로젝트 하나에만** 연결합니다. 연결 주소에 `project_ref`를 지정하고, 다른 프로젝트 ID는 쓰지 않습니다.
+- MCP 설정은 **로컬 범위로만** 등록하고 레포에 커밋하지 않습니다 (`.mcp.json`은 `.gitignore`).
+- **쓰기 작업**(테이블 생성·삭제, 데이터 변경, 함수 배포, secrets 설정)은 실행할 SQL·명령 전문을 먼저 보고하고 승인을 받은 뒤 실행합니다.
+- 챗봇 테이블은 `public` 스키마에 `site_` 접두어를 붙이고 RLS를 켭니다 (정책 없음 — 브라우저에서 직접 읽지 못함).
+- 토큰·키 값은 설정 파일·보고·커밋·문서에 쓰지 않습니다. 홈페이지에는 공개용(anon/publishable) 키만 둡니다. `.env`는 커밋하지 않고 변수 이름은 `.env.example`에 둡니다.
 
 ## git
 

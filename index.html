@@ -1232,8 +1232,8 @@ tailwind.config = {
   <div id="chat-panel" class="hidden w-[calc(100vw-2rem)] sm:w-[380px] h-[min(560px,calc(100dvh-6.5rem))] bg-surface-container-lowest rounded-2xl shadow-[0_8px_32px_rgba(17,28,45,0.18)] border border-[#E8EFF7] flex-col overflow-hidden" role="dialog" aria-labelledby="chat-title">
     <div class="flex items-center justify-between gap-3 px-4 py-3 bg-primary text-on-primary">
       <div>
-        <div id="chat-title" class="text-headline-sm font-bold">문서에게 물어보기</div>
-        <div class="text-label-sm font-normal opacity-90">PRD·설계 문서를 근거로 답해요</div>
+        <div id="chat-title" class="text-headline-sm font-bold">별일없지에게 물어보기</div>
+        <div class="text-label-sm font-normal opacity-90">홈페이지와 PRD·설계 문서를 근거로 답해요</div>
       </div>
       <button id="chat-close" type="button" class="w-9 h-9 flex-shrink-0 rounded-full inline-flex items-center justify-center hover:bg-primary-container transition-colors" aria-label="챗봇 닫기"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
     </div>
@@ -1247,7 +1247,7 @@ tailwind.config = {
       <p class="text-label-sm font-normal text-outline">질문은 답변 생성을 위해 Google Gemini로 전송되며, 이 사이트는 질문 내용을 저장하지 않습니다.</p>
     </form>
   </div>
-  <button id="chat-toggle" type="button" class="w-14 h-14 rounded-full bg-primary text-on-primary shadow-[0_6px_20px_rgba(11,127,120,0.35)] inline-flex items-center justify-center hover:bg-primary-container transition-colors" aria-label="문서 챗봇 열기" aria-expanded="false" aria-controls="chat-panel"><span class="material-symbols-outlined text-[28px]" aria-hidden="true">chat</span></button>
+  <button id="chat-toggle" type="button" class="w-14 h-14 rounded-full bg-primary text-on-primary shadow-[0_6px_20px_rgba(11,127,120,0.35)] inline-flex items-center justify-center hover:bg-primary-container transition-colors" aria-label="별일없지 챗봇 열기" aria-expanded="false" aria-controls="chat-panel"><span class="material-symbols-outlined text-[28px]" aria-hidden="true">chat</span></button>
 </div>
 
 <script>
@@ -1435,15 +1435,33 @@ tailwind.config = {
     panel.classList.toggle('hidden', !open);
     panel.classList.toggle('flex', open);
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle.setAttribute('aria-label', open ? '문서 챗봇 닫기' : '문서 챗봇 열기');
+    toggle.setAttribute('aria-label', open ? '별일없지 챗봇 닫기' : '별일없지 챗봇 열기');
     toggle.querySelector('.material-symbols-outlined').textContent = open ? 'close' : 'chat';
     if (open) {
-      if (!log.childElementCount) bubble('bot', '별일없지 문서에 대해 물어보세요.\n예: 카메라 영상이 밖으로 나가나요?');
+      if (!log.childElementCount) {
+        bubble('bot', '안녕하세요! 별일없지에 대해 궁금한 점을 물어보세요. 홈페이지와 문서에 있는 내용으로 답해 드려요.');
+        showExamples();
+      }
       input.focus();
     }
   }
 
+  // 예시 질문 칩 — 누르면 바로 전송, 첫 질문을 보내면 사라짐
+  var EXAMPLES = ['별일없지는 어떤 서비스인가요?', '카메라 영상이 밖으로 나가나요?', '외출은 어떻게 판단하나요?', '보호자에게 알림은 어떻게 오나요?'];
+  var examples = null;
+  function showExamples() {
+    examples = el('div', 'self-start flex flex-wrap gap-2 max-w-full');
+    EXAMPLES.forEach(function (q) {
+      var b = el('button', 'max-w-full text-left px-3 py-1.5 rounded-full border border-primary/30 bg-surface-container-lowest text-primary text-label-md hover:bg-primary-fixed/40 transition-colors', q);
+      b.type = 'button';
+      b.addEventListener('click', function () { if (!busy) ask(q); });
+      examples.appendChild(b);
+    });
+    log.appendChild(examples);
+  }
+
   function ask(question) {
+    if (examples) { examples.remove(); examples = null; }
     busy = true;
     send.disabled = true;
     bubble('me', question);

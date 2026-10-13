@@ -1,5 +1,6 @@
 // 홈페이지 문서 챗봇 — 질문 하나를 받아 docs.json 문서 조각만 근거로 답함.
 //
+// {mode: "status"} 는 남은 질문 횟수만 돌려줌 (기록·Gemini 호출 없음)
 // 흐름: Origin·입력 확인 → 요청 횟수 확인(site_check_rate) → 질문 임베딩 → 조각 검색(site_match_chunks)
 //       → 조각이 없으면 고정 문구 / 있으면 Gemini 로 답변 생성 → {status, answer, sources}
 //
@@ -15,6 +16,7 @@ const GEN_MODEL = "gemini-3.5-flash-lite";
 
 const ALLOWED_ORIGINS = ["https://namong118.github.io", "http://localhost:8000"];
 const MAX_QUESTION_CHARS = 300;
+const PER_DAY = 30;                 // IP별 24시간 상한 — site_check_rate 에 넘기고 남은 횟수 표시에도 씀
 const MATCH_COUNT = 5;
 const MIN_SIMILARITY = 0.5;          // 임시값 — 검증 질문의 유사도를 보고 정함
 const EMBED_TIMEOUT_MS = 10_000;
@@ -83,9 +85,11 @@ function corsHeaders(origin: string | null): Record<string, string> {
   return h;
 }
 
-function reply(origin: string | null, httpStatus: number, status: Status, answer: string, sources: Source[] = [], topSimilarity: number | null = null) {
+type Quota = { remaining: number; limit: number };
+
+function reply(origin: string | null, httpStatus: number, status: Status, answer: string, sources: Source[] = [], topSimilarity: number | null = null, quota: Quota | null = null) {
   return new Response(
-    JSON.stringify({ status, answer, sources, top_similarity: topSimilarity }),
+    JSON.stringify({ status, answer, sources, top_similarity: topSimilarity, ...(quota ?? {}) }),
     { status: httpStatus, headers: { ...corsHeaders(origin), "Content-Type": "application/json; charset=utf-8" } },
   );
 }
@@ -171,6 +175,29 @@ async function generate(question: string, chunks: Chunk[]): Promise<string> {
   return text;
 }
 
+// 남은 질문 횟수 — 최근 24시간 기록 건수만 셈 (기록하지 않음, site_check_rate 와 같은 24시간 기준)
+async function quotaOf(ipHash: string): Promise<Quota> {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const url = `${SUPABASE_URL}/rest/v1/site_rate_events?select=id&ip_hash=eq.${ipHash}&created_at=gte.${encodeURIComponent(since)}`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "HEAD",
+      headers: { apikey: SECRET_KEY, Prefer: "count=exact" },
+      signal: AbortSignal.timeout(DB_TIMEOUT_MS),
+    });
+  } catch {
+    console.error("quota: network");
+    throw new UpstreamError("quota");
+  }
+  const used = Number((res.headers.get("content-range") ?? "").split("/")[1]);
+  if (!res.ok || !Number.isFinite(used)) {
+    console.error(`quota: HTTP ${res.status}`);
+    throw new UpstreamError("quota");
+  }
+  return { remaining: Math.max(0, PER_DAY - used), limit: PER_DAY };
+}
+
 // 검색된 조각의 문서 버전 — site_match_chunks 는 version 을 돌려주지 않아 따로 읽음 (DB 변경 없이)
 async function documentVersions(ids: string[]): Promise<Map<string, string | null>> {
   const url = `${SUPABASE_URL}/rest/v1/site_documents?select=id,version&id=in.(${ids.map(encodeURIComponent).join(",")})`;
@@ -223,22 +250,38 @@ Deno.serve(async (req) => {
   }
 
   let question = "";
+  let mode = "";
   try {
     const body = await req.json();
     question = typeof body?.question === "string" ? body.question.trim() : "";
+    mode = typeof body?.mode === "string" ? body.mode : "";
   } catch {
     // 아래에서 빈 질문으로 처리
+  }
+
+  // 원문 IP 대신 솔트 해시만 씀
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const ipHash = await sha256Hex(`${RATE_SALT}:${ip}`);
+
+  // 남은 횟수 조회 — 횟수를 쓰지 않고 Gemini 도 부르지 않음
+  if (mode === "status") {
+    try {
+      return reply(origin, 200, "ok", "", [], null, await quotaOf(ipHash));
+    } catch {
+      return reply(origin, 503, "unavailable", MSG_UNAVAILABLE);
+    }
   }
   if (!question || question.length > MAX_QUESTION_CHARS) {
     return reply(origin, 400, "invalid", `질문은 1~${MAX_QUESTION_CHARS}자로 입력해 주세요.`);
   }
 
+  let quota: Quota | null = null;
   try {
-    // 1. 요청 횟수 — 원문 IP 대신 솔트 해시만 넘김
-    const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
-    const [rate] = await rpc("site_check_rate", { p_ip_hash: await sha256Hex(`${RATE_SALT}:${ip}`) });
+    // 1. 요청 횟수 — 통과하면 기록됨. 기록 뒤 남은 횟수를 응답에 함께 보냄 (limited 는 기록되지 않음)
+    const [rate] = await rpc("site_check_rate", { p_ip_hash: ipHash, p_per_day: PER_DAY });
+    quota = await quotaOf(ipHash);
     if (!rate?.allowed) {
-      return reply(origin, 429, "limited", MSG_LIMITED);
+      return reply(origin, 429, "limited", MSG_LIMITED, [], null, quota);
     }
 
     // 2. 검색 — 최고 유사도를 보고하려고 하한 없이 가져온 뒤 여기서 거름
@@ -251,18 +294,18 @@ Deno.serve(async (req) => {
     const top = found.length ? Math.round(found[0].similarity * 1000) / 1000 : null;
     const chunks = found.filter((c) => c.similarity >= MIN_SIMILARITY);
     if (!chunks.length) {
-      return reply(origin, 200, "no_match", NO_ANSWER, [], top);
+      return reply(origin, 200, "no_match", NO_ANSWER, [], top, quota);
     }
 
     // 3. 답변 — 모델이 고정 문구로 답하면 근거 없는 답이므로 출처를 붙이지 않음
     const answer = await generate(question, chunks);
     if (answer.includes(NO_ANSWER)) {
-      return reply(origin, 200, "no_match", NO_ANSWER, [], top);
+      return reply(origin, 200, "no_match", NO_ANSWER, [], top, quota);
     }
     const versions = await documentVersions([...new Set(chunks.map((c) => c.document_id))]);
-    return reply(origin, 200, "ok", answer, toSources(chunks, versions), top);
+    return reply(origin, 200, "ok", answer, toSources(chunks, versions), top, quota);
   } catch (e) {
     if (!(e instanceof UpstreamError)) console.error("unexpected error");
-    return reply(origin, 503, "unavailable", MSG_UNAVAILABLE);
+    return reply(origin, 503, "unavailable", MSG_UNAVAILABLE, [], null, quota);
   }
 });

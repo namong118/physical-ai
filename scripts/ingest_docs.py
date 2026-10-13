@@ -25,6 +25,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -34,6 +35,10 @@ CHUNK_VERSION = "1"
 MAX_CHARS = 1200      # 조각 본문 최대 길이(글자)
 MIN_CHARS = 40        # 이보다 짧은 절은 건너뜀 (제목만 있는 절 등)
 ALLOWED_DIRS = ("PRD/", "report/")
+
+# docs.json 밖에서 함께 넣는 페이지 — 문서 카드 목록(docs.json)에는 나타나지 않음.
+# docs.json 에 없다고 지우는 규칙에서도 제외됨.
+PAGES = [{"id": "homepage", "title": "홈페이지", "file": "index.html"}]
 
 # 임베딩 — 설정은 site-chat 과 공유하는 파일에서 읽음
 EMBED_CONFIG = json.loads((ROOT / "supabase/functions/_shared/embedding.json").read_text(encoding="utf-8"))
@@ -61,6 +66,109 @@ def load_docs():
             sys.exit(f"허용하지 않는 문서 경로: {file}")
         docs.append(d)
     return docs
+
+
+# ---------- 홈페이지 본문 ----------
+
+class PageText(HTMLParser):
+    """index.html 의 <section> 별 본문만 모음.
+
+    빼는 것: script·style·svg·img·header·nav·footer·button, 아이콘 글자(material-symbols),
+    aria-hidden 요소, #docs(docs.json 으로 그리는 동적 영역),
+    'Hero visual' 주석 바로 다음 요소(히어로의 보호자 앱 화면 예시 — 장식용 예시 화면).
+    """
+    SKIP_TAGS = {"script", "style", "svg", "img", "header", "nav", "footer", "button", "noscript", "template"}
+    VOID_TAGS = {"br", "img", "hr", "input", "meta", "link", "source", "wbr"}
+    BLOCK_TAGS = {"p", "div", "li", "ul", "ol", "h1", "h2", "h4", "h5", "h6", "tr", "table",
+                  "figcaption", "blockquote", "dt", "dd"}
+    BREAK = " "   # h3 앞 블록 경계 (조각을 나눌 수 있는 자리)
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack = []
+        self.skip_at = None       # 건너뛰는 요소가 열린 깊이
+        self.skip_next = False
+        self.title_at = None      # 섹션 제목(h1·h2)이 열린 깊이
+        self.sections = []
+        self.cur = None
+
+    def handle_comment(self, data):
+        if "Hero visual" in data:
+            self.skip_next = True
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.VOID_TAGS:
+            if tag == "br" and self.cur is not None and self.skip_at is None:
+                (self.cur["title"] if self.title_at else self.cur["body"]).append(" ")
+            return
+        a = dict(attrs)
+        self.stack.append(tag)
+        if tag == "section":
+            self.cur = {"id": a.get("id"), "title": [], "body": []}
+            self.sections.append(self.cur)
+        if self.cur is None or self.skip_at is not None:
+            return
+        if (self.skip_next or tag in self.SKIP_TAGS or a.get("aria-hidden") == "true"
+                or "material-symbols" in (a.get("class") or "") or self.cur["id"] == "docs"):
+            self.skip_next = False
+            self.skip_at = len(self.stack)
+            return
+        if tag in ("h1", "h2") and not self.cur["title"]:
+            self.title_at = len(self.stack)
+        elif tag == "h3":
+            self.cur["body"].append(self.BREAK)
+        elif tag in self.BLOCK_TAGS:
+            self.cur["body"].append("\n")
+
+    def handle_endtag(self, tag):
+        if tag in self.VOID_TAGS or tag not in self.stack:
+            return
+        while self.stack:
+            depth = len(self.stack)
+            t = self.stack.pop()
+            if self.skip_at is not None and depth <= self.skip_at:
+                self.skip_at = None
+            if self.title_at is not None and depth <= self.title_at:
+                self.title_at = None
+            if t == tag:
+                break
+        if self.cur is not None and self.skip_at is None and tag in self.BLOCK_TAGS | {"h3"}:
+            self.cur["body"].append("\n")
+        if tag == "section":
+            self.cur = None
+
+    def handle_data(self, data):
+        if self.cur is None or self.skip_at is not None:
+            return
+        (self.cur["title"] if self.title_at else self.cur["body"]).append(data)
+
+
+def tidy_block(text):
+    """공백 정리, 빈 줄 제거. 카드의 '무엇을 / 언제 / 왜' 라벨은 다음 줄 값과 한 줄로 합침."""
+    lines = [re.sub(r"\s+", " ", l).strip() for l in text.split("\n")]
+    lines = [l for l in lines if l]
+    out = []
+    for l in lines:
+        if out and out[-1] in ("무엇을", "언제", "왜"):
+            out[-1] = f"{out[-1]}: {l}"
+        else:
+            out.append(l)
+    return "\n".join(out)
+
+
+def page_markdown(page):
+    """홈페이지를 '# 제목 > ## 섹션 제목 > 본문' 형태로 바꿔 문서와 같은 조각 나누기를 씀."""
+    parser = PageText()
+    parser.feed((ROOT / page["file"]).read_text(encoding="utf-8"))
+    parts = [f"# {page['title']}"]
+    for sec in parser.sections:
+        title = re.sub(r"\s+", " ", "".join(sec["title"])).strip()
+        blocks = [tidy_block(b) for b in "".join(sec["body"]).split(PageText.BREAK)]
+        body = "\n\n".join(b for b in blocks if b)
+        if not body:
+            continue
+        parts.append(f"## {title or page['title']}\n\n{body}")
+    return "\n\n".join(parts) + "\n"
 
 
 # ---------- 조각 나누기 ----------
@@ -282,7 +390,7 @@ def ingest(docs, prepared, force):
         print(f"  넣음: {doc['file']} — 조각 {len(chunks)}개")
 
     # docs.json 에서 빠진 문서는 지움 (조각은 on delete cascade)
-    removed = sorted(set(existing) - {d["id"] for d in docs})
+    removed = sorted(set(existing) - {d["id"] for d in docs} - {p["id"] for p in PAGES})
     for doc_id in removed:
         db.call("DELETE", f"site_documents?id=eq.{doc_id}", prefer="return=minimal")
         print(f"  지움 (docs.json 에 없음): {doc_id}")
@@ -307,10 +415,13 @@ def main():
     for doc in docs:
         md = (ROOT / doc["file"]).read_text(encoding="utf-8")
         prepared.append((doc, md, build_chunks(doc, md)))
+    for page in PAGES:
+        md = page_markdown(page)
+        prepared.append((page, md, build_chunks(page, md)))
 
     total = 0
     print(f"임베딩: {EMBED_MODEL}, {EMBED_DIM}차원 (embedding.json)")
-    print(f"문서 {len(docs)}개 (docs.json)")
+    print(f"문서 {len(docs)}개 (docs.json) + 페이지 {len(PAGES)}개 (PAGES)")
     for doc, md, chunks in prepared:
         lens = [len(c["content"]) for c in chunks]
         total += len(chunks)

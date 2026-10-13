@@ -109,6 +109,11 @@ push 전.
 - 홈페이지 챗봇 창(`index.html`): 오른쪽 아래 버튼 → 대화 패널, Enter 전송(Shift+Enter 줄바꿈, 한글 조합 중 Enter 무시), 로딩 표시, 답변 아래 문서 출처 링크(`doc.html?file=…`, 출처 없으면 생략), limited·unavailable·invalid 짧은 안내, Gemini 전송 안내 문구. 서버에는 질문 하나만 보내고 답은 `textContent`로만 넣음. 함수 주소와 publishable 키만 둠.
 - 확인(로컬 서버 8000): 1440px — "카메라 영상이 밖으로 나가나요?" 답 + 출처 3개, 375px(기기 에뮬레이션) — "가격이 얼마예요?" 판매 가격 없음·가정값 구분 답 + 출처 2개. 두 폭 가로 스크롤 없음, 콘솔은 Tailwind CDN 경고뿐.
 
+- **홈페이지 내용 검색(가벼운 방식):** 마이그레이션·`index.html` 수정 없이 넣기 스크립트에 `PAGES`(홈페이지, `index.html`)를 추가. `<section>`별 본문만 뽑고 script·style·svg·header·nav·footer·button·아이콘 글자·aria-hidden·`#docs` 제외, 히어로의 앱 화면 예시는 바로 앞 `Hero visual` 주석 기준으로 제외. 삭제 규칙에서 `PAGES` 제외(docs.json에 없다고 지워지지 않게).
+- site-chat 지시에 "문서와 홈페이지 내용이 다르면 문서를 따른다" 추가 후 재배포(표기 그대로 지시도 함께 반영). 챗봇 창은 `index.html` 출처를 뷰어 대신 그 파일로 바로 연결, 이름은 "홈페이지 · 섹션 제목".
+- 확인: dry-run 홈페이지 조각 18개(전처리·후처리 섹션 5개, 나머지 1개씩), 상태 표시 22개 유지. 실제 넣기(사용자 실행) 후 MCP — 홈페이지 18행, 문서 4개는 건너뜀, 합계 89, 빈 임베딩 0.
+- 챗봇 창(375px)에서 질문 2개: "단정하지 않는 말투가 뭔가요?" → 홈페이지 문구대로 답, 출처에 홈페이지(`index.html`) 포함. "알림은 얼마나 빨리 오나요?" → 목표값 **60초** 이하로 정확히 답(이전 50초 오답 해소), 출처 홈페이지·PRD. 이번 답에는 "아직 측정 전"이 빠짐. 콘솔은 Tailwind CDN 경고뿐.
+
 ### 배운 점
 - 401 + `GRANT … TO anon` 힌트는 키가 공개용(publishable/anon)으로 인식됐다는 뜻이다. RLS·권한 회수가 의도대로 막고 있다는 확인이기도 하다.
 - pgvector가 `extensions` 스키마에 있어 조회에서 `vector_dims`·`<=>`는 스키마를 붙이거나 `search_path`에 `extensions`를 넣어야 한다.

@@ -1,0 +1,7 @@
+# Supabase CLI 설정 — 배포에 필요한 항목만 둠 (로컬 개발 스택은 쓰지 않음)
+project_id = "physicalai-main"
+
+# 홈페이지는 새 publishable 키(JWT 아님)를 apikey 헤더로 보냄.
+# 플랫폼 JWT 검사를 켜면 모든 요청이 401 이 되므로 끄고, Origin·키·요청 횟수는 함수 코드에서 확인함.
+[functions.site-chat]
+verify_jwt = false

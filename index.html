@@ -1239,6 +1239,7 @@ tailwind.config = {
     </div>
     <div id="chat-log" class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3" aria-live="polite"></div>
     <form id="chat-form" class="border-t border-surface-container p-3 flex flex-col gap-2">
+      <div id="chat-quota" class="hidden text-label-sm font-normal text-outline text-right" aria-live="polite"></div>
       <div class="flex items-end gap-2">
         <label for="chat-input" class="sr-only">질문</label>
         <textarea id="chat-input" rows="2" maxlength="300" placeholder="질문을 입력하세요 (Enter로 전송)" class="flex-1 resize-none rounded-xl border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"></textarea>
@@ -1372,7 +1373,8 @@ tailwind.config = {
   var NOTICE = {
     limited: '질문이 많아 잠시 쉬고 있어요. 조금 뒤 다시 시도해 주세요.',
     unavailable: '지금은 답변을 만들 수 없어요. 잠시 뒤 다시 시도해 주세요.',
-    invalid: '질문은 1~300자로 입력해 주세요.'
+    invalid: '질문은 1~300자로 입력해 주세요.',
+    exhausted: '질문 횟수를 모두 사용했어요. 잠시 후 다시 이용해 주세요.'
   };
 
   var toggle = document.getElementById('chat-toggle');
@@ -1382,7 +1384,9 @@ tailwind.config = {
   var form = document.getElementById('chat-form');
   var input = document.getElementById('chat-input');
   var send = document.getElementById('chat-send');
+  var quotaBox = document.getElementById('chat-quota');
   var busy = false;
+  var exhausted = false;
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -1431,6 +1435,30 @@ tailwind.config = {
     scrollDown();
   }
 
+  // 남은 질문 횟수 (최근 24시간, IP별) — 0이 되면 입력창·예시 버튼을 막음
+  function showQuota(data, noticeShown) {
+    if (!data || typeof data.remaining !== 'number' || typeof data.limit !== 'number') return;
+    quotaBox.textContent = '남은 질문 ' + data.remaining + '/' + data.limit;
+    quotaBox.classList.remove('hidden');
+    if (data.remaining > 0 || exhausted) return;
+    exhausted = true;
+    input.disabled = true;
+    send.disabled = true;
+    if (examples) examples.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+    if (!noticeShown) bubble('bot', NOTICE.exhausted);
+  }
+  // 창을 열 때 조회 — 횟수를 쓰지 않음
+  function loadQuota() {
+    fetch(CHAT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': PUBLISHABLE_KEY },
+      body: JSON.stringify({ mode: 'status' })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) { if (!busy) showQuota(data); })
+      .catch(function () {});
+  }
+
   function setOpen(open) {
     panel.classList.toggle('hidden', !open);
     panel.classList.toggle('flex', open);
@@ -1442,7 +1470,8 @@ tailwind.config = {
         bubble('bot', '안녕하세요! 별일없지에 대해 궁금한 점을 물어보세요. 홈페이지와 문서에 있는 내용으로 답해 드려요.');
         showExamples();
       }
-      input.focus();
+      loadQuota();
+      if (!exhausted) input.focus();
     }
   }
 
@@ -1452,9 +1481,10 @@ tailwind.config = {
   function showExamples() {
     examples = el('div', 'self-start flex flex-wrap gap-2 max-w-full');
     EXAMPLES.forEach(function (q) {
-      var b = el('button', 'max-w-full text-left px-3 py-1.5 rounded-full border border-primary/30 bg-surface-container-lowest text-primary text-label-md hover:bg-primary-fixed/40 transition-colors', q);
+      var b = el('button', 'max-w-full text-left px-3 py-1.5 rounded-full border border-primary/30 bg-surface-container-lowest text-primary text-label-md hover:bg-primary-fixed/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed', q);
       b.type = 'button';
-      b.addEventListener('click', function () { if (!busy) ask(q); });
+      b.disabled = exhausted;
+      b.addEventListener('click', function () { if (!busy && !exhausted) ask(q); });
       examples.appendChild(b);
     });
     log.appendChild(examples);
@@ -1475,12 +1505,14 @@ tailwind.config = {
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (data) {
         wait.classList.remove('animate-pulse');
+        var usedUp = data.status === 'limited' && data.remaining === 0;
         if (data.status === 'ok' || data.status === 'no_match') {
           wait.textContent = data.answer || NOTICE.unavailable;
           if (data.status === 'ok') sources(data.sources);
         } else {
-          wait.textContent = NOTICE[data.status] || NOTICE.unavailable;
+          wait.textContent = usedUp ? NOTICE.exhausted : (NOTICE[data.status] || NOTICE.unavailable);
         }
+        showQuota(data, usedUp);
       })
       .catch(function () {
         wait.classList.remove('animate-pulse');
@@ -1488,16 +1520,16 @@ tailwind.config = {
       })
       .then(function () {
         busy = false;
-        send.disabled = false;
+        send.disabled = exhausted;
         scrollDown();
-        input.focus();
+        if (!exhausted) input.focus();
       });
   }
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var q = input.value.trim();
-    if (busy || !q) return;
+    if (busy || exhausted || !q) return;
     if (q.length > 300) { bubble('bot', NOTICE.invalid); return; }
     input.value = '';
     ask(q);

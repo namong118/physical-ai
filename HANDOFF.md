@@ -26,9 +26,9 @@
 | 항목 | 값 |
 |---|---|
 | Supabase 프로젝트 ref | `zerclhuaekfsseriyevp` (챗봇용 실습 프로젝트 하나만, MCP는 `read_only=true`) |
-| 테이블 (`public`, RLS 켬, 정책 없음) | `site_documents`, `site_chunks`, `site_rate_events` |
+| 테이블 (`public`, RLS 켬, 정책 없음) | `site_documents`, `site_chunks`, `site_rate_events`. `site_chunks`: `heading`(제목 경로, 출처 링크용) · `section`(마지막 제목) · `doc_group`(제품/설계·검증/실습/홈페이지), 둘 다 NOT NULL |
 | RPC | `site_match_chunks(query_embedding, match_count, min_similarity)`, `site_check_rate(p_ip_hash, p_per_minute, p_per_day, p_global_per_day)` |
-| 마이그레이션 | `supabase/migrations/20261013000000_site_chat.sql` |
+| 마이그레이션 | `supabase/migrations/20261013000000_site_chat.sql`, `20261014000000`(section·doc_group 추가), `20261014000001`(NOT NULL) |
 | Edge Function | `site-chat` (`supabase/functions/site-chat/index.ts`, `verify_jwt = false`) |
 | 임베딩 | `gemini-embedding-2`, 768차원 — `supabase/functions/_shared/embedding.json` (넣기 스크립트와 함께 씀) |
 | 생성 모델 | `gemini-3.5-flash-lite` — `index.ts`의 `GEN_MODEL` 상수, temperature 0 |
@@ -36,7 +36,7 @@
 | 검색 | `MATCH_COUNT` 5, `MIN_SIMILARITY` 0.5 (0.5 유지로 결정, 문서 밖 판단은 생성 단계 고정 문구에 맡김) |
 | 응답 status | `ok`, `no_match`, `limited`, `unavailable`, `invalid` (+ `{mode:"status"}`은 남은 횟수 `remaining`·`limit`·`next_at`만) |
 | 허용 Origin | `https://namong118.github.io`, `http://localhost:8000` |
-| 넣은 조각 | 문서 5개 + 홈페이지 = 103개 (hardware-parts v1.1 14개 포함) |
+| 넣은 조각 | 문서 5개 + 홈페이지 = 103개 (`CHUNK_VERSION` 2) |
 
 **secret 이름** (값은 어디에도 쓰지 않음)
 - Edge Function: `GEMINI_API_KEY`, `RATE_SALT` (사용자가 대시보드에서 설정), `SUPABASE_URL`·`SUPABASE_SECRET_KEYS`·`SUPABASE_PUBLISHABLE_KEYS` (기본 제공)
@@ -75,6 +75,8 @@ python -m http.server 8000
 - **하드웨어:** 확인 필요로 남긴 전류(Pi 5 추론 부하, Active Cooler, Camera Module 3, ESP32-S3 보드 전체), 웹캠·IR LED 제품 선정, ESP32 대수(위치당/센서당) 결정, MC-38 GPIO5 배선·펌웨어
 - **개념도:** 부품이 바뀌면 `images/hardware/parts-overview.webp` 다시 만들기 — 기준은 문서와 상세 배선도
 - **안전 검토 (기획 단계):** 최악의 경우, 힘·속도·무게 최소화, 안전한 상태 정의, 예상 밖의 사용자, 대책 순서(없앤다 → 막는다 → 알린다) — 검토 예정
+- **챗봇 DB 확장:** 섹션 단위 테이블(site_sections)과 섹션 전체를 답변 근거로 넘기는 방식 — 피드백 제공자 확인 후 검토
+- **넣기 스크립트:** 전체 다시 넣기 때 Gemini 임베딩 무료 한도(100건)에 걸림 — 429 때 1분 기다렸다 재시도 또는 문서 사이 쉬기
 - **챗봇:** 응답에서 `top_similarity` 빼기(아직 응답에 있음)
 - **챗봇 지시:** 절감액 답의 "가정" 표시 보완(보류 중), "알림은 얼마나 빨리 오나요?" 답에서 "아직 측정 전"이 빠지는 문제
 - **챗봇:** `gemini-3.5-flash-lite` 무료 한도 수치 확인 (AI Studio)

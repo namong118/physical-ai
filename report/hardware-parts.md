@@ -42,11 +42,15 @@
 
 ![별일없지 부품 관계도 개념도 — 거실·주방, 침실, 현관·화장실의 부품 역할과 연결, Wi-Fi로 공유기·Cloudflare Worker·가족 앱까지 이어지는 흐름](../images/hardware/parts-overview.webp)
 
+[원본 크기로 보기](../images/hardware/parts-overview.webp)
+
 - 부품마다 역할을 쉬운 말로 적은 개념도입니다. **부품 모양은 예시**이며, 정확한 배선과 사양은 아래 상세 배선도와 이 문서의 표를 기준으로 합니다.
 
 ### 상세 배선
 
 ![별일없지 하드웨어 부품 관계도 상세 — 거실·주방 Edge, 침실 Edge, 현관·화장실 센서 허브의 전원·유선·접지·무선 연결과 참고 사항](../images/hardware/parts-diagram.svg)
+
+[원본 크기로 보기](../images/hardware/parts-diagram.svg)
 
 - **선 읽는 법:** 빨강 실선은 전원, 파랑 실선은 유선 연결(USB·CSI-2·GPIO·PWM), 회색 실선은 접지(GND), 파랑 점선은 무선(Wi-Fi), 회색 점선은 아직 정하지 않은 연결입니다. 점선 상자는 미정·후보·로드맵 부품입니다.
 
@@ -55,9 +59,9 @@
 | 묶음 | 두뇌 | 연결된 부품 (연결 방식) | 전원 |
 |---|---|---|---|
 | Edge #1 · 거실·주방 | Raspberry Pi 5 | USB 웹캠 (USB 2.0 UVC), Active Cooler (PWM·타코미터) | 27W 어댑터 #1 → 5V-A |
-| Edge #2 · 침실 | Raspberry Pi 5 | Camera Module 3 NoIR (MIPI CSI-2·I2C), Active Cooler (PWM·타코미터), IR LED 850nm (GPIO → MOSFET, 가정 · 제품 미정) | 27W 어댑터 #2 → 5V-B |
+| Edge #2 · 침실 | Raspberry Pi 5 | Camera Module 3 NoIR (MIPI CSI-2·I2C), Active Cooler (PWM·타코미터), IR LED 850nm (상시 점등형 또는 GPIO → MOSFET, 가정 · 제품 미정) | 27W 어댑터 #2 → 5V-B (IR LED가 수백 mA급이면 별도 공급 검토) |
 | 센서 허브 · 현관·화장실 | ESP32-S3 DevKitC-1 (대수 미정) | HC-SR501 PIR (VCC ← 5V 핀, OUT → GPIO4, GND 공통 · 실물 검증), MC-38 도어 센서 (GPIO5 후보 · INPUT_PULLUP, GND · 펌웨어 미구현) | 5V USB 어댑터 1A 이상 (가정) → 5V-C |
-| 집 밖 | — | 세 묶음 → Wi-Fi 2.4GHz 공유기 → HTTPS(JSON) → Cloudflare Worker → 가족 앱. 스마트워치는 BLE → 스마트폰 → Health Connect → 앱 (로드맵 4단계) | — |
+| 집 밖 | — | 세 묶음 → 공유기 (ESP32 때문에 2.4GHz 지원 필요) → HTTPS(JSON) → Cloudflare Worker → 가족 앱. 스마트워치는 BLE → 스마트폰 → Health Connect → 앱 (로드맵 4단계) | — |
 
 - 영상은 집 밖으로 보내지 않고 상태 전환 이벤트만 보냅니다. ESP32는 10분마다 heartbeat도 보냅니다.
 - 개념도는 AI로 만든 그림이라 부품이 바뀌면 다시 만들어야 합니다. 내용이 다를 때는 이 문서와 상세 배선도를 기준으로 합니다.
@@ -137,7 +141,7 @@
 | 웹캠 → Pi #1 | 선 (USB 2.0 UVC) | 저가, 드라이버 호환성 |
 | NoIR 카메라 → Pi #2 | 선 (MIPI CSI-2) | 영상은 데이터가 큼, IR 대응 |
 | ESP32 → Cloudflare Worker | Wi-Fi 2.4GHz + HTTPS(JSON), 디바이스 키 | 이벤트와 10분 주기 heartbeat만 전송 |
-| Pi → 클라우드 | Wi-Fi + HTTPS(JSON) | 영상은 보내지 않고 상태 전환 이벤트만 전송 |
+| Pi → 클라우드 (Cloudflare Worker, PRD 로드맵 1단계) | Wi-Fi + HTTPS(JSON) | 영상은 보내지 않고 상태 전환 이벤트만 전송 |
 | 스마트워치 → 앱 | BLE → 스마트폰 → Health Connect | 집 밖 걸음 활동만 사용 |
 | 이더넷 | 선택 | 고정 설치라 가능하지만, 설치 편의상 Wi-Fi가 기본 |
 

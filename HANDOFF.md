@@ -18,7 +18,7 @@
 | prd | `PRD/PRD.md` (+ `PRD_v1.2.docx`) | v1.2 · 2026-10-07 | 확정 |
 | vision-preprocessing-design | `report/vision-preprocessing-design.md` | v1.1 · 2026-10-07 | 진행 중 |
 | model-training-validation | `report/model-training-validation.md` | v1.1 · 2026-10-12 | 계획 |
-| hardware-parts | `report/hardware-parts.md` | v1.0 · 2026-10-14 | 진행 중 |
+| hardware-parts | `report/hardware-parts.md` (+ `images/hardware/` 개념도·상세 배선도) | v1.1 · 2026-10-14 | 진행 중 |
 | vision-models-practice | `report/vision-models-practice.md` | v1.0 · 2026-10-12 | 확정 |
 
 **챗봇 구성**
@@ -36,7 +36,7 @@
 | 검색 | `MATCH_COUNT` 5, `MIN_SIMILARITY` 0.5 (0.5 유지로 결정, 문서 밖 판단은 생성 단계 고정 문구에 맡김) |
 | 응답 status | `ok`, `no_match`, `limited`, `unavailable`, `invalid` (+ `{mode:"status"}`은 남은 횟수 `remaining`·`limit`·`next_at`만) |
 | 허용 Origin | `https://namong118.github.io`, `http://localhost:8000` |
-| 넣은 조각 | 문서 5개 + 홈페이지 = 99개 |
+| 넣은 조각 | 문서 5개 + 홈페이지 = 99개 (hardware-parts v1.1 넣기 전. dry-run 기준 넣은 뒤 103개) |
 
 **secret 이름** (값은 어디에도 쓰지 않음)
 - Edge Function: `GEMINI_API_KEY`, `RATE_SALT` (사용자가 대시보드에서 설정), `SUPABASE_URL`·`SUPABASE_SECRET_KEYS`·`SUPABASE_PUBLISHABLE_KEYS` (기본 제공)
@@ -73,6 +73,10 @@ python -m http.server 8000
 - **비전 코드:** 사람 선택을 ByteTrack(Supervision)으로 교체
 - **보조 모델 검토 (직접 촬영 영상):** YOLOE로 Zone 초안, SigLIP으로 약점 장면 검색, SAM 3로 라벨 초안
 - **하드웨어:** 확인 필요로 남긴 전류(Pi 5 추론 부하, Active Cooler, Camera Module 3, ESP32-S3 보드 전체), 웹캠·IR LED 제품 선정, ESP32 대수(위치당/센서당) 결정, MC-38 GPIO5 배선·펌웨어
+- **하드웨어 v1.1 넣기:** `python scripts/ingest_docs.py` 실행 후 조각 수 확인 (사용자 실행)
+- **개념도:** 부품이 바뀌면 `images/hardware/parts-overview.webp` 다시 만들기 — 기준은 문서와 상세 배선도
+- **연결 요약 표 검토:** 1~4장과 다른 표기(IR LED 제어 방법, Pi → Cloudflare Worker)
+- **안전 검토 (기획 단계):** 최악의 경우, 힘·속도·무게 최소화, 안전한 상태 정의, 예상 밖의 사용자, 대책 순서(없앤다 → 막는다 → 알린다) — 검토 예정
 - **챗봇:** 응답에서 `top_similarity` 빼기(아직 응답에 있음)
 - **챗봇 지시:** 절감액 답의 "가정" 표시 보완(보류 중), "알림은 얼마나 빨리 오나요?" 답에서 "아직 측정 전"이 빠지는 문제
 - **챗봇:** `gemini-3.5-flash-lite` 무료 한도 수치 확인 (AI Studio)

@@ -31,14 +31,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 # 조각 나누기 설정 — 바꾸면 모든 문서의 content_hash 가 바뀌어 다시 들어갑니다
-CHUNK_VERSION = "1"
+# 2: 조각 행에 section(마지막 제목)·doc_group(문서 분야) 추가
+CHUNK_VERSION = "2"
 MAX_CHARS = 1200      # 조각 본문 최대 길이(글자)
 MIN_CHARS = 40        # 이보다 짧은 절은 건너뜀 (제목만 있는 절 등)
 ALLOWED_DIRS = ("PRD/", "report/")
 
 # docs.json 밖에서 함께 넣는 페이지 — 문서 카드 목록(docs.json)에는 나타나지 않음.
 # docs.json 에 없다고 지우는 규칙에서도 제외됨.
-PAGES = [{"id": "homepage", "title": "홈페이지", "file": "index.html"}]
+PAGES = [{"id": "homepage", "title": "홈페이지", "file": "index.html", "group": "홈페이지"}]
 
 # 임베딩 — 설정은 site-chat 과 공유하는 파일에서 읽음
 EMBED_CONFIG = json.loads((ROOT / "supabase/functions/_shared/embedding.json").read_text(encoding="utf-8"))
@@ -180,7 +181,7 @@ def plain_heading(text):
 
 
 def split_sections(md):
-    """제목 기준으로 (제목 경로, 본문) 목록을 만듦. 코드 블록 안의 # 줄은 제목으로 보지 않음."""
+    """제목 기준으로 (제목 경로, 마지막 제목, 본문) 목록을 만듦. 코드 블록 안의 # 줄은 제목으로 보지 않음."""
     sections = []
     path = []          # [(level, title)]
     buf = []
@@ -189,7 +190,7 @@ def split_sections(md):
     def flush():
         body = "\n".join(buf).strip()
         if body:
-            sections.append((" > ".join(t for _, t in path), body))
+            sections.append((" > ".join(t for _, t in path), path[-1][1] if path else "", body))
         buf.clear()
 
     for line in md.splitlines():
@@ -264,11 +265,12 @@ def chunk_section(body):
 
 def build_chunks(doc, md):
     out = []
-    for heading, body in split_sections(md):
+    for heading, section, body in split_sections(md):
         if len(body) < MIN_CHARS:
             continue
         for text in chunk_section(body):
-            out.append({"heading": heading or doc["title"], "content": text})
+            out.append({"heading": heading or doc["title"], "section": section or doc["title"],
+                        "doc_group": doc["group"], "content": text})
     for i, c in enumerate(out):
         c["chunk_index"] = i
     return out
@@ -376,17 +378,20 @@ def ingest(docs, prepared, force):
             print(f"  건너뜀 (바뀌지 않음): {doc['file']}")
             continue
         vectors = embed([embed_text(doc, c) for c in chunks])
+        # 해시는 조각을 모두 넣은 뒤에 기록함. 중간에 실패하면 빈 해시로 남아 다음 실행에서 다시 넣음
         db.call("POST", "site_documents?on_conflict=id", [{
             "id": doc["id"], "title": doc["title"], "file": doc["file"],
             "version": doc.get("version"), "doc_date": doc.get("date"),
-            "content_hash": h, "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "content_hash": "", "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }], prefer="resolution=merge-duplicates,return=minimal")
         db.call("DELETE", f"site_chunks?document_id=eq.{doc['id']}", prefer="return=minimal")
         db.call("POST", "site_chunks", [
             {"document_id": doc["id"], "chunk_index": c["chunk_index"], "heading": c["heading"],
+             "section": c["section"], "doc_group": c["doc_group"],
              "content": c["content"], "embedding": "[" + ",".join(f"{x:.7f}" for x in v) + "]"}
             for c, v in zip(chunks, vectors)
         ], prefer="return=minimal")
+        db.call("PATCH", f"site_documents?id=eq.{doc['id']}", {"content_hash": h}, prefer="return=minimal")
         print(f"  넣음: {doc['file']} — 조각 {len(chunks)}개")
 
     # docs.json 에서 빠진 문서는 지움 (조각은 on delete cascade)
@@ -428,7 +433,7 @@ def main():
         print(f"- {doc['file']}  조각 {len(chunks)}개, 글자 수 최소 {min(lens)} / 평균 {sum(lens) // len(lens)} / 최대 {max(lens)}")
         for c in chunks[:args.show] if args.dry_run else []:
             preview = c["content"][:160].replace("\n", " ⏎ ")
-            print(f"    [{c['chunk_index']}] {c['heading']}\n        {preview}")
+            print(f"    [{c['chunk_index']}] {c['heading']}\n        section: {c['section']} · group: {c['doc_group']}\n        {preview}")
     print(f"조각 합계 {total}개")
 
     if args.dry_run:

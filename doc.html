@@ -164,6 +164,8 @@ tailwind.config = {
 (function () {
   // 뷰어가 열 수 있는 문서: 레포의 PRD/, report/ 아래 .md 만
   var ALLOWED = /^(PRD|report)\/[^\\:?#]+\.md$/i;
+  // 문서 안 링크가 레포 이미지를 가리키면 새 탭에서 원본으로 엶 (같은 출처라 레포 SVG에 script를 넣지 않음)
+  var IMAGE_FILE = /\.(png|jpe?g|webp|svg|gif)$/i;
   var article = document.getElementById('doc');
   var siteRoot = new URL('./', location.href);   // doc.html 이 있는 레포 루트
 
@@ -217,6 +219,10 @@ tailwind.config = {
       }
       if (isAllowed(rel)) {                                     // 다른 문서 → 뷰어 안에서
         a.setAttribute('href', 'doc.html?file=' + encodeURIComponent(rel).replace(/%2F/g, '/') + abs.hash);
+      } else if (IMAGE_FILE.test(rel)) {                        // 레포 이미지 → 새 탭에서 원본
+        a.setAttribute('href', rel + abs.hash);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
       } else {                                                  // docx 등 → 파일 그대로
         a.setAttribute('href', rel + abs.hash);
         if (!/\.html?$/i.test(rel)) a.setAttribute('download', '');

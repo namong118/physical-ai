@@ -1,7 +1,7 @@
 # 별일없지 — Physical AI 생활안심 시스템 PRD
 
-> 문서 버전 **v1.2** · 작성일 2026-10-07
-> Word 버전: [PRD_v1.2.docx](PRD_v1.2.docx) · 관련 문서: [Vision 전처리·후처리 설계](../report/vision-preprocessing-design.md)
+> 문서 버전 **v1.3** · 작성일 2026-10-15
+> Word 버전: [PRD_v1.2.docx](PRD_v1.2.docx) (v1.2 기준 — v1.3 변경은 반영 전) · 관련 문서: [Vision 전처리·후처리 설계](../report/vision-preprocessing-design.md) · [추론 엔진 선택](../report/inference-engine-selection.md)
 
 > 본 문서는 **제품 기준 PRD**이며, 최종 목표 구조와 단계별 로드맵을 함께 정의합니다. 4주 개인 PoC는 로드맵의 **1단계(거실·주방 카메라 + 앱 연동)**만 검증합니다(5.3 참고).
 > 주요 출력(행동)은 **보호자 앱의 상태·Timeline 표시와 푸시 알림**입니다.
@@ -13,6 +13,7 @@
 | v1.0 | 2026-10-06 | 최초 작성 |
 | v1.1 | 2026-10-07 | 최종 목표 구조 추가(공간별 장치 배치, Cloud 재실 위치 통합), 카메라 판단을 "위치(Zone) + 자세" 두 축으로 재정의, 주방 활동·식탁 체류 추가, 스마트워치를 선택 장치로 추가, 공통 이벤트 형식 정의, 4단계 로드맵으로 범위 재구성 |
 | v1.2 | 2026-10-07 | 작성 과정에서 가정으로 추가했던 내용 정리: 야간 동선 조명 제어 삭제, 페르소나 세부 설정(나이·보호자 신상) 삭제, 돌봄 기관·생활지원사는 ROI 도입 가정과 로드맵의 운영자 대시보드로 한정. 스마트워치를 집 밖 케어 장치(로드맵 4단계)로 정리하고 원칙을 "집 안은 착용 없이, 집 밖은 워치로"로 변경 |
+| v1.3 | 2026-10-15 | Edge 추론 엔진을 ONNX Runtime에서 NCNN으로 변경(ONNX Runtime은 전환 후보). Ultralytics 공개 벤치마크와 공식 문서 조사 기반 선택, Raspberry Pi 실측 전 ([추론 엔진 선택](../report/inference-engine-selection.md)) |
 
 ---
 
@@ -142,8 +143,8 @@
 | 센서 | HC-SR501 PIR, MC-38 마그네틱 도어 센서 | 현관·화장실은 카메라 없이 출입과 체류 판단 가능. 저가이며 검증된 부품 |
 | 웨어러블 (로드맵 4단계) | 스마트워치 (예: Galaxy Watch). 1차: Android Health Connect로 걸음 수 연동, 2차: 자체 Wear OS 앱 검토 | 집 밖 활동 신호 담당. 실시간 위치 대신 외출 시간·걸음 활동만 사용하고, 집 안 판단은 워치 없이 동작하도록 설계 |
 | MCU | ESP32-S3 | Wi-Fi 내장, 기존 PIR 펌웨어와 heartbeat 구조를 재사용 |
-| Edge AI 장치 | Raspberry Pi 5 (8GB) (가정) | 산업 PoC에서 많이 쓰는 ARM SBC. Python·OpenCV·ONNX 생태계 지원 |
-| 사람 검출 | YOLO nano급 모델 (ONNX Runtime) | 경량, 사전학습 person 클래스 바로 사용. ⚠️ Ultralytics YOLO는 AGPL-3.0이므로 상용 시 기업 라이선스 필요 |
+| Edge AI 장치 | Raspberry Pi 5 (8GB) (가정) | 산업 PoC에서 많이 쓰는 ARM SBC. Python·OpenCV 지원, YOLO 내보내기 형식(NCNN·ONNX 등)을 Pi 5에서 실행할 수 있음 |
+| 사람 검출 | YOLO nano급 모델 (추론 엔진: NCNN, 전환 후보 ONNX Runtime) | 경량, 사전학습 person 클래스 바로 사용. 엔진은 Ultralytics 공개 벤치마크 기준 Pi 5에서 가장 빠른 NCNN을 선택 (문서 조사 기반, Raspberry Pi 실측 전). ⚠️ Ultralytics YOLO는 AGPL-3.0이므로 상용 시 기업 라이선스 필요 (ncnn 런타임은 BSD-3이지만 모델·가중치는 AGPL 적용) |
 | 자세 추정 | MediaPipe Pose (사람 영역 crop 후 적용) | CPU 실시간 동작, 별도 학습 불필요. 광각 화면에서 작게 잡히는 사람의 관절 정확도를 crop으로 보완 |
 | 위치 판정 | 다각형 Zone 설정 + 발 위치 판정 (OpenCV `pointPolygonTest`) | 고정 카메라에서는 설치 시 1회 지정한 Zone이 자동 공간 인식보다 정확하고 설명 가능 |
 | 행동 판단 | 규칙 기반 상태 머신 (위치 + 자세 + 체류 시간 + 히스테리시스) | 학습 데이터 없이 동작하고, 판단 근거를 설명할 수 있음. 실데이터 축적 후 경량 분류기로 교체 검토 |

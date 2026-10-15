@@ -10,11 +10,11 @@
       "title": "PRD",
       "description": "문제 정의, 사용자 시나리오, 성공 지표, 기술 스택, 개발 범위·로드맵, ROI",
       "file": "PRD/PRD.md",
-      "version": "v1.2",
-      "date": "2026-10-07",
+      "version": "v1.3",
+      "date": "2026-10-15",
       "status": "확정",
       "downloads": [
-        { "label": "Word 다운로드", "file": "PRD/PRD_v1.2.docx" }
+        { "label": "Word 다운로드 (v1.2 기준)", "file": "PRD/PRD_v1.2.docx" }
       ]
     },
     {

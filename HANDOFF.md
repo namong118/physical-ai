@@ -17,7 +17,7 @@
 
 | id | 파일 | 버전 · 날짜 | 상태 |
 |---|---|---|---|
-| prd | `PRD/PRD.md` (+ `PRD_v1.2.docx`, Word는 v1.2 기준) | v1.3 · 2026-10-15 | 확정 |
+| prd | `PRD/PRD.md` (+ `PRD_v1.2.docx`, Word는 v1.2 기준. 홈페이지 다운로드 버튼은 2026-10-15 삭제, PRD 첫머리 링크만 남음) | v1.3 · 2026-10-15 | 확정 |
 | vision-preprocessing-design | `report/vision-preprocessing-design.md` | v1.1 · 2026-10-07 | 진행 중 |
 | model-training-validation | `report/model-training-validation.md` | v1.1 · 2026-10-12 | 계획 |
 | hardware-parts | `report/hardware-parts.md` (+ `images/hardware/` 개념도·상세 배선도) | v1.1 · 2026-10-14 | 진행 중 |
@@ -103,7 +103,7 @@ python -m http.server 8000
 - **보조 모델 검토 (직접 촬영 영상):** YOLOE로 Zone 초안, SigLIP으로 약점 장면 검색, SAM 3로 라벨 초안
 - **하드웨어:** 웹캠·IR LED 제품 선정, ESP32 대수(위치당/센서당) 결정, MC-38 GPIO5 배선·펌웨어
 - **홈페이지:** 히어로 배지 "영상 외부 전송 0건"이 측정값처럼 읽힐 수 있음 — 문구 검토
-- **배포 확인:** 배포 주소에서 메뉴·문서 모음·뷰어 직접 확인 — 특히 2026-10-15 반영분(`#tech` 추론 엔진 줄, `#docs` 새 문서·PRD v1.3·"Word 다운로드 (v1.2 기준)"). 768~1023px 구간, 실제 노트북 배율(125%·150%)과 실제 휴대폰
+- **배포 확인:** 배포 주소에서 메뉴·문서 모음·뷰어 직접 확인 — 특히 2026-10-15 반영분(`#tech` 추론 엔진 줄, `#docs` 새 문서·PRD v1.3, PRD 다운로드 버튼 없음). 768~1023px 구간, 실제 노트북 배율(125%·150%)과 실제 휴대폰
 - **정리 결정:** 미추적 파일 `code/`(`byeol_edge_vision (1).zip`), `report/checklist.md`, `report/preprocess.md`
 
 ## 5. 새 세션 시작 방법

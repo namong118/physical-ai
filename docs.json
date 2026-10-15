@@ -13,9 +13,7 @@
       "version": "v1.3",
       "date": "2026-10-15",
       "status": "확정",
-      "downloads": [
-        { "label": "Word 다운로드 (v1.2 기준)", "file": "PRD/PRD_v1.2.docx" }
-      ]
+      "downloads": []
     },
     {
       "id": "vision-preprocessing-design",

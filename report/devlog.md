@@ -15,6 +15,7 @@
 - 진행: 조사 보고 → 결론·반영 순서 승인 → torch 의존성 확인·PRD 수정안 보고 → B안 승인 → 구현.
 - 측정은 하지 않음(Raspberry Pi 없음, 노트북 측정도 이번에는 안 함). 속도 수치는 모두 Ultralytics 공식 Raspberry Pi 가이드의 출처 기준 값(YOLO26n, FP32, 640, 8.4.108, 전처리·후처리 제외).
 - 실행 경로: 첫 실측은 Ultralytics 경로, 무거움(torch 등 필수 의존성)이 확인되면 ncnn 직접 경로로 전환 — 승인됨.
+- 후속 수정(push 전이라 v1.0 유지): 모델과 엔진은 별개 결정임을 명시, 5.1 개발 단계 전략(PC는 `.pt`로 개발 → Pi에서 같은 `.pt`의 NCNN·ONNX Runtime 비교, ncnn Windows x86_64 휠 있음·Ultralytics NCNN의 Windows 동작은 확인 필요), 전환 조건·검증 표에 parity check, 3.6 CPU가 부족할 때(해상도·분석 빈도·경량 모델·AI HAT NPU — Ultralytics Hailo 내보내기는 YOLO26-pose 미지원). dry-run 조각 120 → 124개.
 
 ### 확인한 것
 

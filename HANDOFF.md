@@ -37,7 +37,7 @@
 | 검색 | `MATCH_COUNT` 5, `MIN_SIMILARITY` 0.5 (0.5 유지로 결정, 문서 밖 판단은 생성 단계 고정 문구에 맡김) |
 | 응답 status | `ok`, `no_match`, `limited`, `unavailable`, `invalid` (+ `{mode:"status"}`은 남은 횟수 `remaining`·`limit`·`next_at`만) |
 | 허용 Origin | `https://namong118.github.io`, `http://localhost:8000` |
-| 넣은 조각 | 문서 5개 + 홈페이지 = 103개 (`CHUNK_VERSION` 2). 새 문서 추가 후 dry-run 120개 — 넣기 전 |
+| 넣은 조각 | 문서 5개 + 홈페이지 = 103개 (`CHUNK_VERSION` 2). 새 문서 추가 후 dry-run 124개 — 넣기 전 |
 
 **secret 이름** (값은 어디에도 쓰지 않음)
 - Edge Function: `GEMINI_API_KEY`, `RATE_SALT` (사용자가 대시보드에서 설정), `SUPABASE_URL`·`SUPABASE_SECRET_KEYS`·`SUPABASE_PUBLISHABLE_KEYS` (기본 제공)

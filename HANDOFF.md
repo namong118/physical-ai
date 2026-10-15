@@ -1,6 +1,6 @@
 # HANDOFF — 새 세션 인수인계
 
-> 기준일 2026-10-14. 작업을 마칠 때 "현재 상태"와 "남은 일"을 갱신합니다.
+> 기준일 2026-10-15. 작업을 마칠 때 "현재 상태"와 "남은 일"을 갱신합니다.
 
 ## 1. 프로젝트와 레포 역할
 - **별일없지:** 혼자 사시는 부모님 댁의 Edge AI 카메라·생활센서가 생활 리듬을 읽고, 가족에게는 영상 대신 생활 신호만 보내는 생활안심 시스템.
@@ -15,10 +15,11 @@
 
 | id | 파일 | 버전 · 날짜 | 상태 |
 |---|---|---|---|
-| prd | `PRD/PRD.md` (+ `PRD_v1.2.docx`) | v1.2 · 2026-10-07 | 확정 |
+| prd | `PRD/PRD.md` (+ `PRD_v1.2.docx`, Word는 v1.2 기준) | v1.3 · 2026-10-15 | 확정 |
 | vision-preprocessing-design | `report/vision-preprocessing-design.md` | v1.1 · 2026-10-07 | 진행 중 |
 | model-training-validation | `report/model-training-validation.md` | v1.1 · 2026-10-12 | 계획 |
 | hardware-parts | `report/hardware-parts.md` (+ `images/hardware/` 개념도·상세 배선도) | v1.1 · 2026-10-14 | 진행 중 |
+| inference-engine-selection | `report/inference-engine-selection.md` (NCNN 1순위, ONNX Runtime 2순위, 문서 조사 기반·Pi 실측 전) | v1.0 · 2026-10-15 | 계획 |
 | vision-models-practice | `report/vision-models-practice.md` | v1.0 · 2026-10-12 | 확정 |
 
 **챗봇 구성**
@@ -36,7 +37,7 @@
 | 검색 | `MATCH_COUNT` 5, `MIN_SIMILARITY` 0.5 (0.5 유지로 결정, 문서 밖 판단은 생성 단계 고정 문구에 맡김) |
 | 응답 status | `ok`, `no_match`, `limited`, `unavailable`, `invalid` (+ `{mode:"status"}`은 남은 횟수 `remaining`·`limit`·`next_at`만) |
 | 허용 Origin | `https://namong118.github.io`, `http://localhost:8000` |
-| 넣은 조각 | 문서 5개 + 홈페이지 = 103개 (`CHUNK_VERSION` 2) |
+| 넣은 조각 | 문서 5개 + 홈페이지 = 103개 (`CHUNK_VERSION` 2). 새 문서 추가 후 dry-run 120개 — 넣기 전 |
 
 **secret 이름** (값은 어디에도 쓰지 않음)
 - Edge Function: `GEMINI_API_KEY`, `RATE_SALT` (사용자가 대시보드에서 설정), `SUPABASE_URL`·`SUPABASE_SECRET_KEYS`·`SUPABASE_PUBLISHABLE_KEYS` (기본 제공)
@@ -70,6 +71,11 @@ python -m http.server 8000
 - **비전 실측:** 시나리오 녹화 → 라벨링 → 사전학습 모델 기준선 측정 → 파인튜닝 여부 결정 (모델 계획 문서 순서)
 - **비전 비교:** 실제 영상으로 단계별 on/off 비교, Raspberry Pi FPS 측정 → 홈페이지 "실측 전" 항목과 문서 결과표에 반영
 - **비전 비교:** YOLO + MediaPipe vs YOLO-pose 단독, 같은 영상으로 정확도·FPS 비교
+- **추론 엔진 실측:** Pi 5에서 같은 모델로 NCNN·ONNX Runtime FPS 비교(추론만 + 전처리·후처리 포함 전체), 구성 A/B별 — `report/inference-engine-selection.md` 5장. Ultralytics 경로로 먼저, 무거우면 ncnn 직접 경로. x86 노트북 결과로 대신하지 않음
+- **넣기 (사용자 실행):** 추론 엔진 문서·PRD v1.3·홈페이지 변경 넣기 → 챗봇 확인
+- **PRD Word:** PRD Word 파일을 v1.3 이후 내용으로 갱신 (다음 큰 개정 때)
+- **기존 불일치 (이번에 안 고침):** 모델 문서 4.7 처리 속도 측정 방법 "노트북 실측"이 "x86 결과는 Pi를 대신할 수 없음"(추론 엔진 문서 5장)과 어긋남 / PRD 4장 자세 추정 행과 홈페이지 TIER 02가 MediaPipe Pose를 확정처럼 표기하나 모델 문서는 A/B 비교 중
+- **PRD 표기:** 7행 `**1단계(…)**만`이 뷰어에서 굵게 처리되지 않음 (닫는 `**` 앞 괄호 + 뒤 한글)
 - **비전 코드:** 사람 선택을 ByteTrack(Supervision)으로 교체
 - **보조 모델 검토 (직접 촬영 영상):** YOLOE로 Zone 초안, SigLIP으로 약점 장면 검색, SAM 3로 라벨 초안
 - **하드웨어:** 확인 필요로 남긴 전류(Pi 5 추론 부하, Active Cooler, Camera Module 3, ESP32-S3 보드 전체), 웹캠·IR LED 제품 선정, ESP32 대수(위치당/센서당) 결정, MC-38 GPIO5 배선·펌웨어

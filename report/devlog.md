@@ -2,6 +2,47 @@
 
 ---
 
+## 2026-10-15 — Edge 추론 엔진 선택 (문서 조사, Pi 실측 전)
+
+### 오늘 한 일
+
+| 커밋 | 내용 |
+|---|---|
+| `db2abd9` | 새 문서 `report/inference-engine-selection.md` v1.0 — ONNX Runtime·NCNN·OpenVINO·LiteRT 비교, NCNN 1순위·ONNX Runtime 2순위, 전환 조건, Pi 검증 계획. `docs.json` 설계·검증에 등록 |
+| `1b49c7e` | PRD v1.3 — 4장 사람 검출 엔진을 NCNN으로(ONNX Runtime 전환 후보), 변경 이력 행. Word 파일은 v1.2 기준으로 두고 첫머리·다운로드 이름에 표시(B안) |
+| `24a5850` | 홈페이지 `#tech` — TIER 02 "YOLO nano급 사람 검출 (NCNN · Pi 실측 전)", 카드 아래 추론 엔진 요약과 문서 링크 |
+
+- 진행: 조사 보고 → 결론·반영 순서 승인 → torch 의존성 확인·PRD 수정안 보고 → B안 승인 → 구현.
+- 측정은 하지 않음(Raspberry Pi 없음, 노트북 측정도 이번에는 안 함). 속도 수치는 모두 Ultralytics 공식 Raspberry Pi 가이드의 출처 기준 값(YOLO26n, FP32, 640, 8.4.108, 전처리·후처리 제외).
+- 실행 경로: 첫 실측은 Ultralytics 경로, 무거움(torch 등 필수 의존성)이 확인되면 ncnn 직접 경로로 전환 — 승인됨.
+
+### 확인한 것
+
+- 뷰어: 새 문서·PRD의 목차·표 렌더링. 새 문서에서 `**…(출처 기준)**이며`가 굵게 처리되지 않아 문구를 바꿈
+- 홈페이지·뷰어 1440 · 1024 · 375px(기기 에뮬레이션) 가로 스크롤 없음, 콘솔은 Tailwind CDN 경고만
+- 홈페이지 `#docs`에 새 문서(v1.0 · 2026-10-15), PRD v1.3, "Word 다운로드 (v1.2 기준)" 표시
+- 금지 단어 0건 (CLAUDE.md 규칙 문장과 site-chat 지시 제외)
+- `python scripts/ingest_docs.py --dry-run`: 문서 6개 + 홈페이지, 조각 합계 120개 (새 문서 17개)
+- 넣기는 아직 하지 않음 (사용자 실행)
+
+### 배운 점
+
+- 공개 벤치마크(Pi 5)에서 엔진 차이가 큼: NCNN 67 ms, OpenVINO 105 ms, LiteRT 123 ms, ONNX Runtime 126 ms (출처 기준, 추론만).
+- OpenVINO는 Arm에서 INT8을 시뮬레이션 모드로 실행하고, LiteRT는 Pi에서 YOLO를 내보낼 수 없음.
+- MediaPipe는 내부에서 TFLite를 쓰므로 후보 A(YOLO + MediaPipe)는 엔진 2개가 함께 돎.
+- Ultralytics 패키지는 필수 의존성에 torch가 있어 NCNN 모델도 Ultralytics로 실행하면 torch가 필요함. AGPL-3.0은 모델·가중치에도 적용돼 엔진 선택과 무관한 별도 과제.
+- CommonMark에서 닫는 `**` 앞이 괄호 같은 문장부호이고 뒤가 한글이면 굵게 처리되지 않음.
+
+### 남은 일
+
+- 넣기(사용자 실행) 후 챗봇 확인 질문 2개
+- Pi 5에서 엔진별 FPS 실측 (문서 5장)
+- PRD Word 파일을 v1.3 이후 내용으로 갱신 (다음 큰 개정 때)
+- 기존 불일치 2건(모델 문서 4.7 "노트북 실측", MediaPipe Pose 확정 표기) — 이번에는 고치지 않음
+- PRD 7행 `**1단계(…)**만`이 뷰어에서 굵게 처리되지 않음 (기존 문제, 이번에 발견)
+
+---
+
 ## 2026-10-14 (2) — 챗봇 DB 가독성: site_chunks 에 section·doc_group
 
 ### 오늘 한 일

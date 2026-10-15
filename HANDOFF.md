@@ -37,7 +37,7 @@
 | 검색 | `MATCH_COUNT` 5, `MIN_SIMILARITY` 0.5 (0.5 유지로 결정, 문서 밖 판단은 생성 단계 고정 문구에 맡김) |
 | 응답 status | `ok`, `no_match`, `limited`, `unavailable`, `invalid` (+ `{mode:"status"}`은 남은 횟수 `remaining`·`limit`·`next_at`만) |
 | 허용 Origin | `https://namong118.github.io`, `http://localhost:8000` |
-| 넣은 조각 | 문서 5개 + 홈페이지 = 103개 (`CHUNK_VERSION` 2). 새 문서 추가 후 dry-run 124개 — 넣기 전 |
+| 넣은 조각 | 문서 6개 + 홈페이지 = 124개 (`CHUNK_VERSION` 2, 2026-10-15 넣기) |
 
 **secret 이름** (값은 어디에도 쓰지 않음)
 - Edge Function: `GEMINI_API_KEY`, `RATE_SALT` (사용자가 대시보드에서 설정), `SUPABASE_URL`·`SUPABASE_SECRET_KEYS`·`SUPABASE_PUBLISHABLE_KEYS` (기본 제공)
@@ -72,7 +72,7 @@ python -m http.server 8000
 - **비전 비교:** 실제 영상으로 단계별 on/off 비교, Raspberry Pi FPS 측정 → 홈페이지 "실측 전" 항목과 문서 결과표에 반영
 - **비전 비교:** YOLO + MediaPipe vs YOLO-pose 단독, 같은 영상으로 정확도·FPS 비교
 - **추론 엔진 실측:** Pi 5에서 같은 모델로 NCNN·ONNX Runtime FPS 비교(추론만 + 전처리·후처리 포함 전체), 구성 A/B별 — `report/inference-engine-selection.md` 5장. Ultralytics 경로로 먼저, 무거우면 ncnn 직접 경로. x86 노트북 결과로 대신하지 않음
-- **넣기 (사용자 실행):** 추론 엔진 문서·PRD v1.3·홈페이지 변경 넣기 → 챗봇 확인
+- **챗봇 확인:** 추론 엔진 문서 넣기 완료(2026-10-15) — "Edge 추론 엔진은 뭘 써?", "왜 OpenVINO는 안 썼어?" 답과 출처 확인
 - **PRD Word:** PRD Word 파일을 v1.3 이후 내용으로 갱신 (다음 큰 개정 때)
 - **기존 불일치 (이번에 안 고침):** 모델 문서 4.7 처리 속도 측정 방법 "노트북 실측"이 "x86 결과는 Pi를 대신할 수 없음"(추론 엔진 문서 5장)과 어긋남 / PRD 4장 자세 추정 행과 홈페이지 TIER 02가 MediaPipe Pose를 확정처럼 표기하나 모델 문서는 A/B 비교 중
 - **PRD 표기:** 7행 `**1단계(…)**만`이 뷰어에서 굵게 처리되지 않음 (닫는 `**` 앞 괄호 + 뒤 한글)

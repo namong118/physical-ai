@@ -9,6 +9,8 @@
 
 ## 2. 현재 상태
 
+**push:** `origin/main` = `c420658` (2026-10-15 push). 그 뒤 커밋은 push 전 — `git log origin/main..main`으로 확인
+
 **홈페이지 `index.html` 섹션 (위→아래):** 히어로(`#top`) → 왜 필요한가 `#problem` → Quiet Care Principles → 작동 방식 `#how` → 전처리·후처리 `#pipeline` → 공간별 설치 `#spaces` → 하루 시나리오 `#day` → Sensor vs. Physical AI → 프라이버시 `#privacy` → 성공 지표 `#metrics` → 기술 스택 `#tech` → 범위·로드맵 `#poc` → 도입 효과 `#roi` → 문서 `#docs` → 마무리 CTA. 오른쪽 아래에 챗봇 창.
 
 **`docs.json` 문서 목록** (그룹: 제품 / 설계·검증 / 실습, "실습"은 별도 블록)
@@ -27,7 +29,9 @@
 | 항목 | 값 |
 |---|---|
 | Supabase 프로젝트 ref | `zerclhuaekfsseriyevp` (챗봇용 실습 프로젝트 하나만, MCP는 `read_only=true`) |
-| 테이블 (`public`, RLS 켬, 정책 없음) | `site_documents`, `site_chunks`, `site_rate_events`. `site_chunks`: `heading`(제목 경로, 출처 링크용) · `section`(마지막 제목) · `doc_group`(제품/설계·검증/실습/홈페이지), 둘 다 NOT NULL |
+| 테이블 (`public`, RLS 켬, 정책 없음) | `site_documents`, `site_chunks`, `site_rate_events` |
+| `site_documents` 칸 | `id`, `title`, `file`, `version`, `doc_date`, `content_hash`(넣기 완료 표시, 조각을 다 넣은 뒤 기록), `updated_at` |
+| `site_chunks` 칸 | `id`, `document_id`, `chunk_index`, `heading`(제목 경로, 출처 링크용), `content`, `embedding`, `section`(마지막 제목), `doc_group`(제품/설계·검증/실습/홈페이지). `section`·`doc_group`은 NOT NULL |
 | RPC | `site_match_chunks(query_embedding, match_count, min_similarity)`, `site_check_rate(p_ip_hash, p_per_minute, p_per_day, p_global_per_day)` |
 | 마이그레이션 | `supabase/migrations/20261013000000_site_chat.sql`, `20261014000000`(section·doc_group 추가), `20261014000001`(NOT NULL) |
 | Edge Function | `site-chat` (`supabase/functions/site-chat/index.ts`, `verify_jwt = false`) |
@@ -37,7 +41,7 @@
 | 검색 | `MATCH_COUNT` 5, `MIN_SIMILARITY` 0.5 (0.5 유지로 결정, 문서 밖 판단은 생성 단계 고정 문구에 맡김) |
 | 응답 status | `ok`, `no_match`, `limited`, `unavailable`, `invalid` (+ `{mode:"status"}`은 남은 횟수 `remaining`·`limit`·`next_at`만) |
 | 허용 Origin | `https://namong118.github.io`, `http://localhost:8000` |
-| 넣은 조각 | 문서 6개 + 홈페이지 = 124개 (`CHUNK_VERSION` 2, 2026-10-15 넣기) |
+| 넣은 조각 | 문서 6개 + 홈페이지 = 124개 (`CHUNK_VERSION` 2, 2026-10-15 넣기). PRD 22 · 전처리 설계 10 · 모델 계획 23 · 하드웨어 14 · 추론 엔진 21 · 실습 16 · 홈페이지 18. 임베딩·section·doc_group·해시 빈 값 0 (MCP 확인 2026-10-15) |
 
 **secret 이름** (값은 어디에도 쓰지 않음)
 - Edge Function: `GEMINI_API_KEY`, `RATE_SALT` (사용자가 대시보드에서 설정), `SUPABASE_URL`·`SUPABASE_SECRET_KEYS`·`SUPABASE_PUBLISHABLE_KEYS` (기본 제공)
@@ -68,26 +72,38 @@ python -m http.server 8000
 - 문서는 `doc.html?file=report/….md`에서 목차·표·이미지 확인. 한 줄에 `~`가 두 개면 취소선이 되므로 `–` 사용
 
 ## 4. 남은 일
+
+### 실측 필요
 - **비전 실측:** 시나리오 녹화 → 라벨링 → 사전학습 모델 기준선 측정 → 파인튜닝 여부 결정 (모델 계획 문서 순서)
-- **비전 비교:** 실제 영상으로 단계별 on/off 비교, Raspberry Pi FPS 측정 → 홈페이지 "실측 전" 항목과 문서 결과표에 반영
-- **비전 비교:** YOLO + MediaPipe vs YOLO-pose 단독, 같은 영상으로 정확도·FPS 비교
-- **추론 엔진 실측:** Pi 5에서 같은 모델로 NCNN·ONNX Runtime FPS 비교(추론만 + 전처리·후처리 포함 전체), 구성 A/B별 — `report/inference-engine-selection.md` 5장. Ultralytics 경로로 먼저, 무거우면 ncnn 직접 경로. x86 노트북 결과로 대신하지 않음
-- **챗봇 확인:** 추론 엔진 문서 넣기 완료(2026-10-15) — "Edge 추론 엔진은 뭘 써?", "왜 OpenVINO는 안 썼어?" 답과 출처 확인
-- **PRD Word:** PRD Word 파일을 v1.3 이후 내용으로 갱신 (다음 큰 개정 때)
-- **기존 불일치 (이번에 안 고침):** 모델 문서 4.7 처리 속도 측정 방법 "노트북 실측"이 "x86 결과는 Pi를 대신할 수 없음"(추론 엔진 문서 5장)과 어긋남 / PRD 4장 자세 추정 행과 홈페이지 TIER 02가 MediaPipe Pose를 확정처럼 표기하나 모델 문서는 A/B 비교 중
-- **PRD 표기:** 7행 `**1단계(…)**만`이 뷰어에서 굵게 처리되지 않음 (닫는 `**` 앞 괄호 + 뒤 한글)
+- **비전 비교:** 같은 실제 영상으로 ① 전처리 단계별 on/off ② YOLO + MediaPipe vs YOLO-pose 단독(정확도·FPS) 비교 → 홈페이지 "실측 전" 항목과 문서 결과표에 반영
+- **추론 엔진 Pi 실측:** Pi 5에서 같은 `.pt`로 내보낸 NCNN·ONNX Runtime 비교 — 추론만 + 전처리·후처리 포함 전체 FPS, 구성 A/B별, **parity check**(원본 대비 박스·관절 좌표 차이, 허용 기준은 검증 전에 정함). Ultralytics 경로로 먼저, 무거우면 ncnn 직접 경로. x86 노트북 결과로 대신하지 않음 — `report/inference-engine-selection.md` 3.5·5장
+- **추론 엔진 확인 필요:** Windows에서 Ultralytics NCNN 내보내기·실행, AI HAT+ 가격과 MediaPipe 관계 등 — 같은 문서 5.2 "확인하지 못한 항목"
+- **하드웨어 전류:** 확인 필요로 남긴 전류(Pi 5 추론 부하, Active Cooler, Camera Module 3, ESP32-S3 보드 전체)
+
+### 문서 정리
+- **PRD Word:** `PRD_v1.2.docx`를 v1.3 이후 내용으로 갱신 (다음 큰 개정 때)
+- **불일치 — 측정 방법:** 모델 문서 4.7 처리 속도 "노트북 실측, Raspberry Pi는 대여 가능 시 실측"이 "x86 결과는 Pi를 대신할 수 없음"(추론 엔진 문서 5장)과 어긋남
+- **불일치 — MediaPipe Pose 확정 표기:** PRD 4장 자세 추정 행과 홈페이지 TIER 02가 MediaPipe Pose를 확정처럼 표기하나 모델 문서는 A/B 비교 중
+- **PRD 표기:** 6행 `**1단계(…)**만`이 뷰어에서 굵게 처리되지 않음 (닫는 `**` 앞 괄호 + 뒤 한글)
+- **개념도:** 부품이 바뀌면 `images/hardware/parts-overview.webp` 다시 만들기 — 기준은 문서와 상세 배선도
+
+### 챗봇
+- **질문 확인 (아직 안 함):** "Edge 추론 엔진은 뭘 써?", "왜 OpenVINO는 안 썼어?", "CPU가 부족하면 어떻게 해?" — 답·"실측 전"·"출처 기준" 표시·출처 링크 확인
+- **응답:** `top_similarity` 빼기 (`supabase/functions/site-chat/index.ts` 응답에 아직 있음)
+- **답변 보완:** "알림은 얼마나 빨리 오나요?" 답에서 "아직 측정 전"이 빠지는 문제, 절감액 답의 "가정" 표시(보류 중)
+- **DB 확장:** 섹션 단위 테이블(site_sections)과 섹션 전체를 답변 근거로 넘기는 방식 — 피드백 제공자 확인 후 검토
+- **넣기 스크립트:** 전체 다시 넣기 때 Gemini 임베딩 무료 한도(100건)에 걸림. 지금은 429 때 5·10초 간격으로 3회까지만 재시도 — 1분 기다렸다 재시도 또는 문서 사이 쉬기
+- **생성 모델:** `gemini-3.5-flash-lite` 무료 한도 수치 확인 (AI Studio)
+
+### 기획
+- **안전 검토:** 최악의 경우, 힘·속도·무게 최소화, 안전한 상태 정의, 예상 밖의 사용자, 대책 순서(없앤다 → 막는다 → 알린다) — 검토 예정
+
+### 그 외
 - **비전 코드:** 사람 선택을 ByteTrack(Supervision)으로 교체
 - **보조 모델 검토 (직접 촬영 영상):** YOLOE로 Zone 초안, SigLIP으로 약점 장면 검색, SAM 3로 라벨 초안
-- **하드웨어:** 확인 필요로 남긴 전류(Pi 5 추론 부하, Active Cooler, Camera Module 3, ESP32-S3 보드 전체), 웹캠·IR LED 제품 선정, ESP32 대수(위치당/센서당) 결정, MC-38 GPIO5 배선·펌웨어
-- **개념도:** 부품이 바뀌면 `images/hardware/parts-overview.webp` 다시 만들기 — 기준은 문서와 상세 배선도
-- **안전 검토 (기획 단계):** 최악의 경우, 힘·속도·무게 최소화, 안전한 상태 정의, 예상 밖의 사용자, 대책 순서(없앤다 → 막는다 → 알린다) — 검토 예정
-- **챗봇 DB 확장:** 섹션 단위 테이블(site_sections)과 섹션 전체를 답변 근거로 넘기는 방식 — 피드백 제공자 확인 후 검토
-- **넣기 스크립트:** 전체 다시 넣기 때 Gemini 임베딩 무료 한도(100건)에 걸림 — 429 때 1분 기다렸다 재시도 또는 문서 사이 쉬기
-- **챗봇:** 응답에서 `top_similarity` 빼기(아직 응답에 있음)
-- **챗봇 지시:** 절감액 답의 "가정" 표시 보완(보류 중), "알림은 얼마나 빨리 오나요?" 답에서 "아직 측정 전"이 빠지는 문제
-- **챗봇:** `gemini-3.5-flash-lite` 무료 한도 수치 확인 (AI Studio)
+- **하드웨어:** 웹캠·IR LED 제품 선정, ESP32 대수(위치당/센서당) 결정, MC-38 GPIO5 배선·펌웨어
 - **홈페이지:** 히어로 배지 "영상 외부 전송 0건"이 측정값처럼 읽힐 수 있음 — 문구 검토
-- **확인:** 배포 주소에서 메뉴·문서 모음·뷰어 직접 확인, 768~1023px 구간, 실제 노트북 배율(125%·150%)과 실제 휴대폰
+- **배포 확인:** 배포 주소에서 메뉴·문서 모음·뷰어 직접 확인 — 특히 2026-10-15 반영분(`#tech` 추론 엔진 줄, `#docs` 새 문서·PRD v1.3·"Word 다운로드 (v1.2 기준)"). 768~1023px 구간, 실제 노트북 배율(125%·150%)과 실제 휴대폰
 - **정리 결정:** 미추적 파일 `code/`(`byeol_edge_vision (1).zip`), `report/checklist.md`, `report/preprocess.md`
 
 ## 5. 새 세션 시작 방법

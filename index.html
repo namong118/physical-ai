@@ -1026,7 +1026,7 @@ tailwind.config = {
         <h3 class="text-headline-md font-bold mb-3">EDGE AI</h3>
         <ul class="flex flex-col gap-2 text-body-sm text-on-surface-variant">
           <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-secondary">developer_board</span>Raspberry Pi 5 (8GB)</li>
-          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-secondary">person_search</span>YOLO nano급 사람 검출 (ONNX Runtime)</li>
+          <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-secondary">person_search</span>YOLO nano급 사람 검출 (NCNN · Pi 실측 전)</li>
           <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-secondary">accessibility</span>MediaPipe Pose 자세 추정</li>
           <li class="flex gap-2"><span class="material-symbols-outlined text-sm text-secondary">account_tree</span>규칙 기반 상태 머신 (Zone·자세·체류 시간)</li>
         </ul>
@@ -1053,6 +1053,17 @@ tailwind.config = {
         </ul>
         <div class="mt-auto pt-4 border-t border-surface-container text-label-sm text-outline mt-6">가족을 위한 화면 (돌봄 기관 도입 시 운영자 대시보드)</div>
       </div>
+    </div>
+
+    <!-- 추론 엔진 선택 + 문서 링크 -->
+    <div class="mt-8 flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl bg-surface-container-low border-l-4 border-secondary">
+      <div class="text-body-md text-on-surface">
+        <b>추론 엔진.</b> Ultralytics 공개 벤치마크 기준 Raspberry Pi 5에서 가장 빠른 NCNN을 골랐고, ONNX Runtime은 전환 후보로 둡니다.
+        <span class="text-on-surface-variant">문서 조사 기반 선택이며 Raspberry Pi 실측 전입니다. Pi에서 같은 모델로 엔진별 FPS를 비교해 확정합니다.</span>
+      </div>
+      <a class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-surface-container-lowest text-on-surface text-label-md font-semibold hover:bg-surface-container transition-all shadow-sm flex-shrink-0 self-start md:self-auto" href="doc.html?file=report/inference-engine-selection.md">
+        <span class="material-symbols-outlined text-lg text-secondary">memory</span><span>추론 엔진 선택 보기</span>
+      </a>
     </div>
   </div>
 </section>

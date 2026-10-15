@@ -51,6 +51,17 @@
       "downloads": []
     },
     {
+      "id": "inference-engine-selection",
+      "group": "설계·검증",
+      "title": "Edge 추론 엔진 선택",
+      "description": "ONNX Runtime·NCNN·OpenVINO·LiteRT 비교, NCNN 선택 이유, 전환 조건, Raspberry Pi 검증 계획 (실측 전)",
+      "file": "report/inference-engine-selection.md",
+      "version": "v1.0",
+      "date": "2026-10-15",
+      "status": "계획",
+      "downloads": []
+    },
+    {
       "id": "vision-models-practice",
       "group": "실습",
       "title": "비전 모델 실습 보고서",

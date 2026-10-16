@@ -35,20 +35,19 @@
 
 ESP32는 **Pi를 거치지 않고** Wi-Fi 2.4GHz + HTTPS(JSON)로 Cloudflare Worker에 직접 보고합니다([하드웨어 부품 정리](hardware-parts.md) 4장).
 
-```
-현관·화장실:  PIR·도어 센서 → ESP32-S3 ──Wi-Fi·HTTPS──┐
-                                                    ├→ Cloudflare Worker → 가족 앱
-거실·주방·침실: 카메라 → Raspberry Pi 5 ──Wi-Fi·HTTPS──┘
-```
+| 공간 | 경로 |
+|---|---|
+| 현관·화장실 | PIR·도어 센서 → ESP32-S3 → Wi-Fi·HTTPS → Cloudflare Worker → 가족 앱 |
+| 거실·주방·침실 | 카메라 → Raspberry Pi 5 → Wi-Fi·HTTPS → Cloudflare Worker → 가족 앱 |
 
 - Pi가 멈추거나 재부팅되어도 현관·화장실의 출입·움직임 신호는 계속 Worker로 갑니다.
 - 반대로 ESP32가 멈춰도 Pi의 판단은 계속됩니다. 두 경로가 서로를 기다리지 않습니다.
 
 ### 1.2 멈춘 장치는 heartbeat로 알아챈다
 
-- ESP32는 10분마다 heartbeat를 보내고, Worker는 heartbeat가 끊긴 기기를 **OFFLINE으로** 판정합니다(개발 레포 PoC, ESP32 실기기에서 검증 [F1]).
+- ESP32는 10분마다 heartbeat를 보내고, Worker는 heartbeat가 끊긴 기기를 **OFFLINE으로** 판정합니다(개발 레포 PoC, ESP32에서 검증 — [Edge 컨테이너 구조](edge-container-architecture.md) 3장).
 - Pi도 같은 방식으로 heartbeat를 보내도록 계획했습니다([Edge 컨테이너 구조](edge-container-architecture.md) 3장). Pi 안에서 추론만 멈추면 "Edge 판단 불가"를 보내고, Pi 전체가 멈추면 heartbeat가 끊겨 OFFLINE이 됩니다.
-- 그래서 어느 장치가 멈춰도 가족 앱에 "이상 없음"이 계속 보이는 일은 막습니다.
+- 그래서 어느 장치가 멈춰도 가족 앱에 "이상 없음"이 계속 보이지 않도록 설계합니다. Pi 쪽 동작은 검증 전입니다.
 
 ---
 

@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="940" viewBox="0 0 900 940" role="img" font-family="'Plus Jakarta Sans','Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans CJK KR',sans-serif">
+<title>별일없지 Edge 컨테이너 구조 (계획)</title>
+<desc>Raspberry Pi 5 한 대 안의 Docker 컨테이너 구성. camera-capture, uplink-guardian, broker는 멈추면 안 되는 구역(restart always), ai-inference는 죽어도 되는 구역(restart on-failure, mem_limit). 프레임은 공유 메모리로만 전달하고 브로커와 집 밖으로 보내지 않음. Matter/Thread용 otbr·matter-server는 검토 예정. Raspberry Pi 실측 전.</desc>
+<defs><marker id="mb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#0C87FD" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="mg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#73829A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="mt" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#0B7F78" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect width="900" height="940" fill="#f9f9ff"/>
+<rect width="900" height="4" fill="#2CC9C3"/>
+<text x="40" y="40" font-size="20" font-weight="700" fill="#111c2d" text-anchor="start" dominant-baseline="central">별일없지 Edge 컨테이너 구조 (계획)</text>
+<text x="40" y="66" font-size="12" font-weight="400" fill="#6d7a72" text-anchor="start" dominant-baseline="central">Raspberry Pi 5 한 대 기준 · 근거: edge-container-architecture.md · Raspberry Pi 실측 전</text>
+<rect x="40" y="96" width="400" height="56" rx="12" fill="#ffffff" stroke="#bccac0" stroke-width="1.2"/>
+<text x="58" y="120" font-size="14" font-weight="700" fill="#111c2d" text-anchor="start" dominant-baseline="central">하드웨어 (호스트 장치)</text>
+<text x="58" y="143" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">CSI 카메라 · USB 웹캠 · GPIO(IR LED, 미정)</text>
+<rect x="520" y="96" width="340" height="56" rx="12" fill="#F0F6FF" stroke="#9DBDFF" stroke-width="1.2"/>
+<text x="538" y="120" font-size="14" font-weight="700" fill="#001A41" text-anchor="start" dominant-baseline="central">Cloudflare Worker → 가족 앱</text>
+<text x="538" y="143" font-size="12" font-weight="400" fill="#00367A" text-anchor="start" dominant-baseline="central">HTTPS(JSON) · 디바이스 키</text>
+<rect x="40" y="190" width="820" height="530" rx="20" fill="#ffffff" fill-opacity="0.55" stroke="#d8e3fb" stroke-width="1.5"/>
+<text x="64" y="214" font-size="14" font-weight="700" fill="#0B7F78" text-anchor="start" dominant-baseline="central">Raspberry Pi 5 · Docker Engine</text>
+<rect x="70" y="240" width="340" height="96" rx="12" fill="#E6F7F4" stroke="#0B7F78" stroke-width="1.2"/>
+<text x="88" y="264" font-size="14" font-weight="700" fill="#00201D" text-anchor="start" dominant-baseline="central">① camera-capture</text>
+<text x="88" y="287" font-size="12" font-weight="400" fill="#096A64" text-anchor="start" dominant-baseline="central">--device로 카메라만 연결 · privileged 아님</text>
+<text x="88" y="305" font-size="12" font-weight="400" fill="#096A64" text-anchor="start" dominant-baseline="central">5~10fps 샘플링 · 축소</text>
+<text x="88" y="323" font-size="12" font-weight="400" fill="#096A64" text-anchor="start" dominant-baseline="central">프레임은 공유 메모리(/dev/shm)로만</text>
+<rect x="282" y="250" width="116" height="20" rx="10" fill="#B5F0E6"/>
+<text x="340.0" y="260" font-size="11" font-weight="600" fill="#00201D" text-anchor="middle" dominant-baseline="central">restart: always</text>
+<rect x="490" y="240" width="340" height="96" rx="12" fill="#E6F7F4" stroke="#0B7F78" stroke-width="1.2"/>
+<text x="508" y="264" font-size="14" font-weight="700" fill="#00201D" text-anchor="start" dominant-baseline="central">② uplink-guardian</text>
+<text x="508" y="287" font-size="12" font-weight="400" fill="#096A64" text-anchor="start" dominant-baseline="central">이벤트 · 10분 heartbeat → Worker</text>
+<text x="508" y="305" font-size="12" font-weight="400" fill="#096A64" text-anchor="start" dominant-baseline="central">추론 소식이 끊기면 '판단 불가' 전송</text>
+<text x="508" y="323" font-size="12" font-weight="400" fill="#096A64" text-anchor="start" dominant-baseline="central">하드웨어 권한 없음 (unprivileged)</text>
+<rect x="702" y="250" width="116" height="20" rx="10" fill="#B5F0E6"/>
+<text x="760.0" y="260" font-size="11" font-weight="600" fill="#00201D" text-anchor="middle" dominant-baseline="central">restart: always</text>
+<rect x="150" y="386" width="680" height="64" rx="12" fill="#E6F7F4" stroke="#0B7F78" stroke-width="1.2"/>
+<text x="168" y="410" font-size="14" font-weight="700" fill="#00201D" text-anchor="start" dominant-baseline="central">③ broker · Mosquitto MQTT</text>
+<text x="168" y="433" font-size="12" font-weight="400" fill="#096A64" text-anchor="start" dominant-baseline="central">내부 Docker 네트워크만 · 호스트 포트 공개 안 함 · 이미지 없이 상태 메시지만</text>
+<rect x="702" y="396" width="116" height="20" rx="10" fill="#B5F0E6"/>
+<text x="760.0" y="406" font-size="11" font-weight="600" fill="#00201D" text-anchor="middle" dominant-baseline="central">restart: always</text>
+<rect x="70" y="500" width="760" height="96" rx="12" fill="#FFF4E5" stroke="#a36700" stroke-width="1.2"/>
+<text x="88" y="524" font-size="14" font-weight="700" fill="#2a1700" text-anchor="start" dominant-baseline="central">④ ai-inference</text>
+<text x="88" y="547" font-size="12" font-weight="400" fill="#825100" text-anchor="start" dominant-baseline="central">YOLO(NCNN) + MediaPipe Pose + 사람 추적</text>
+<text x="88" y="565" font-size="12" font-weight="400" fill="#825100" text-anchor="start" dominant-baseline="central">mem_limit 설정 · 하드웨어 권한 없음 (unprivileged)</text>
+<text x="88" y="583" font-size="12" font-weight="400" fill="#825100" text-anchor="start" dominant-baseline="central">OOM으로 죽어도 ①②③은 계속 동작 → ②가 '판단 불가'를 알림</text>
+<rect x="690" y="510" width="128" height="20" rx="10" fill="#ffddb8"/>
+<text x="754.0" y="520" font-size="11" font-weight="600" fill="#2a1700" text-anchor="middle" dominant-baseline="central">restart: on-failure</text>
+<rect x="70" y="626" width="760" height="64" rx="12" fill="#ffffff" stroke="#bccac0" stroke-width="1.2" stroke-dasharray="6 4"/>
+<text x="88" y="650" font-size="14" font-weight="700" fill="#111c2d" text-anchor="start" dominant-baseline="central">⑤ otbr · matter-server</text>
+<text x="88" y="673" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">ESP32 센서를 Matter/Thread로 받을 때 · Thread 동글은 --device · ESP32-C6/H2 필요</text>
+<rect x="728" y="636" width="90" height="20" rx="10" fill="#e7eeff"/>
+<text x="773.0" y="646" font-size="11" font-weight="600" fill="#3d4a42" text-anchor="middle" dominant-baseline="central">검토 예정</text>
+<line x1="360" y1="152" x2="360" y2="236" stroke="#73829A" stroke-width="2" marker-end="url(#mg)"/>
+<text x="368" y="172" font-size="12" font-weight="400" fill="#6d7a72" text-anchor="start" dominant-baseline="central">device 매핑</text>
+<line x1="690" y1="240" x2="690" y2="156" stroke="#0C87FD" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#mb)"/>
+<text x="698" y="172" font-size="12" font-weight="400" fill="#6d7a72" text-anchor="start" dominant-baseline="central">HTTPS</text>
+<line x1="300" y1="336" x2="300" y2="382" stroke="#0C87FD" stroke-width="2" marker-end="url(#mb)"/>
+<text x="308" y="360" font-size="12" font-weight="400" fill="#6d7a72" text-anchor="start" dominant-baseline="central">pub · edge/health</text>
+<line x1="660" y1="386" x2="660" y2="340" stroke="#0C87FD" stroke-width="2" marker-end="url(#mb)"/>
+<text x="668" y="362" font-size="12" font-weight="400" fill="#6d7a72" text-anchor="start" dominant-baseline="central">sub · edge/state, edge/health</text>
+<line x1="660" y1="500" x2="660" y2="454" stroke="#0C87FD" stroke-width="2" marker-end="url(#mb)"/>
+<text x="668" y="476" font-size="12" font-weight="400" fill="#6d7a72" text-anchor="start" dominant-baseline="central">pub · edge/state</text>
+<line x1="105" y1="336" x2="105" y2="496" stroke="#0B7F78" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#mt)"/>
+<text x="40" y="756" font-size="14" font-weight="700" fill="#111c2d" text-anchor="start" dominant-baseline="central">범례</text>
+<rect x="40" y="776" width="16" height="16" rx="4" fill="#E6F7F4" stroke="#0B7F78" stroke-width="1.2"/>
+<text x="64" y="784" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">멈추면 안 되는 구역 · restart: always</text>
+<rect x="330" y="776" width="16" height="16" rx="4" fill="#FFF4E5" stroke="#a36700" stroke-width="1.2"/>
+<text x="354" y="784" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">죽어도 되는 구역 · restart: on-failure</text>
+<rect x="620" y="776" width="16" height="16" rx="4" fill="#ffffff" stroke="#bccac0" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="644" y="784" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">점선 상자 · 검토 예정</text>
+<line x1="40" y1="816" x2="70" y2="816" stroke="#0C87FD" stroke-width="2"/>
+<text x="78" y="816" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">MQTT 메시지 (결과·상태만)</text>
+<line x1="260" y1="816" x2="290" y2="816" stroke="#0C87FD" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="298" y="816" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">집 밖 전송 (HTTPS)</text>
+<line x1="460" y1="816" x2="490" y2="816" stroke="#0B7F78" stroke-width="2" stroke-dasharray="4 4"/>
+<text x="498" y="816" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">프레임 (공유 메모리, 브로커 안 거침)</text>
+<line x1="750" y1="816" x2="780" y2="816" stroke="#73829A" stroke-width="2"/>
+<text x="788" y="816" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">장치 매핑</text>
+<text x="40" y="858" font-size="14" font-weight="700" fill="#111c2d" text-anchor="start" dominant-baseline="central">참고</text>
+<text x="40" y="882" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">영상(프레임)은 같은 Pi 안에서만 오가며, 브로커와 집 밖으로는 결과·상태 메시지만 나갑니다.</text>
+<text x="40" y="902" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">구성·재시작 정책은 계획입니다. 노트북 Docker로는 재시작·OOM 동작만 확인할 수 있고, 속도는 Pi 실측 전입니다.</text>
+<text x="40" y="922" font-size="12" font-weight="400" fill="#3d4a42" text-anchor="start" dominant-baseline="central">Raspberry Pi 5의 GPIO 장치 이름(/dev/gpiochip0 또는 4)은 커널 버전에 따라 달라 확인이 필요합니다.</text>
+</svg>

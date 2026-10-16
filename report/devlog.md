@@ -8,17 +8,25 @@
 
 | 커밋 | 내용 |
 |---|---|
-| (이번 커밋) | 새 문서 `report/edge-container-architecture.md` v1.0 — 컨테이너 4개(camera-capture·uplink-guardian·broker·ai-inference)와 검토 예정 ⑤ otbr·matter-server, 멈추면 안 되는 구역(`restart: always`)과 죽어도 되는 구역(`on-failure`·`mem_limit`), 토픽, 프라이버시 경계, 검증 계획, compose 초안. 구조도 `images/edge-containers.svg`(홈페이지 색·글꼴, 부품 관계도 상세와 같은 형식). `docs.json` 설계·검증에 등록 |
-| (이번 커밋) | 홈페이지 `#tech` — 추론 엔진 줄 아래에 컨테이너 구성 요약과 문서 링크 |
+| `d43a671` | 새 문서 `report/edge-container-architecture.md` v1.0 — 컨테이너 4개(camera-capture·uplink-guardian·broker·ai-inference)와 검토 예정 ⑤ otbr·matter-server, 멈추면 안 되는 구역(`restart: always`)과 죽어도 되는 구역(`on-failure`·`mem_limit`), 토픽, 프라이버시 경계, 검증 계획, compose 초안. 구조도 `images/edge-containers.svg`(홈페이지 색·글꼴, 부품 관계도 상세와 같은 형식). `docs.json` 설계·검증에 등록 |
+| `7f3209c` | 홈페이지 `#tech` — 추론 엔진 줄 아래에 컨테이너 구성 요약과 문서 링크 |
+| `6a9d50b` | 뷰어 표기 수정 — 3장 표 ① 행 `~` 두 개가 취소선이 되어 `5–10fps`·`1–3단계`로, 1·7장 굵게가 풀린 두 곳은 조사 "로"를 굵게 안으로 (내용·버전 그대로) |
 
 - 진행: 예시 구조(로봇용, 모터·E-Stop 구역)를 별일없지에 맞춤 → 계획 보고 → 승인 → 구현. 모터가 없으므로 "안전 정지" 대신 "판단 불가를 알린다"를 안전한 상태로 정함.
 - 측정·실행은 하지 않음. compose는 실행 전 초안.
+- 앞 두 커밋과 개발일지·HANDOFF 커밋은 다른 세션에서 만든 패치를 `git am`으로 적용(기준 `35372a1`, 충돌 없음). 표기 수정은 브라우저 확인 뒤 승인받아 새 커밋으로.
 
 ### 확인한 것
 
 - SVG를 PNG로 변환해 겹침·잘림 확인 (범례 한 줄 겹침을 고침). script·foreignObject·이벤트 속성 없음
-- `docs.json` JSON 형식, 금지 단어 0건
-- **확인하지 못한 것:** 브라우저에서 홈페이지·뷰어 1440 · 1024 · 375px 확인, 콘솔 오류, 뷰어 목차·표·이미지 렌더링 (작업 환경에 브라우저 없음 — 사용자 확인 필요). 챗봇 넣기(`ingest_docs.py`)도 아직 안 함
+- `docs.json` JSON 형식, 금지 단어 0건 (이번에 추가·수정한 문서·SVG·홈페이지·`docs.json`)
+- 챗봇 조각 `--dry-run`: 새 문서 11개(글자 수 최소 263 / 평균 489 / 최대 1001), 전체 135개(124 + 11, 홈페이지 18개 그대로)
+- 브라우저(Chrome, `python -m http.server 8000`):
+  - 홈페이지 `#tech` 새 줄 — 1440 · 1024 · 375px(기기 에뮬레이션)에서 가로 스크롤 없음, 콘솔은 Tailwind CDN 경고뿐. `deployed_code` 아이콘으로 표시. "컨테이너 구조 보기"가 문서 뷰어로 열림
+  - `#docs` 설계·검증 그룹에 "Edge 컨테이너 구조 v1.0 · 2026-10-16 · 계획" 표시
+  - 뷰어 — 목차 9개 장, 표 6개, SVG(①–⑤ 원 숫자·범례 겹침 없음), yaml 코드 블록 렌더링. 375px에서 넓은 표·코드는 블록 안 가로 스크롤, 페이지 가로 스크롤 없음. 콘솔 오류 없음 ("Lazy-loaded images" 안내는 하드웨어 문서에도 있는 기존 동작)
+  - 처음 확인 때 3장 표 취소선과 굵게 풀림 2곳을 발견해 `6a9d50b`로 고친 뒤 다시 확인
+- **확인하지 못한 것:** 챗봇 넣기(`ingest_docs.py`)는 사용자 실행 예정
 
 ### 배운 점
 

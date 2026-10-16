@@ -9,7 +9,7 @@
 
 ## 2. 현재 상태
 
-**push:** `origin/main` = `c420658` (2026-10-15 push). 그 뒤 커밋은 push 전 — `git log origin/main..main`으로 확인
+**push:** `origin/main` = `35372a1` (2026-10-16 확인). 그 뒤 커밋은 push 전 — `git log origin/main..main`으로 확인
 
 **홈페이지 `index.html` 섹션 (위→아래):** 히어로(`#top`) → 왜 필요한가 `#problem` → Quiet Care Principles → 작동 방식 `#how` → 전처리·후처리 `#pipeline` → 공간별 설치 `#spaces` → 하루 시나리오 `#day` → Sensor vs. Physical AI → 프라이버시 `#privacy` → 성공 지표 `#metrics` → 기술 스택 `#tech` → 범위·로드맵 `#poc` → 도입 효과 `#roi` → 문서 `#docs` → 마무리 CTA. 오른쪽 아래에 챗봇 창.
 
@@ -82,7 +82,7 @@ python -m http.server 8000
 - **하드웨어 전류:** 확인 필요로 남긴 전류(Pi 5 추론 부하, Active Cooler, Camera Module 3, ESP32-S3 보드 전체)
 
 - **컨테이너 구조 검증:** 노트북 Docker로 ④ 강제 종료·OOM 때 ①②③ 유지, ②의 "판단 불가" 전송, 브로커 외부 차단 확인 → Pi에서 카메라 `--device` 연결, `mem_limit` 값 — `report/edge-container-architecture.md` 6·9장
-- **컨테이너 문서 넣기:** 챗봇에 아직 안 넣음 — `python scripts/ingest_docs.py --dry-run` 후 사용자 실행
+- **컨테이너 문서 넣기:** 챗봇에 아직 안 넣음 — dry-run 확인 완료(새 문서 11개, 전체 135개), `python scripts/ingest_docs.py` 사용자 실행 후 MCP로 조각 수 확인
 
 ### 문서 정리
 - **PRD Word:** `PRD_v1.2.docx`를 v1.3 이후 내용으로 갱신 (다음 큰 개정 때)

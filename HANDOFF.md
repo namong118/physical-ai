@@ -9,7 +9,7 @@
 
 ## 2. 현재 상태
 
-**push:** `origin/main` = `35372a1` (2026-10-16 확인). 그 뒤 커밋은 push 전 — `git log origin/main..main`으로 확인
+**push:** `origin/main` = `aba8aac` (2026-10-16, 로컬 추적 브랜치 기준). 그 뒤 커밋은 push 전 — `git log origin/main..main`으로 확인
 
 **홈페이지 `index.html` 섹션 (위→아래):** 히어로(`#top`) → 왜 필요한가 `#problem` → Quiet Care Principles → 작동 방식 `#how` → 전처리·후처리 `#pipeline` → 공간별 설치 `#spaces` → 하루 시나리오 `#day` → Sensor vs. Physical AI → 프라이버시 `#privacy` → 성공 지표 `#metrics` → 기술 스택 `#tech` → 범위·로드맵 `#poc` → 도입 효과 `#roi` → 문서 `#docs` → 마무리 CTA. 오른쪽 아래에 챗봇 창.
 
@@ -22,7 +22,8 @@
 | model-training-validation | `report/model-training-validation.md` | v1.1 · 2026-10-12 | 계획 |
 | hardware-parts | `report/hardware-parts.md` (+ `images/hardware/` 개념도·상세 배선도) | v1.1 · 2026-10-14 | 진행 중 |
 | inference-engine-selection | `report/inference-engine-selection.md` (NCNN 1순위, ONNX Runtime 2순위, 문서 조사 기반·Pi 실측 전) | v1.0 · 2026-10-15 | 계획 |
-| edge-container-architecture | `report/edge-container-architecture.md` (+ `images/edge-containers.svg`, 컨테이너 4개 + Matter/Thread 검토 예정, Pi 실측 전). 홈페이지 `#tech`에 요약 줄 | v1.0 · 2026-10-16 | 계획 |
+| edge-container-architecture | `report/edge-container-architecture.md` (+ `images/edge-containers.svg`, 컨테이너 4개 + Matter/Thread 검토 예정, Pi 실측 전. v1.1: 1.1절 SBC·MCU 역할 나누기, 9장 칩별 Thread 지원 확인함). 홈페이지 `#tech`에 요약 줄 | v1.1 · 2026-10-16 | 계획 |
+| sbc-mcu-selection | `report/sbc-mcu-selection.md` (Pi 5 = 판단, ESP32-S3 = 센서, SBC 5종·MCU 6종 ✓/△/✕ 비교, 전환 조건, 문서 조사 기반·실측 전). 홈페이지 `#tech`에 요약 줄 | v1.0 · 2026-10-16 | 계획 |
 | vision-models-practice | `report/vision-models-practice.md` | v1.0 · 2026-10-12 | 확정 |
 
 **챗봇 구성**
@@ -42,7 +43,7 @@
 | 검색 | `MATCH_COUNT` 5, `MIN_SIMILARITY` 0.5 (0.5 유지로 결정, 문서 밖 판단은 생성 단계 고정 문구에 맡김) |
 | 응답 status | `ok`, `no_match`, `limited`, `unavailable`, `invalid` (+ `{mode:"status"}`은 남은 횟수 `remaining`·`limit`·`next_at`만) |
 | 허용 Origin | `https://namong118.github.io`, `http://localhost:8000` |
-| 넣은 조각 | 문서 7개 + 홈페이지 = 135개 (`CHUNK_VERSION` 2, 2026-10-16 컨테이너 문서·홈페이지 넣기). PRD 22 · 전처리 설계 10 · 모델 계획 23 · 하드웨어 14 · 추론 엔진 21 · 컨테이너 구조 11 · 실습 16 · 홈페이지 18. 임베딩·section·doc_group·해시 빈 값 0, 고아 조각 0 (MCP 확인 2026-10-16) |
+| 넣은 조각 | **넣기 전:** 2026-10-16 부품 선정 문서 추가·컨테이너 v1.1·홈페이지 줄 추가 후 `--dry-run` 156개(부품 선정 20 · 컨테이너 12). 아래는 마지막 넣기 기준 — 문서 7개 + 홈페이지 = 135개 (`CHUNK_VERSION` 2, 2026-10-16 컨테이너 문서·홈페이지 넣기). PRD 22 · 전처리 설계 10 · 모델 계획 23 · 하드웨어 14 · 추론 엔진 21 · 컨테이너 구조 11 · 실습 16 · 홈페이지 18. 임베딩·section·doc_group·해시 빈 값 0, 고아 조각 0 (MCP 확인 2026-10-16) |
 
 **secret 이름** (값은 어디에도 쓰지 않음)
 - Edge Function: `GEMINI_API_KEY`, `RATE_SALT` (사용자가 대시보드에서 설정), `SUPABASE_URL`·`SUPABASE_SECRET_KEYS`·`SUPABASE_PUBLISHABLE_KEYS` (기본 제공)
@@ -81,9 +82,11 @@ python -m http.server 8000
 - **추론 엔진 확인 필요:** Windows에서 Ultralytics NCNN 내보내기·실행, AI HAT+ 가격과 MediaPipe 관계 등 — 같은 문서 5.2 "확인하지 못한 항목"
 - **하드웨어 전류:** 확인 필요로 남긴 전류(Pi 5 추론 부하, Active Cooler, Camera Module 3, ESP32-S3 보드 전체)
 
+- **부품 선정 확인 필요:** 보드 가격(Pi 5는 PRD 6.1 가정값만 씀), ESP32-S3-DevKitC-1 N16R8 보드 품번(공식 가이드 주문 목록에 없음), Jetson 기본 전력 모드(15W/25W), AI HAT+·RK3588 보드의 전력·카메라 입력, C3·C6·H2 메모리, nRF52840 Matter, 부팅 시간(공식 수치 없음) — `report/sbc-mcu-selection.md` 6장
 - **컨테이너 구조 검증:** 노트북 Docker로 ④ 강제 종료·OOM 때 ①②③ 유지, ②의 "판단 불가" 전송, 브로커 외부 차단 확인 → Pi에서 카메라 `--device` 연결, `mem_limit` 값 — `report/edge-container-architecture.md` 6·9장
 
 ### 문서 정리
+- **불일치 후보 — ESP32 보드 표기:** 하드웨어 문서는 "ESP32-S3 DevKitC-1", 부품 선정 문서는 "DevKitC-1 호환 보드, 모듈 WROOM-1-N16R8, 보드 품번 확인 필요". 하드웨어 문서는 지시에 따라 고치지 않음 — 정할 일
 - **PRD Word:** `PRD_v1.2.docx`를 v1.3 이후 내용으로 갱신 (다음 큰 개정 때)
 - **불일치 — 측정 방법:** 모델 문서 4.7 처리 속도 "노트북 실측, Raspberry Pi는 대여 가능 시 실측"이 "x86 결과는 Pi를 대신할 수 없음"(추론 엔진 문서 5장)과 어긋남
 - **불일치 — MediaPipe Pose 확정 표기:** PRD 4장 자세 추정 행과 홈페이지 TIER 02가 MediaPipe Pose를 확정처럼 표기하나 모델 문서는 A/B 비교 중
@@ -91,6 +94,7 @@ python -m http.server 8000
 - **개념도:** 부품이 바뀌면 `images/hardware/parts-overview.webp` 다시 만들기 — 기준은 문서와 상세 배선도
 
 ### 챗봇
+- **넣기 (사용자 실행):** `python scripts/ingest_docs.py` — 부품 선정 문서·컨테이너 v1.1·홈페이지가 바뀜. 넣은 뒤 MCP 조회로 156개·빈 값 0 확인
 - **응답:** `top_similarity` 빼기 (`supabase/functions/site-chat/index.ts` 응답에 아직 있음)
 - **답변 보완:** "알림은 얼마나 빨리 오나요?" 답에서 "아직 측정 전"이 빠지는 문제, 절감액 답의 "가정" 표시(보류 중)
 - **DB 확장:** 섹션 단위 테이블(site_sections)과 섹션 전체를 답변 근거로 넘기는 방식 — 피드백 제공자 확인 후 검토

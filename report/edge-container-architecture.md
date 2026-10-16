@@ -31,7 +31,7 @@
 
 > 추론이 죽어도, 가족에게 "지금은 판단할 수 없다"를 알리는 경로는 살아 있어야 한다.
 
-별일없지에는 모터 같은 구동부가 없습니다. 따라서 로봇에서 말하는 "안전 정지"는 별일없지에서 **"판단 불가를 알린다"**로 바뀝니다.
+별일없지에는 모터 같은 구동부가 없습니다. 따라서 로봇에서 말하는 "안전 정지"는 별일없지에서 **"판단 불가를 알린다"로** 바뀝니다.
 
 ---
 
@@ -50,7 +50,7 @@
 
 | 컨테이너 | 하는 일 | 하드웨어 권한 | 재시작 | 메모리 |
 |---|---|---|---|---|
-| ① camera-capture | 카메라에서 프레임을 읽고 5~10fps로 샘플링·축소(전처리 설계 1~3단계). 프레임은 공유 메모리에 둠. 자신의 상태를 `edge/health`로 발행 | 카메라 장치만 `--device`로 연결. `privileged` 쓰지 않음 | `always` | 제한 없음 (가벼움) |
+| ① camera-capture | 카메라에서 프레임을 읽고 5–10fps로 샘플링·축소(전처리 설계 1–3단계). 프레임은 공유 메모리에 둠. 자신의 상태를 `edge/health`로 발행 | 카메라 장치만 `--device`로 연결. `privileged` 쓰지 않음 | `always` | 제한 없음 (가벼움) |
 | ② uplink-guardian | `edge/state`·`edge/health`를 구독해 상태 전환 이벤트와 10분 heartbeat를 Cloudflare Worker로 전송. 추론 결과가 일정 시간 오지 않으면 **"Edge 판단 불가"** 전송 | 없음 | `always` | 제한 없음 (가벼움) |
 | ③ broker | Mosquitto MQTT. 컨테이너 사이 메시지 전달 | 없음 | `always` | 제한 없음 |
 | ④ ai-inference | 공유 메모리의 프레임으로 YOLO(NCNN) 사람 검출 → 사람 추적 → MediaPipe Pose. 결과를 `edge/state`로 발행 | 없음 | `on-failure` | `mem_limit` 설정 (값은 Pi 실측 후 정함) |
@@ -102,7 +102,7 @@
 
 ## 7. Matter/Thread 검토 (검토 예정)
 
-지금 ESP32 센서는 **Wi-Fi 2.4GHz + HTTPS(JSON)**로 Cloudflare Worker에 직접 보냅니다([하드웨어 부품 정리](hardware-parts.md) 4장). Matter/Thread는 이 경로를 바꿀 때의 후보입니다.
+지금 ESP32 센서는 **Wi-Fi 2.4GHz + HTTPS(JSON)로** Cloudflare Worker에 직접 보냅니다([하드웨어 부품 정리](hardware-parts.md) 4장). Matter/Thread는 이 경로를 바꿀 때의 후보입니다.
 
 | 항목 | 내용 |
 |---|---|

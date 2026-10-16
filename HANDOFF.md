@@ -43,7 +43,7 @@
 | 검색 | `MATCH_COUNT` 5, `MIN_SIMILARITY` 0.5 (0.5 유지로 결정, 문서 밖 판단은 생성 단계 고정 문구에 맡김) |
 | 응답 status | `ok`, `no_match`, `limited`, `unavailable`, `invalid` (+ `{mode:"status"}`은 남은 횟수 `remaining`·`limit`·`next_at`만) |
 | 허용 Origin | `https://namong118.github.io`, `http://localhost:8000` |
-| 넣은 조각 | **넣기 전:** 2026-10-16 부품 선정 문서 추가·컨테이너 v1.1·홈페이지 줄 추가 후 `--dry-run` 156개(부품 선정 20 · 컨테이너 12). 아래는 마지막 넣기 기준 — 문서 7개 + 홈페이지 = 135개 (`CHUNK_VERSION` 2, 2026-10-16 컨테이너 문서·홈페이지 넣기). PRD 22 · 전처리 설계 10 · 모델 계획 23 · 하드웨어 14 · 추론 엔진 21 · 컨테이너 구조 11 · 실습 16 · 홈페이지 18. 임베딩·section·doc_group·해시 빈 값 0, 고아 조각 0 (MCP 확인 2026-10-16) |
+| 넣은 조각 | **넣기 전:** 2026-10-16 부품 선정 문서 추가·컨테이너 v1.1·홈페이지 줄 추가 후 `--dry-run` 157개(부품 선정 20 · 컨테이너 12 · 하드웨어 v1.2 15). 아래는 마지막 넣기 기준 — 문서 7개 + 홈페이지 = 135개 (`CHUNK_VERSION` 2, 2026-10-16 컨테이너 문서·홈페이지 넣기). PRD 22 · 전처리 설계 10 · 모델 계획 23 · 하드웨어 14 · 추론 엔진 21 · 컨테이너 구조 11 · 실습 16 · 홈페이지 18. 임베딩·section·doc_group·해시 빈 값 0, 고아 조각 0 (MCP 확인 2026-10-16) |
 
 **secret 이름** (값은 어디에도 쓰지 않음)
 - Edge Function: `GEMINI_API_KEY`, `RATE_SALT` (사용자가 대시보드에서 설정), `SUPABASE_URL`·`SUPABASE_SECRET_KEYS`·`SUPABASE_PUBLISHABLE_KEYS` (기본 제공)
@@ -93,7 +93,7 @@ python -m http.server 8000
 - **개념도:** 부품이 바뀌면 `images/hardware/parts-overview.webp` 다시 만들기 — 기준은 문서와 상세 배선도
 
 ### 챗봇
-- **넣기 (사용자 실행):** `python scripts/ingest_docs.py` — 부품 선정 문서·컨테이너 v1.1·홈페이지가 바뀜. 넣은 뒤 MCP 조회로 156개·빈 값 0 확인
+- **넣기 (사용자 실행):** `python scripts/ingest_docs.py` — 부품 선정 문서·컨테이너 v1.1·하드웨어 v1.2·홈페이지가 바뀜. 넣은 뒤 MCP 조회로 157개·빈 값 0 확인
 - **응답:** `top_similarity` 빼기 (`supabase/functions/site-chat/index.ts` 응답에 아직 있음)
 - **답변 보완:** "알림은 얼마나 빨리 오나요?" 답에서 "아직 측정 전"이 빠지는 문제, 절감액 답의 "가정" 표시(보류 중)
 - **DB 확장:** 섹션 단위 테이블(site_sections)과 섹션 전체를 답변 근거로 넘기는 방식 — 피드백 제공자 확인 후 검토

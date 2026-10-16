@@ -42,7 +42,7 @@
 | 검색 | `MATCH_COUNT` 5, `MIN_SIMILARITY` 0.5 (0.5 유지로 결정, 문서 밖 판단은 생성 단계 고정 문구에 맡김) |
 | 응답 status | `ok`, `no_match`, `limited`, `unavailable`, `invalid` (+ `{mode:"status"}`은 남은 횟수 `remaining`·`limit`·`next_at`만) |
 | 허용 Origin | `https://namong118.github.io`, `http://localhost:8000` |
-| 넣은 조각 | 문서 6개 + 홈페이지 = 124개 (`CHUNK_VERSION` 2, 2026-10-15 넣기). PRD 22 · 전처리 설계 10 · 모델 계획 23 · 하드웨어 14 · 추론 엔진 21 · 실습 16 · 홈페이지 18. 임베딩·section·doc_group·해시 빈 값 0 (MCP 확인 2026-10-15) |
+| 넣은 조각 | 문서 7개 + 홈페이지 = 135개 (`CHUNK_VERSION` 2, 2026-10-16 컨테이너 문서·홈페이지 넣기). PRD 22 · 전처리 설계 10 · 모델 계획 23 · 하드웨어 14 · 추론 엔진 21 · 컨테이너 구조 11 · 실습 16 · 홈페이지 18. 임베딩·section·doc_group·해시 빈 값 0, 고아 조각 0 (MCP 확인 2026-10-16) |
 
 **secret 이름** (값은 어디에도 쓰지 않음)
 - Edge Function: `GEMINI_API_KEY`, `RATE_SALT` (사용자가 대시보드에서 설정), `SUPABASE_URL`·`SUPABASE_SECRET_KEYS`·`SUPABASE_PUBLISHABLE_KEYS` (기본 제공)
@@ -82,7 +82,6 @@ python -m http.server 8000
 - **하드웨어 전류:** 확인 필요로 남긴 전류(Pi 5 추론 부하, Active Cooler, Camera Module 3, ESP32-S3 보드 전체)
 
 - **컨테이너 구조 검증:** 노트북 Docker로 ④ 강제 종료·OOM 때 ①②③ 유지, ②의 "판단 불가" 전송, 브로커 외부 차단 확인 → Pi에서 카메라 `--device` 연결, `mem_limit` 값 — `report/edge-container-architecture.md` 6·9장
-- **컨테이너 문서 넣기:** 챗봇에 아직 안 넣음 — dry-run 확인 완료(새 문서 11개, 전체 135개), `python scripts/ingest_docs.py` 사용자 실행 후 MCP로 조각 수 확인
 
 ### 문서 정리
 - **PRD Word:** `PRD_v1.2.docx`를 v1.3 이후 내용으로 갱신 (다음 큰 개정 때)

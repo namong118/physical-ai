@@ -121,7 +121,7 @@ ESP32는 **Pi를 거치지 않고** Wi-Fi 2.4GHz + HTTPS(JSON)로 Cloudflare Wor
 | 메모리 | ✓ 플래시 16MB + PSRAM 8MB (N16R8 모듈) [E1] | 확인 필요 | 확인 필요 | 확인 필요 | 플래시 1MB, RAM 256KB [D1] | SRAM 264KB [P1] |
 | 실기기 검증 | ✓ PIR → GPIO4 → Wi-Fi → Worker, heartbeat 왕복 [F1] | ✕ | ✕ | ✕ | ✕ | ✕ |
 | 기존 펌웨어 재사용 | ✓ 그대로 [F1] | △ 같은 Espressif 도구라 이식 쉬울 것 (판단, 확인 전) | △ 같음 | △ Wi-Fi 코드는 못 씀 | ✕ 개발 환경이 다름 (판단) | ✕ 개발 환경이 다름 (판단) |
-| 비용 | 확인 필요 | 확인 필요 | 확인 필요 | 확인 필요 | 확인 필요 | 확인 필요 |
+| 비용 | PRD 6.1: ESP32 센서 4세트 40,000원 (가정) | 확인 필요 | 확인 필요 | 확인 필요 | 확인 필요 | 확인 필요 |
 
 ### 4.1 ESP32-S3를 고른 이유
 
@@ -158,7 +158,7 @@ ESP32는 **Pi를 거치지 않고** Wi-Fi 2.4GHz + HTTPS(JSON)로 Cloudflare Wor
 | Pi 5에서 컨테이너 4개 + 추론의 전체 FPS·메모리 | 실측 전 ([Edge 추론 엔진 선택](inference-engine-selection.md) 5장) |
 | 8GB 대신 4GB로 충분한지 | 실측 전 |
 | Pi 5·ESP32 부팅 시간 | 공식 수치 없음. 실측 전 |
-| 보드 가격 (Pi 5 8GB, Pi Zero 2 W, Jetson Orin Nano Super, RK3588 보드, AI HAT+, ESP32 계열, nRF52840, Pico W) | 확인 필요. 비용 비교는 PRD 6.1 가정값(Edge 2대 360,000원)만 씀 |
+| 보드 가격 (Pi 5 8GB, Pi Zero 2 W, Jetson Orin Nano Super, RK3588 보드, AI HAT+, ESP32 계열, nRF52840, Pico W) | 확인 필요. 비용 비교는 PRD 6.1 가정값(Edge 2대 360,000원, ESP32 센서 4세트 40,000원)만 씀 |
 | Jetson Orin Nano Super 기본 전력 모드 | NVIDIA 문서마다 15W·25W로 다름. 확인 필요 |
 | AI HAT+·RK3588 보드의 전력과 카메라 입력 | 보드별 확인 필요 |
 | ESP32-S3 DevKitC-1 N16R8 보드 품번 | 공식 사용자 가이드 주문 목록에 없음. 확인 필요 |

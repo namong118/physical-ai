@@ -1,7 +1,7 @@
 # 별일없지 — Edge 컨테이너 구조
 
-> 문서 버전 v1.0 · 작성일 2026-10-16
-> 관련 문서: [PRD](../PRD/PRD.md) · [Edge 추론 엔진 선택](inference-engine-selection.md) · [하드웨어 부품 정리](hardware-parts.md) · [Vision 전처리·후처리 설계](vision-preprocessing-design.md)
+> 문서 버전 v1.1 · 작성일 2026-10-16 (v1.1: SBC·MCU 역할 나누기 절(1.1) 추가, 9장 ESP32 칩별 Thread 지원 확인)
+> 관련 문서: [PRD](../PRD/PRD.md) · [SBC·MCU 부품 선정](sbc-mcu-selection.md) · [Edge 추론 엔진 선택](inference-engine-selection.md) · [하드웨어 부품 정리](hardware-parts.md) · [Vision 전처리·후처리 설계](vision-preprocessing-design.md)
 
 > **현재 상태:** 구성 계획. Raspberry Pi 실측 전.
 > 이 문서는 Edge 장치(Raspberry Pi 5) 안의 소프트웨어를 Docker 컨테이너로 어떻게 나눌지 정한 계획입니다. 아직 Pi에서 실행하지 않았고, 속도·메모리 수치는 쓰지 않습니다.
@@ -32,6 +32,19 @@
 > 추론이 죽어도, 가족에게 "지금은 판단할 수 없다"를 알리는 경로는 살아 있어야 한다.
 
 별일없지에는 모터 같은 구동부가 없습니다. 따라서 로봇에서 말하는 "안전 정지"는 별일없지에서 **"판단 불가를 알린다"로** 바뀝니다.
+
+### 1.1 왜 SBC에서 컨테이너로 나누고, MCU와는 어떻게 나누는가
+
+| | SBC — Raspberry Pi 5 | MCU — ESP32-S3 |
+|---|---|---|
+| 하는 일 | 카메라 입력, 비전 AI, 상태 판단, 클라우드 전송 | 현관·화장실 PIR·도어 센서 읽기, 이벤트·heartbeat 전송 |
+| 실행 환경 | 리눅스 위에 프로그램 여러 개 | OS 없이 펌웨어 하나 |
+| 컨테이너 | **나눔** — 한 프로그램이 죽어도 다른 프로그램이 살아 있게 (실패 격리) | 나누지 않음 — 나눌 프로그램이 하나뿐 |
+| 클라우드 경로 | ② uplink-guardian → Cloudflare Worker | Pi를 거치지 않고 Wi-Fi로 Cloudflare Worker에 직접 |
+
+- **SBC에서 나누는 이유:** Pi 한 대가 카메라·추론·전송을 함께 하므로, 가장 먼저 죽을 수 있는 추론을 다른 부분과 떼어 놓아야 합니다(1장).
+- **MCU와 나누는 방식:** 센서는 Pi 밖의 ESP32가 맡고 Worker로 바로 보냅니다. Pi 전체가 멈춰도 현관·화장실 신호는 계속 가고, 멈춘 장치는 heartbeat가 끊겨 OFFLINE으로 판정됩니다(3장).
+- 부품을 고른 이유와 전환 조건은 [SBC·MCU 부품 선정](sbc-mcu-selection.md)에 정리했습니다.
 
 ---
 
@@ -161,5 +174,6 @@ networks:
 - Docker 재시작 정책·`mem_limit`·`internal` 네트워크·`ipc` 설정의 정확한 동작 — Docker 공식 문서로 확인 필요
 - Raspberry Pi 5 카메라(libcamera)를 컨테이너 안에서 `--device`만으로 쓸 때 필요한 장치 목록
 - Raspberry Pi 5의 GPIO 장치 이름(`/dev/gpiochip0` 또는 `4`) — 커널 버전에 따라 다름
-- ESP32 칩별 Thread 지원, OTBR·Matter 서버의 컨테이너 배포 방식 — Espressif·OpenThread·CSA 공식 문서로 확인 필요
+- ESP32 칩별 Thread 지원 — **확인함** (2026-10-16): ESP32-S3에는 802.15.4가 없고([ESP32-S3 데이터시트 v2.2](https://documentation.espressif.com/esp32-s3_datasheet_en.pdf)), ESP32-C6(Thread 1.3)·ESP32-H2(Thread 1.4)에는 있음([ESP32-C6 데이터시트 v1.5](https://documentation.espressif.com/esp32-c6_datasheet_en.pdf) · [ESP32-H2 데이터시트 v1.3](https://documentation.espressif.com/esp32-h2_datasheet_en.pdf)). [SBC·MCU 부품 선정](sbc-mcu-selection.md) 7장 출처 S6·E3·E4
+- OTBR·Matter 서버의 컨테이너 배포 방식 — OpenThread·CSA 공식 문서로 확인 필요
 - 이 문서의 내용은 이번에 출처를 다시 확인하지 않았습니다. 구현 전에 위 항목을 공식 문서로 확인하고 출처를 추가합니다.

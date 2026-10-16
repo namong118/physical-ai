@@ -20,7 +20,7 @@
 | prd | `PRD/PRD.md` (+ `PRD_v1.2.docx`, Word는 v1.2 기준. 홈페이지 다운로드 버튼은 2026-10-15 삭제, PRD 첫머리 링크만 남음) | v1.3 · 2026-10-15 | 확정 |
 | vision-preprocessing-design | `report/vision-preprocessing-design.md` | v1.1 · 2026-10-07 | 진행 중 |
 | model-training-validation | `report/model-training-validation.md` | v1.1 · 2026-10-12 | 계획 |
-| hardware-parts | `report/hardware-parts.md` (+ `images/hardware/` 개념도·상세 배선도) | v1.1 · 2026-10-14 | 진행 중 |
+| hardware-parts | `report/hardware-parts.md` (+ `images/hardware/` 개념도·상세 배선도. v1.2: ESP32 보드 표기를 "DevKitC-1 호환 보드 (모듈 ESP32-S3-WROOM-1-N16R8)"로, 그림은 그대로) | v1.2 · 2026-10-16 | 진행 중 |
 | inference-engine-selection | `report/inference-engine-selection.md` (NCNN 1순위, ONNX Runtime 2순위, 문서 조사 기반·Pi 실측 전) | v1.0 · 2026-10-15 | 계획 |
 | edge-container-architecture | `report/edge-container-architecture.md` (+ `images/edge-containers.svg`, 컨테이너 4개 + Matter/Thread 검토 예정, Pi 실측 전. v1.1: 1.1절 SBC·MCU 역할 나누기, 9장 칩별 Thread 지원 확인함). 홈페이지 `#tech`에 요약 줄 | v1.1 · 2026-10-16 | 계획 |
 | sbc-mcu-selection | `report/sbc-mcu-selection.md` (Pi 5 = 판단, ESP32-S3 = 센서, SBC 5종·MCU 6종 ✓/△/✕ 비교, 전환 조건, 문서 조사 기반·실측 전). 홈페이지 `#tech`에 요약 줄 | v1.0 · 2026-10-16 | 계획 |
@@ -86,7 +86,6 @@ python -m http.server 8000
 - **컨테이너 구조 검증:** 노트북 Docker로 ④ 강제 종료·OOM 때 ①②③ 유지, ②의 "판단 불가" 전송, 브로커 외부 차단 확인 → Pi에서 카메라 `--device` 연결, `mem_limit` 값 — `report/edge-container-architecture.md` 6·9장
 
 ### 문서 정리
-- **불일치 후보 — ESP32 보드 표기:** 하드웨어 문서는 "ESP32-S3 DevKitC-1", 부품 선정 문서는 "DevKitC-1 호환 보드, 모듈 WROOM-1-N16R8, 보드 품번 확인 필요". 하드웨어 문서는 지시에 따라 고치지 않음 — 정할 일
 - **PRD Word:** `PRD_v1.2.docx`를 v1.3 이후 내용으로 갱신 (다음 큰 개정 때)
 - **불일치 — 측정 방법:** 모델 문서 4.7 처리 속도 "노트북 실측, Raspberry Pi는 대여 가능 시 실측"이 "x86 결과는 Pi를 대신할 수 없음"(추론 엔진 문서 5장)과 어긋남
 - **불일치 — MediaPipe Pose 확정 표기:** PRD 4장 자세 추정 행과 홈페이지 TIER 02가 MediaPipe Pose를 확정처럼 표기하나 모델 문서는 A/B 비교 중

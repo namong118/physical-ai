@@ -43,8 +43,8 @@
       "title": "하드웨어 부품 정리",
       "description": "부품 관계도, 부품별 공급 전압·전류(실측 전)·통신 방식, 전원 라인, ESP32-S3 핀 연결표, 통신 구간",
       "file": "report/hardware-parts.md",
-      "version": "v1.1",
-      "date": "2026-10-14",
+      "version": "v1.2",
+      "date": "2026-10-16",
       "status": "진행 중",
       "downloads": []
     },

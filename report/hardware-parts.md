@@ -1,6 +1,6 @@
 # 별일없지 — 하드웨어 부품 정리
 
-> 문서 버전 v1.1 · 작성일 2026-10-14 (v1.1: 부품 관계도 추가)
+> 문서 버전 v1.2 · 작성일 2026-10-16 (v1.2: ESP32 보드 표기를 "ESP32-S3 DevKitC-1 호환 보드 (모듈 ESP32-S3-WROOM-1-N16R8)"로 맞춤, 내용 변경 없음 · v1.1: 부품 관계도 추가)
 > 관련 문서: [PRD](../PRD/PRD.md) · [Vision 전처리·후처리 설계](vision-preprocessing-design.md)
 
 ---
@@ -60,7 +60,7 @@
 |---|---|---|---|
 | Edge #1 · 거실·주방 | Raspberry Pi 5 | USB 웹캠 (USB 2.0 UVC), Active Cooler (PWM·타코미터) | 27W 어댑터 #1 → 5V-A |
 | Edge #2 · 침실 | Raspberry Pi 5 | Camera Module 3 NoIR (MIPI CSI-2·I2C), Active Cooler (PWM·타코미터), IR LED 850nm (상시 점등형 또는 GPIO → MOSFET, 가정 · 제품 미정) | 27W 어댑터 #2 → 5V-B (IR LED가 수백 mA급이면 별도 공급 검토) |
-| 센서 허브 · 현관·화장실 | ESP32-S3 DevKitC-1 (대수 미정) | HC-SR501 PIR (VCC ← 5V 핀, OUT → GPIO4, GND 공통 · 실물 검증), MC-38 도어 센서 (GPIO5 후보 · INPUT_PULLUP, GND · 펌웨어 미구현) | 5V USB 어댑터 1A 이상 (가정) → 5V-C |
+| 센서 허브 · 현관·화장실 | ESP32-S3 DevKitC-1 호환 보드 (모듈 ESP32-S3-WROOM-1-N16R8) (대수 미정) | HC-SR501 PIR (VCC ← 5V 핀, OUT → GPIO4, GND 공통 · 실물 검증), MC-38 도어 센서 (GPIO5 후보 · INPUT_PULLUP, GND · 펌웨어 미구현) | 5V USB 어댑터 1A 이상 (가정) → 5V-C |
 | 집 밖 | — | 세 묶음 → 공유기 (ESP32 때문에 2.4GHz 지원 필요) → HTTPS(JSON) → Cloudflare Worker → 가족 앱. 스마트워치는 BLE → 스마트폰 → Health Connect → 앱 (로드맵 4단계) | — |
 
 - 영상은 집 밖으로 보내지 않고 상태 전환 이벤트만 보냅니다. ESP32는 10분마다 heartbeat도 보냅니다.
@@ -78,7 +78,7 @@
 | USB UVC 웹캠 1080p 광각 | 1대: 거실·주방 (Edge #1) | 5V USB 버스 전원 | 약 0.2~0.5A (USB 2.0 포트 상한 0.5A) | USB 2.0 UVC | PRD | 일반 사양, 확인 필요 (제품 미정) |
 | Camera Module 3 NoIR | 1대: 침실 (Edge #2) | 3.3V (카메라 커넥터로 Pi가 공급) | 약 0.2~0.3A | MIPI CSI-2 + I2C(설정). Pi 5 연결에는 22핀↔15핀 Standard–Mini 케이블 필요 | PRD (케이블은 가정) | 3.3V·CSI-2·I2C·커넥터: S4, S5 / 전류: 일반 사양, 확인 필요 |
 | 850nm IR LED 조명 | 침실 | 모듈에 따라 3.3V / 5V / 12V | 모듈에 따라 수십~수백 mA | 상시 점등(조도 센서 내장형) 또는 GPIO → MOSFET 스위칭 | PRD (가정) | 일반 사양, 확인 필요 (제품 미정) |
-| ESP32-S3 DevKitC-1 | 현관·화장실 센서 허브 (대수 미정, 5장) | 5V USB 입력 → 보드 LDO 3.3V 로직 | Wi-Fi 연결 유지 약 0.1A / 송신 피크 약 0.35A (칩 기준 340mA) | Wi-Fi 2.4GHz → HTTPS(JSON) → Cloudflare Worker | PRD, F1 (실기기 heartbeat 검증 완료) | 3.3V·LDO: S6, S7 / 송신 피크 340mA: S6 / 연결 유지 평균: 일반 사양, 확인 필요 |
+| ESP32-S3 DevKitC-1 호환 보드 (모듈 ESP32-S3-WROOM-1-N16R8) | 현관·화장실 센서 허브 (대수 미정, 5장) | 5V USB 입력 → 보드 LDO 3.3V 로직 | Wi-Fi 연결 유지 약 0.1A / 송신 피크 약 0.35A (칩 기준 340mA) | Wi-Fi 2.4GHz → HTTPS(JSON) → Cloudflare Worker | PRD, F1 (실기기 heartbeat 검증 완료) | 3.3V·LDO: S6, S7 / 송신 피크 340mA: S6 / 연결 유지 평균: 일반 사양, 확인 필요 |
 | 5V USB 어댑터 1A 이상 | ESP32당 1개 | 5V | 데이터시트 권장 0.5A 이상에 여유를 두어 1A 이상 | — | (가정) | 0.5A 권장: S6 / 1A: (가정) |
 | HC-SR501 PIR | 현관·화장실 | 4.5~20V (ESP32 보드 5V 핀에서 공급) | 대기 50µA 미만 | 디지털 출력 → GPIO4. 출력 HIGH 3.3V라 레벨 시프터 불필요 | PRD, F1 (실물 E2E 검증 완료) | S8, F1 |
 | MC-38 마그네틱 도어 센서 | 현관·화장실 | 무전원 (리드 스위치) | 내부 풀업 기준 약 0.07mA (3.3V ÷ 45kΩ) | 디지털 입력 (`INPUT_PULLUP`) | PRD, GPIO 후보 5 (3장) | 풀업 저항값: S6에서 계산 |
@@ -99,10 +99,10 @@
 |---|---|---|---|
 | 5V-A | 27W 어댑터 #1 (5.1V 5A) | Pi 5 #1, USB 웹캠, Active Cooler | 웹캠과 팬은 Pi의 USB 주변기기 1.6A 한도 안에서 공급 (S1) |
 | 5V-B | 27W 어댑터 #2 (5.1V 5A) | Pi 5 #2, Camera Module 3 NoIR, Active Cooler, (IR LED) | 카메라는 카메라 커넥터 3.3V로 공급 (S4). IR LED가 수백 mA급이면 별도 공급 검토 |
-| 5V-C… | 5V USB 어댑터 1A 이상 (ESP32당 1개) | ESP32-S3 DevKitC-1, HC-SR501 PIR | PIR은 보드 5V 핀에서 공급. **PIR GND와 ESP32 GND를 공통으로 연결** |
+| 5V-C… | 5V USB 어댑터 1A 이상 (ESP32당 1개) | ESP32-S3 DevKitC-1 호환 보드 (모듈 ESP32-S3-WROOM-1-N16R8), HC-SR501 PIR | PIR은 보드 5V 핀에서 공급. **PIR GND와 ESP32 GND를 공통으로 연결** |
 
 - **IR LED를 켜고 끌 때는 GPIO에 직접 연결하지 않고 MOSFET을 거칩니다.** GPIO는 신호만 보내고, LED 전류는 MOSFET이 전원 라인에서 직접 흘립니다. (가정, 상시 점등형을 쓰면 스위칭 불필요)
-- ESP32-S3 DevKitC-1은 USB 포트 / 5V 핀 / 3V3 핀 전원 중 **하나만** 씁니다(S7). 별일없지는 USB 포트 전원을 씁니다.
+- ESP32-S3 DevKitC-1 호환 보드 (모듈 ESP32-S3-WROOM-1-N16R8)는 USB 포트 / 5V 핀 / 3V3 핀 전원 중 **하나만** 씁니다(S7). 별일없지는 USB 포트 전원을 씁니다.
 
 ---
 
@@ -110,7 +110,7 @@
 
 펌웨어 README·`config.h`(F1) 기준입니다.
 
-| 센서 | 센서 핀 | ESP32-S3 DevKitC-1 | 상태 |
+| 센서 | 센서 핀 | ESP32-S3 DevKitC-1 호환 보드 (모듈 ESP32-S3-WROOM-1-N16R8) | 상태 |
 |---|---|---|---|
 | HC-SR501 PIR | `VCC` | `5V` | 실물 검증 완료 |
 | HC-SR501 PIR | `GND` | `GND` | 실물 검증 완료 |

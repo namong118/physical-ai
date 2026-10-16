@@ -71,6 +71,17 @@
       "downloads": []
     },
     {
+      "id": "sbc-mcu-selection",
+      "group": "설계·검증",
+      "title": "SBC·MCU 부품 선정",
+      "description": "Raspberry Pi 5와 ESP32-S3의 역할 나누기, 선정 조건, SBC·MCU 후보 비교, 전환 조건 (문서 조사 기반, 실측 전)",
+      "file": "report/sbc-mcu-selection.md",
+      "version": "v1.0",
+      "date": "2026-10-16",
+      "status": "계획",
+      "downloads": []
+    },
+    {
       "id": "vision-models-practice",
       "group": "실습",
       "title": "비전 모델 실습 보고서",

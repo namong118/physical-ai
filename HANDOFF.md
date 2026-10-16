@@ -9,7 +9,7 @@
 
 ## 2. 현재 상태
 
-**push:** `origin/main` = `aba8aac` (2026-10-16, 로컬 추적 브랜치 기준). 그 뒤 커밋은 push 전 — `git log origin/main..main`으로 확인
+**push:** `origin/main` = `b540f0a` (2026-10-16 push 확인). 그 뒤 커밋은 push 전 — `git log origin/main..main`으로 확인
 
 **홈페이지 `index.html` 섹션 (위→아래):** 히어로(`#top`) → 왜 필요한가 `#problem` → Quiet Care Principles → 작동 방식 `#how` → 전처리·후처리 `#pipeline` → 공간별 설치 `#spaces` → 하루 시나리오 `#day` → Sensor vs. Physical AI → 프라이버시 `#privacy` → 성공 지표 `#metrics` → 기술 스택 `#tech` → 범위·로드맵 `#poc` → 도입 효과 `#roi` → 문서 `#docs` → 마무리 CTA. 오른쪽 아래에 챗봇 창.
 

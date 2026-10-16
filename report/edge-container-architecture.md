@@ -1,4 +1,4 @@
-# 별일없지 — Edge 컨테이너 구조
+# 별일없지 — Edge SBC 컨테이너 구조
 
 > 문서 버전 v1.1 · 작성일 2026-10-16 (v1.1: SBC·MCU 역할 나누기 절(1.1) 추가, 9장 ESP32 칩별 Thread 지원 확인)
 > 관련 문서: [PRD](../PRD/PRD.md) · [SBC·MCU 부품 선정](sbc-mcu-selection.md) · [Edge 추론 엔진 선택](inference-engine-selection.md) · [하드웨어 부품 정리](hardware-parts.md) · [Vision 전처리·후처리 설계](vision-preprocessing-design.md)
@@ -50,7 +50,7 @@
 
 ## 2. 구조도
 
-![별일없지 Edge 컨테이너 구조 — Raspberry Pi 5 안의 camera-capture, uplink-guardian, broker(멈추면 안 되는 구역)와 ai-inference(죽어도 되는 구역), 검토 예정인 otbr·matter-server](../images/edge-containers.svg)
+![별일없지 Edge SBC 컨테이너 구조 — Raspberry Pi 5 안의 camera-capture, uplink-guardian, broker(멈추면 안 되는 구역)와 ai-inference(죽어도 되는 구역), 검토 예정인 otbr·matter-server](../images/edge-containers.svg)
 
 [원본 크기로 보기](../images/edge-containers.svg)
 

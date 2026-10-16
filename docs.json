@@ -62,7 +62,7 @@
     {
       "id": "edge-container-architecture",
       "group": "설계·검증",
-      "title": "Edge 컨테이너 구조",
+      "title": "Edge SBC 컨테이너 구조",
       "description": "Raspberry Pi 안의 컨테이너 구성, 멈추면 안 되는 구역과 죽어도 되는 구역, 메시지 토픽, 프라이버시 경계, Matter/Thread 검토 (실측 전)",
       "file": "report/edge-container-architecture.md",
       "version": "v1.1",

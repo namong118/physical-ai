@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="940" viewBox="0 0 900 940" role="img" font-family="'Plus Jakarta Sans','Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans CJK KR',sans-serif">
-<title>별일없지 Edge 컨테이너 구조 (계획)</title>
+<title>별일없지 Edge SBC 컨테이너 구조 (계획)</title>
 <desc>Raspberry Pi 5 한 대 안의 Docker 컨테이너 구성. camera-capture, uplink-guardian, broker는 멈추면 안 되는 구역(restart always), ai-inference는 죽어도 되는 구역(restart on-failure, mem_limit). 프레임은 공유 메모리로만 전달하고 브로커와 집 밖으로 보내지 않음. Matter/Thread용 otbr·matter-server는 검토 예정. Raspberry Pi 실측 전.</desc>
 <defs><marker id="mb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#0C87FD" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="mg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#73829A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="mt" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#0B7F78" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
 <rect width="900" height="940" fill="#f9f9ff"/>
 <rect width="900" height="4" fill="#2CC9C3"/>
-<text x="40" y="40" font-size="20" font-weight="700" fill="#111c2d" text-anchor="start" dominant-baseline="central">별일없지 Edge 컨테이너 구조 (계획)</text>
+<text x="40" y="40" font-size="20" font-weight="700" fill="#111c2d" text-anchor="start" dominant-baseline="central">별일없지 Edge SBC 컨테이너 구조 (계획)</text>
 <text x="40" y="66" font-size="12" font-weight="400" fill="#6d7a72" text-anchor="start" dominant-baseline="central">Raspberry Pi 5 한 대 기준 · 근거: edge-container-architecture.md · Raspberry Pi 실측 전</text>
 <rect x="40" y="96" width="400" height="56" rx="12" fill="#ffffff" stroke="#bccac0" stroke-width="1.2"/>
 <text x="58" y="120" font-size="14" font-weight="700" fill="#111c2d" text-anchor="start" dominant-baseline="central">하드웨어 (호스트 장치)</text>

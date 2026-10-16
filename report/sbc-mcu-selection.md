@@ -1,7 +1,7 @@
 # 별일없지 — SBC·MCU 부품 선정
 
 > 문서 버전 v1.0 · 작성일 2026-10-16
-> 관련 문서: [PRD](../PRD/PRD.md) · [Edge 컨테이너 구조](edge-container-architecture.md) · [Edge 추론 엔진 선택](inference-engine-selection.md) · [하드웨어 부품 정리](hardware-parts.md)
+> 관련 문서: [PRD](../PRD/PRD.md) · [Edge SBC 컨테이너 구조](edge-container-architecture.md) · [Edge 추론 엔진 선택](inference-engine-selection.md) · [하드웨어 부품 정리](hardware-parts.md)
 
 > **현재 상태:** 문서 조사 기반 선정. Raspberry Pi 실측 전.
 > 이 문서는 별일없지의 두뇌(SBC)와 센서 보드(MCU)를 왜 이 부품으로 골랐는지, 어떤 조건에서 바꾸는지를 정리합니다. 사양은 공식 문서에서 옮긴 값이며(7장 출처), 우리가 측정한 값이 아닙니다. 부품 구성은 [PRD](../PRD/PRD.md) 4장과 같고, 이 문서에서 바꾸지 않습니다.
@@ -27,7 +27,7 @@
 | | SBC — Raspberry Pi 5 | MCU — ESP32-S3 |
 |---|---|---|
 | 역할 | 판단 — 영상에서 사람·자세를 읽고 상태를 정함 | 센서 — 문 열림·움직임을 놓치지 않고 바로 보냄 |
-| 실행 환경 | 리눅스 OS 위에 Docker 컨테이너 여러 개 ([Edge 컨테이너 구조](edge-container-architecture.md)) | OS 없이 펌웨어 하나 |
+| 실행 환경 | 리눅스 OS 위에 Docker 컨테이너 여러 개 ([Edge SBC 컨테이너 구조](edge-container-architecture.md)) | OS 없이 펌웨어 하나 |
 | 켜질 때 | OS 부팅을 거친 뒤 컨테이너가 올라옴 | 전원을 넣으면 바로 펌웨어가 돎 (부팅 시간은 실측 전) |
 | 맡는 공간 | 거실·주방(Edge #1), 침실(Edge #2) | 현관·화장실 (카메라 없음) |
 
@@ -45,8 +45,8 @@ ESP32는 **Pi를 거치지 않고** Wi-Fi 2.4GHz + HTTPS(JSON)로 Cloudflare Wor
 
 ### 1.2 멈춘 장치는 heartbeat로 알아챈다
 
-- ESP32는 10분마다 heartbeat를 보내고, Worker는 heartbeat가 끊긴 기기를 **OFFLINE으로** 판정합니다(개발 레포 PoC, ESP32에서 검증 — [Edge 컨테이너 구조](edge-container-architecture.md) 3장).
-- Pi도 같은 방식으로 heartbeat를 보내도록 계획했습니다([Edge 컨테이너 구조](edge-container-architecture.md) 3장). Pi 안에서 추론만 멈추면 "Edge 판단 불가"를 보내고, Pi 전체가 멈추면 heartbeat가 끊겨 OFFLINE이 됩니다.
+- ESP32는 10분마다 heartbeat를 보내고, Worker는 heartbeat가 끊긴 기기를 **OFFLINE으로** 판정합니다(개발 레포 PoC, ESP32에서 검증 — [Edge SBC 컨테이너 구조](edge-container-architecture.md) 3장).
+- Pi도 같은 방식으로 heartbeat를 보내도록 계획했습니다([Edge SBC 컨테이너 구조](edge-container-architecture.md) 3장). Pi 안에서 추론만 멈추면 "Edge 판단 불가"를 보내고, Pi 전체가 멈추면 heartbeat가 끊겨 OFFLINE이 됩니다.
 - 그래서 어느 장치가 멈춰도 가족 앱에 "이상 없음"이 계속 보이지 않도록 설계합니다. Pi 쪽 동작은 검증 전입니다.
 
 ---
@@ -92,7 +92,7 @@ ESP32는 **Pi를 거치지 않고** Wi-Fi 2.4GHz + HTTPS(JSON)로 Cloudflare Wor
 
 ### 3.1 Raspberry Pi 5를 고른 이유
 
-1. **컨테이너 구조를 그대로 올릴 수 있습니다.** 리눅스·Docker가 되고 8GB 메모리가 있어 camera-capture·uplink-guardian·broker·ai-inference 4개를 한 장치에 둡니다([Edge 컨테이너 구조](edge-container-architecture.md)).
+1. **컨테이너 구조를 그대로 올릴 수 있습니다.** 리눅스·Docker가 되고 8GB 메모리가 있어 camera-capture·uplink-guardian·broker·ai-inference 4개를 한 장치에 둡니다([Edge SBC 컨테이너 구조](edge-container-architecture.md)).
 2. **추론 경로가 공식 문서로 정리되어 있습니다.** Ultralytics가 Pi용 가이드와 엔진별 벤치마크를 내고 NCNN을 권장합니다 [U1]. 공개 수치(67 ms/장, 추론만)로는 5 FPS 목표에 여유가 있지만 실측 전입니다.
 3. **카메라 두 종류를 바로 붙입니다.** 거실·주방 USB 웹캠과 침실 Camera Module 3 NoIR(CSI)을 같은 보드에서 씁니다 [S4].
 4. **나중에 NPU를 더할 수 있습니다.** PCIe 2.0 x1 [R1]에 AI HAT+를 붙이는 길이 있어, 보드를 바꾸지 않고 가속을 검토할 수 있습니다(5장).
@@ -143,7 +143,7 @@ ESP32는 **Pi를 거치지 않고** Wi-Fi 2.4GHz + HTTPS(JSON)로 Cloudflare Wor
 | └ pose 모델까지 가속해야 하는 경우 (후보 B) | **RK3588 보드** — Ultralytics RKNN 내보내기가 YOLO26 pose를 지원. 단 INT8은 검출만, 내보내기는 x86 Linux에서만 [U9] | 검토 예정 |
 | 가구 수가 늘어 센서 보드 단가가 중요해짐 | **ESP32-C3** — Wi-Fi·BLE 내장, 같은 Espressif 계열 [E2]. 펌웨어 이식과 실기기 검증 필요 | 검토 예정 |
 | 전지 센서가 필요해짐, 또는 Matter/Thread로 바꿈 | **ESP32-H2·C6** — 802.15.4 내장 [E3][E4], Matter over Thread 기기로 사용 가능 [E5]. 집 쪽 보더 라우터는 아래 두 선택지 | 검토 예정 |
-| └ 보더 라우터 선택지 1 | Pi에 OTBR·Matter 서버 컨테이너 + Thread 무선 동글 ([Edge 컨테이너 구조](edge-container-architecture.md) 7장) | 검토 예정 |
+| └ 보더 라우터 선택지 1 | Pi에 OTBR·Matter 서버 컨테이너 + Thread 무선 동글 ([Edge SBC 컨테이너 구조](edge-container-architecture.md) 7장) | 검토 예정 |
 | └ 보더 라우터 선택지 2 | **ESP32-S3 + ESP32-H2 보더 라우터 구성** (Espressif esp-thread-br) — S3가 Wi-Fi 호스트, H2가 802.15.4 무선(RCP). Pi와 따로 동작 [E6] | 검토 예정 |
 
 - 어느 전환이든 PRD 6장 ROI의 장치 비용이 바뀝니다. 전환할 때 PRD를 함께 고칩니다.
